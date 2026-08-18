@@ -1,132 +1,87 @@
-# Lichess Chess Machine Learning Project
+# Lichess Chess Machine Learning Project (100% From Scratch)
 
-Dự án Machine Learning phân tích và dự đoán ván cờ từ tập dữ liệu cờ vua trực tiếp:
-`lichess_db_standard_rated_2015-08.pgn.zst` (File PGN nén Zstandard).
+Hệ thống Machine Learning phân tích, dự đoán và khai phá dữ liệu ván cờ Lichess với **3 thuật toán cốt lõi được xây dựng hoàn toàn từ đầu (From Scratch - Không sử dụng Scikit-Learn)**:
+
+1. **Robust Logistic Regression**: Tối ưu Gradient Descent, L1/L2 Regularization, Early Stopping.
+2. **Robust K-Nearest Neighbors (KNN)**: Vectorized Distance Matrix ($||A-B||^2 = ||A||^2 + ||B||^2 - 2AB^T$), Distance-weighted Voting.
+3. **Robust Histogram-based Gradient Boosting (HGB)**: Histogram Quantile Binning (0-255 uint8), Prefix-sum Histogram Decision Trees, L2 Regularized Leaf Weights, Shrinkage & Early Stopping.
 
 ---
 
-## 📌 Tổng quan 3 Thuật toán và Nhiệm vụ riêng biệt
+## 📌 Tổng quan 3 Thuật toán (From-Scratch)
 
-Dự án được xây dựng với **ĐÚNG 3 thuật toán**, mỗi thuật toán thực hiện một nhiệm vụ riêng biệt và độc lập:
-
-| Thuật toán | Đầu vào (Features) | Đầu ra (Target / Goal) | Vai trò & Mục đích |
+| Thuật toán | Cơ chế & Tối ưu hóa thuật toán | Đầu ra / Đánh giá | Mục đích & Ứng dụng |
 | :--- | :--- | :--- | :--- |
-| **1. Logistic Regression** | `WhiteElo`, `BlackElo`, `EloDiff` | `Result` (0: Black, 1: Draw, 2: White) | **BASELINE** để so sánh hiệu năng dự đoán kết quả ván cờ |
-| **2. KNN (K-Nearest Neighbors)** | `Moves` (Chuỗi nước đi) | Opening tương tự, ECO & Danh sách K ván gần nhất | **Tìm ván cờ & Opening tương tự** dựa trên độ tương đồng Cosine (Không dùng Elo, Không dùng cột Opening để tính khoảng cách) |
-| **3. HistGradientBoosting (HGB)** | `WhiteElo`, `BlackElo`, `EloDiff` | `Result` (0: Black, 1: Draw, 2: White) | **Mô hình chính dự đoán kết quả ván cờ** dựa trên chênh lệch Elo |
-
-> ⚠️ **LƯU Ý CỰC KỲ QUAN TRỌNG:**
-> - KNN KHÔNG dùng Elo, chỉ dùng `Moves` để biểu diễn TF-IDF vector và tính Cosine Distance.
-> - Logistic Regression và HGB sử dụng Elo để dự đoán `Result`.
-> - Không trộn bài toán KNN và HGB thành một bài toán duy nhất.
+| **1. Logistic Regression** | Gradient Descent, Sigmoid tránh tràn số học, L2 Regularization, Early Stopping | Accuracy, Weighted Precision, Recall, F1-Score, Confusion Matrix, Learning Curve | **Baseline Model** phân loại tuyến tính |
+| **2. K-Nearest Neighbors (KNN)** | Vectorized Euclidean/Manhattan/Minkowski Distance, $K$-láng giềng gần nhất, Distance-weighted | Accuracy, Multiclass Confusion Matrix, Non-linear Decision Boundary | **Non-linear Multi-class Classifier** phân vùng phi tuyến |
+| **3. HistGradientBoosting (HGB)** | Quantile Binning, Histogram Gradient/Hessian cumsum, Cây quyết định chia nhánh theo Gain tối đa | Test Accuracy, Boosting Stages Loss Curve, Non-linear Complex Boundary | **State-of-the-Art Ensemble Boosting** xử lý dữ liệu phức tạp |
 
 ---
 
-## 📁 Cấu trúc Project
+## 📁 Cấu trúc Thư mục
 
 ```
 demo mh/
 │
 ├── data/
 │   ├── lichess_db_standard_rated_2015-08.pgn.zst   # File nén PGN gốc
-│   └── processed_games.csv                         # Dataset trung gian đã parse & cache
+│   ├── processed_games.csv                         # Dataset đã xử lý
+│   └── filtered_processed_games.csv                # Dataset đã lọc
 │
 ├── src/
-│   ├── data_loader.py                              # Đọc & stream dataset PGN.ZST, kiểm tra thống kê
-│   ├── preprocessing.py                            # Tiền xử lý, tính EloDiff, mã hóa Result, làm sạch Moves
-│   ├── logistic_baseline.py                        # Mô hình Logistic Regression (Baseline Elo -> Result)
-│   ├── knn_opening.py                              # Mô hình KNN (Moves -> Opening tương tự)
-│   ├── hgb_elo.py                                  # Mô hình HistGradientBoosting (Elo -> Result)
-│   ├── comparison.py                               # Báo cáo so sánh Baseline vs HGB
-│   └── main.py                                     # Giao diện điều khiển chính (CLI Interactive)
+│   ├── logistic_baseline.py                        # Logistic Regression thuần túy (From Scratch)
+│   ├── knn_result.py                               # KNN Result Classifier thuần túy (From Scratch)
+│   ├── knn_opening.py                              # KNN đa lớp & trực quan hóa phi tuyến (From Scratch)
+│   ├── hgb_elo.py                                  # Histogram Gradient Boosting thuần túy (From Scratch)
+│   ├── comparison.py                               # Báo cáo so sánh các mô hình
+│   ├── data_loader.py                              # Đọc và stream dataset
+│   ├── preprocessing.py                            # Tiền xử lý dữ liệu
+│   ├── eda_results.py                              # Phân tích khám phá dữ liệu (EDA)
+│   └── main.py                                     # Chương trình điều khiển chính (CLI & Menu)
 │
-├── models/
-│   ├── logistic_baseline.joblib                    # Pipeline Logistic Regression đã huấn luyện
-│   ├── knn_opening.joblib                          # Search index & TF-IDF Vectorizer KNN
-│   └── hgb_elo.joblib                              # Mô hình HistGradientBoosting đã huấn luyện
-│
-├── outputs/
-│   ├── logistic_metrics.json                       # Báo cáo chỉ số Logistic Regression
-│   ├── hgb_metrics.json                            # Báo cáo chỉ số HGB
-│   └── model_comparison.txt                        # Báo cáo so sánh chi tiết
-│
-├── requirements.txt                                # Thư viện phụ thuộc
-└── README.md                                       # Hướng dẫn chi tiết dự án
+├── outputs/                                        # Báo cáo metrics JSON, biểu đồ phân tích
+├── app.py                                          # Web Dashboard Streamlit
+├── requirements.txt                                # Danh sách thư viện
+└── README.md                                       # Tài liệu hướng dẫn
 ```
 
 ---
 
-## 🚀 Hướng dẫn Cài đặt & Chạy Project
+## 🚀 Hướng dẫn Cài đặt & Sử dụng
 
 ### 1. Cài đặt môi trường
-Cài đặt các thư viện cần thiết bằng lệnh:
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Chạy giao diện Menu tương tác (CLI)
-Chạy file giao diện chính:
+### 2. Chạy Console Menu tương tác
 ```bash
 python src/main.py
 ```
 
-Menu điều khiển sẽ xuất hiện:
-```
-============================================================
-     HỆ THỐNG MACHINE LEARNING PHÂN TÍCH VÁN CỜ LICHESS
-============================================================
-1. Logistic Regression (BASELINE dự đoán Result từ Elo)
-2. KNN tìm Opening tương tự (Dựa trên chuỗi nước đi Moves)
-3. HistGradientBoosting (HGB dự đoán Result từ Elo)
-4. Chạy toàn bộ (Full Pipeline & So sánh mô hình)
-0. Thoát
-============================================================
-```
-
-### 3. Chạy từng chế độ qua Dòng lệnh (Non-interactive Mode)
-- **Chạy toàn bộ Pipeline & So sánh:**
+### 3. Chạy từng chế độ qua dòng lệnh (CLI)
+- **Chạy Logistic Regression:**
+  ```bash
+  python src/main.py --mode 1
+  ```
+- **Chạy K-Nearest Neighbors (KNN):**
+  ```bash
+  python src/main.py --mode 2
+  ```
+- **Chạy Histogram Gradient Boosting (HGB):**
+  ```bash
+  python src/main.py --mode 3
+  ```
+- **Chạy so sánh cả 3 mô hình:**
   ```bash
   python src/main.py --mode 4
   ```
-- **Chế độ KNN (Nhập nước đi):**
+- **Tắt đồ thị popup (dành cho headless/terminal):**
   ```bash
-  python src/main.py --mode 2 --moves "1. e4 c5 2. Nf3 d6 3. d4"
-  ```
-- **Chế độ HGB (Nhập Elo):**
-  ```bash
-  python src/main.py --mode 3 --white-elo 1800 --black-elo 1500
+  python src/main.py --mode 4 --no-plot
   ```
 
----
-
-## 📊 Chi tiết Tiền xử lý & Tính toán Feature
-
-1. **Elo chênh lệch (`EloDiff`)**:
-   $$\text{EloDiff} = \text{WhiteElo} - \text{BlackElo}$$
-   *Ví dụ: WhiteElo = 1800, BlackElo = 1500 $\rightarrow$ EloDiff = 300.*
-
-2. **Mã hóa Kết quả (`ResultEncoded`)**:
-   - `0` = Black thắng (`0-1`)
-   - `1` = Hòa (`1/2-1/2`)
-   - `2` = White thắng (`1-0`)
-
-3. **Biểu diễn Nước đi cho KNN (`Moves -> Vector`)**:
-   - Chuỗi nước đi được làm sạch (loại bỏ số thứ tự nước đi, chú thích, kết quả).
-   - Biến đổi thành n-gram (1-4 grams) bằng `TfidfVectorizer`.
-   - Tính khoảng cách Cosine $\text{Distance} = 1 - \text{Cosine Similarity}$.
-   - Chọn K ván gần nhất và lấy yếu tố mở đầu (Opening) xuất hiện nhiều nhất (Majority Voting).
-
----
-
-## 📈 So sánh Mô hình Dự đoán Результат (Elo -> Result)
-
-Mô hình **Logistic Regression (Baseline)** và **HistGradientBoosting (HGB)** được chia tập dữ liệu 80% Train / 20% Test (`random_state=42`).
-
-Bảng so sánh kết quả kiểm thử tiêu chuẩn:
-
-| Model | Accuracy | Precision | Recall | F1-Score |
-| :--- | :---: | :---: | :---: | :---: |
-| **Logistic Regression (BASELINE)** | **0.6440** | **0.6227** | **0.6440** | **0.6331** |
-| **HistGradientBoosting (HGB)** | **0.6270** | **0.6070** | **0.6270** | **0.6168** |
-
-*Đánh giá:* Mối quan hệ giữa chênh lệch điểm Elo và xác suất thắng/thua mang hình thái tuyến tính Sigmoid đặc trưng của hàm Logistic, giúp Logistic Regression hoạt động cực kỳ mượt mà và đóng vai trò làm Baseline lý tưởng để so sánh.
+### 4. Khởi chạy giao diện Web Dashboard (Streamlit)
+```bash
+streamlit run app.py
+```
