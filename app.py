@@ -280,73 +280,25 @@ button[data-baseweb="tab"][aria-selected="true"] {
     box-shadow: 0 6px 18px rgba(0,0,0,0.5), 0 0 15px rgba(56, 189, 248, 0.25) !important;
 }
 
-/* ── DROPDOWN / SELECTBOX / POPOVER LIST OPTIONS - CHỮ MÀU ĐEN TRÊN NỀN TRẮNG SÁNG ── */
-div[data-baseweb="popover"],
-div[data-baseweb="popover"] *,
-div[data-baseweb="menu"],
-div[data-baseweb="menu"] *,
-ul[role="listbox"],
-ul[role="listbox"] * {
-    background-color: #ffffff !important;
-    background: #ffffff !important;
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
-}
-
-div[data-baseweb="popover"] {
-    border: 2px solid #0284c7 !important;
-    border-radius: 12px !important;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(2, 132, 199, 0.25) !important;
-    overflow: hidden !important;
-}
-
-/* Các mục bên trong danh sách xổ xuống - CHỮ MÀU ĐEN NỔI BẬT 100% */
-div[data-baseweb="popover"] li,
-div[data-baseweb="popover"] div[role="option"],
-li[role="option"],
-[data-baseweb="menu"] li {
-    background-color: #ffffff !important;
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
-    font-size: 1.15rem !important;
-    font-weight: 700 !important;
-    padding: 12px 18px !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-    cursor: pointer !important;
-    transition: all 0.15s ease !important;
-}
-
-/* Khi rê chuột vào mục hoặc mục đang chọn -> Nền Xanh Dương Sáng, Chữ Trắng Tinh */
-div[data-baseweb="popover"] li:hover,
-div[data-baseweb="popover"] li[aria-selected="true"],
-li[role="option"]:hover,
-li[role="option"][aria-selected="true"],
-div[role="option"]:hover,
-[data-baseweb="menu"] li:hover {
-    background-color: #0284c7 !important;
-    background: #0284c7 !important;
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-    font-weight: 800 !important;
-}
-
-/* ── KHUNG SELECTBOX CHÍNH TRÊN GIAO DIỆN ── */
-div[data-baseweb="select"],
-div[data-baseweb="select"] > div,
-div[data-baseweb="select"] * {
-    background-color: #090d16 !important;
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-}
+/* ── KHUNG SELECTBOX CHÍNH TRÊN GIAO DIỆN (TRIGGER BUTTON ON PAGE) ── */
 div[data-baseweb="select"] > div {
+    background-color: #090d16 !important;
     border: 1.5px solid #334155 !important;
     border-radius: 12px !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
     font-size: 1.15rem !important;
     font-weight: 700 !important;
-    height: 48px !important;
-    min-height: 48px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
     display: flex !important;
     align-items: center !important;
+    box-sizing: border-box !important;
+}
+div[data-baseweb="select"] > div * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
 div[data-baseweb="select"] > div:hover,
 div[data-baseweb="select"] > div:focus-within {
@@ -358,14 +310,16 @@ div[data-baseweb="select"] svg {
     color: #38bdf8 !important;
 }
 
-/* ── SỐ NƯỚC KHAI CUỘC (NUMBER INPUT & NÚT + / -) - CHIỀU CAO BẰNG 48PX VỚI SELECTBOX ── */
+/* ── SỐ NƯỚC KHAI CUỘC (NUMBER INPUT & NÚT + / -) - CÂN BẰNG CHIỀU CAO 46PX ── */
 div[data-testid="stNumberInput"] {
     background-color: #090d16 !important;
     border-radius: 12px !important;
 }
 div[data-testid="stNumberInput"] > div {
-    height: 48px !important;
-    min-height: 48px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
+    box-sizing: border-box !important;
 }
 div[data-testid="stNumberInput"] input {
     background-color: #090d16 !important;
@@ -374,7 +328,9 @@ div[data-testid="stNumberInput"] input {
     font-size: 1.25rem !important;
     font-weight: 800 !important;
     border: 1.5px solid #334155 !important;
-    height: 48px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    box-sizing: border-box !important;
 }
 div[data-testid="stNumberInput"] button {
     background-color: #1e293b !important;
@@ -383,7 +339,9 @@ div[data-testid="stNumberInput"] button {
     border: 1.5px solid #334155 !important;
     font-weight: 800 !important;
     font-size: 1.2rem !important;
-    height: 48px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    box-sizing: border-box !important;
     transition: all 0.2s ease !important;
 }
 div[data-testid="stNumberInput"] button:hover {
@@ -391,6 +349,69 @@ div[data-testid="stNumberInput"] button:hover {
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
     border-color: #38bdf8 !important;
+}
+
+/* ── DANH SÁCH XỔ XUỐNG (POPOVER DROPDOWN MENU LIST) - CHỮ MÀU ĐEN 100% TRÊN NỀN TRẮNG (ƯU TIÊN CAO NHẤT) ── */
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] *,
+div[data-baseweb="menu"],
+div[data-baseweb="menu"] *,
+ul[role="listbox"],
+ul[role="listbox"] *,
+li[role="option"],
+li[role="option"] *,
+div[role="option"],
+div[role="option"] * {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+}
+
+div[data-baseweb="popover"],
+div[data-baseweb="menu"],
+ul[role="listbox"] {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    border: 2px solid #0284c7 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(2, 132, 199, 0.3) !important;
+    overflow: hidden !important;
+}
+
+/* Các mục lựa chọn trong danh sách */
+div[data-baseweb="popover"] li,
+div[data-baseweb="popover"] div[role="option"],
+li[role="option"],
+[data-baseweb="menu"] li {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    padding: 12px 18px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+/* Rê chuột hoặc mục đang chọn -> Nền Xanh Dương Đậm + Chữ Trắng Nổ */
+div[data-baseweb="popover"] li:hover,
+div[data-baseweb="popover"] li:hover *,
+div[data-baseweb="popover"] li[aria-selected="true"],
+div[data-baseweb="popover"] li[aria-selected="true"] *,
+li[role="option"]:hover,
+li[role="option"]:hover *,
+li[role="option"][aria-selected="true"],
+li[role="option"][aria-selected="true"] *,
+div[role="option"]:hover,
+div[role="option"]:hover *,
+[data-baseweb="menu"] li:hover,
+[data-baseweb="menu"] li:hover * {
+    background-color: #0284c7 !important;
+    background: #0284c7 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    font-weight: 800 !important;
 }
 
 /* ── CHỈ SỐ SLIDER (1800, 1500) ── */
