@@ -280,7 +280,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
     box-shadow: 0 6px 18px rgba(0,0,0,0.5), 0 0 15px rgba(56, 189, 248, 0.25) !important;
 }
 
-/* ── TIÊU ĐỀ TRÊN CÁC NÚT ĐIỀU KHIỂN (LABELS - VỪA MẮT) ── */
+/* ── TIÊU ĐỀ TRÊN CÁC NÚT ĐIỀU KHIỂN (LABELS) ── */
 [data-testid="stWidgetLabel"] p, label p {
     font-family: 'Be Vietnam Pro', sans-serif !important;
     font-size: 0.92rem !important;
@@ -289,35 +289,38 @@ button[data-baseweb="tab"][aria-selected="true"] {
     margin-bottom: 5px !important;
 }
 
-/* ── THẾ THỨC SELECTBOX (CỜ TÍNH ELO) - CỠ CHỮ 0.92REM VỪA MẮT ── */
+/* ── THẾ THỨC SELECTBOX (CỜ TÍNH ELO) - NỀN TRẮNG SÁNG, CHỮ MÀU ĐEN TUYỆT ĐỐI ── */
 div[data-testid="stSelectbox"] > div > div {
-    background-color: #161b26 !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    border: 1.5px solid #0284c7 !important;
     border-radius: 8px !important;
     height: 40px !important;
     min-height: 40px !important;
     max-height: 40px !important;
     display: flex !important;
     align-items: center !important;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
 div[data-testid="stSelectbox"] [data-baseweb="select"] span,
-div[data-testid="stSelectbox"] [data-baseweb="select"] div {
+div[data-testid="stSelectbox"] [data-baseweb="select"] div,
+div[data-testid="stSelectbox"] [data-baseweb="select"] p {
     font-family: 'JetBrains Mono', 'Be Vietnam Pro', monospace !important;
     font-size: 0.92rem !important;
-    font-weight: 600 !important;
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
 }
 div[data-testid="stSelectbox"] svg {
-    fill: #ffffff !important;
-    color: #ffffff !important;
+    fill: #000000 !important;
+    color: #000000 !important;
 }
 
-/* ── SỐ NƯỚC KHAI CUỘC (NUMBER INPUT & NÚT + / -) - CỠ CHỮ 0.92REM VỪA MẮT ── */
+/* ── SỐ NƯỚC KHAI CUỘC (NUMBER INPUT) - NỀN TRẮNG SÁNG, CHỮ MÀU ĐEN TUYỆT ĐỐI ── */
 div[data-testid="stNumberInput"] > div > div {
-    background-color: #161b26 !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    border: 1.5px solid #0284c7 !important;
     border-radius: 8px !important;
     height: 40px !important;
     min-height: 40px !important;
@@ -325,16 +328,16 @@ div[data-testid="stNumberInput"] > div > div {
     overflow: hidden !important;
     display: flex !important;
     align-items: center !important;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
 div[data-testid="stNumberInput"] input {
-    background-color: transparent !important;
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
     font-family: 'JetBrains Mono', monospace !important;
     font-size: 0.92rem !important;
-    font-weight: 700 !important;
+    font-weight: 800 !important;
     border: none !important;
     height: 40px !important;
     padding-left: 12px !important;
@@ -342,24 +345,24 @@ div[data-testid="stNumberInput"] input {
 
 /* Nút - và + bên phải */
 div[data-testid="stNumberInput"] button {
-    background-color: #1c2433 !important;
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
+    background-color: #e2e8f0 !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
     border: none !important;
-    border-left: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-left: 1px solid #cbd5e1 !important;
     font-size: 0.95rem !important;
-    font-weight: 700 !important;
+    font-weight: 800 !important;
     height: 40px !important;
     min-width: 32px !important;
     transition: background 0.15s ease !important;
 }
 div[data-testid="stNumberInput"] button:hover {
-    background-color: #2a364a !important;
+    background-color: #0284c7 !important;
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
 }
 
-/* ── POPOVER DROPDOWN MENU LIST - CHỮ MÀU ĐEN KHÔNG THỂ LẪN TRÊN NỀN TRẮNG ── */
+/* ── POPOVER DROPDOWN MENU LIST - CHỮ MÀU ĐEN 100% TRÊN NỀN TRẮNG SÁNG ── */
 div[data-baseweb="popover"],
 div[data-baseweb="popover"] div,
 div[data-baseweb="menu"],
