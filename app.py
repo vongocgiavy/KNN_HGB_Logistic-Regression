@@ -625,9 +625,15 @@ with tab2:
     with col_moves:
         st.markdown(f"""
         <div class="card-box accent-green">
-          <img src="data:image/jpeg;base64,{chess_knight_b64}" class="art-card-header" />
-          <div class="card-heading">🐴 Truy vấn & Nhận diện Khai cuộc KNN</div>
-          <div class="card-subheading">Dán chuỗi nước đi chuẩn PGN để thuật toán K-Nearest Neighbors tìm kiếm các ván cờ tương đồng nhất trong kho dữ liệu Lichess.</div>
+          <div style="display: flex; gap: 1.5rem; align-items: center; justify-content: space-between;">
+            <div style="flex: 1;">
+              <div class="card-heading">🐴 Truy vấn & Nhận diện Khai cuộc KNN</div>
+              <div class="card-subheading" style="margin-bottom:0;">Dán chuỗi nước đi chuẩn PGN để thuật toán K-Nearest Neighbors tìm kiếm các ván cờ tương đồng nhất trong kho dữ liệu Lichess.</div>
+            </div>
+            <div style="width: 140px; flex-shrink: 0;">
+              <img src="data:image/jpeg;base64,{chess_knight_b64}" style="width:100%; height:110px; border-radius:12px; object-fit:cover; border:1px solid #cbd5e1; box-shadow:0 4px 12px rgba(15,23,42,0.06);" />
+            </div>
+          </div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -741,10 +747,16 @@ with tab3:
 
     st.markdown(f"""
     <div class="card-box accent-blue">
-      <img src="data:image/jpeg;base64,{chess_analytics_b64}" class="art-card-header" />
-      <div class="card-heading">📈 Bảng So sánh Toàn diện Hiệu suất Mô hình Machine Learning</div>
-      <div class="card-subheading">
-        Bộ phân loại <b>Tăng cường Gradient Biểu đồ Histogram (HistGradientBoosting)</b> đạt hiệu suất vượt trội trên tất cả các chỉ số, với độ chính xác giữ lại <b>83,19%</b> và kết quả xác thực chéo nhất quán.
+      <div style="display: flex; gap: 1.8rem; align-items: center; justify-content: space-between;">
+        <div style="flex: 1;">
+          <div class="card-heading">📈 Bảng So sánh Toàn diện Hiệu suất Mô hình Machine Learning</div>
+          <div class="card-subheading" style="margin-bottom:0;">
+            Bộ phân loại <b>Tăng cường Gradient Biểu đồ Histogram (HistGradientBoosting)</b> đạt hiệu suất vượt trội trên tất cả các chỉ số, với độ chính xác giữ lại <b>83,19%</b> và kết quả xác thực chéo nhất quán.
+          </div>
+        </div>
+        <div style="width: 220px; flex-shrink: 0;">
+          <img src="data:image/jpeg;base64,{chess_analytics_b64}" style="width:100%; height:130px; border-radius:14px; object-fit:cover; border:1px solid #cbd5e1; box-shadow:0 4px 14px rgba(15,23,42,0.08);" />
+        </div>
       </div>
     </div>
     """, unsafe_allow_html=True)
