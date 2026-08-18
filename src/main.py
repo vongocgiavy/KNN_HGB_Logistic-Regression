@@ -2,13 +2,14 @@ import os
 import sys
 import argparse
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 # Ensure UTF-8 output encoding for Windows terminal
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-# Add current directory and parent directory to sys.path
+# Ensure proper path resolution regardless of working directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
@@ -16,7 +17,7 @@ parent_dir = os.path.dirname(current_dir)
 if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
-# Import 3 from-scratch models with fallback support
+# Import from-scratch models
 try:
     from logistic_baseline import (
         StandardScaler as LRStandardScaler,
@@ -31,16 +32,22 @@ except ImportError:
     )
 
 try:
-    from knn_opening import (
+    from knn_result import (
         StandardScaler as KNNStandardScaler,
         RobustKNNClassifier,
-        compute_multiclass_metrics as evaluate_knn_metrics
+        CustomPipeline,
+        evaluate_multiclass_metrics as evaluate_knn_metrics,
+        stratified_train_test_split as knn_train_test_split,
+        predict_result_knn
     )
 except ImportError:
-    from src.knn_opening import (
+    from src.knn_result import (
         StandardScaler as KNNStandardScaler,
         RobustKNNClassifier,
-        compute_multiclass_metrics as evaluate_knn_metrics
+        CustomPipeline,
+        evaluate_multiclass_metrics as evaluate_knn_metrics,
+        stratified_train_test_split as knn_train_test_split,
+        predict_result_knn
     )
 
 try:
@@ -68,20 +75,22 @@ def train_test_split_custom(X, y, test_size=0.2, random_state=42):
     train_idx = indices[:train_size]
     test_idx = indices[train_size:]
     
+    if isinstance(X, pd.DataFrame):
+        return X.iloc[train_idx], X.iloc[test_idx], y[train_idx], y[test_idx]
     return X[train_idx], X[test_idx], y[train_idx], y[test_idx]
 
 
 # =====================================================================
-# 1. RUN LOGISTIC REGRESSION (FROM SCRATCH)
+# 1. CHỨC NĂNG 1: LOGISTIC REGRESSION (FROM SCRATCH)
 # =====================================================================
 def run_logistic_regression(show_plot=True):
     print("\n" + "=" * 65)
-    print(" [1] HUẤN LUYỆN VÀ ĐÁNH GIÁ: ROBUST LOGISTIC REGRESSION (FROM SCRATCH)")
+    print(" [1] LOGISTIC REGRESSION THUẦN TÚY (GRADIENT DESCENT + L2 REGULARIZATION)")
     print("=" * 65)
 
     np.random.seed(42)
     n_samples = 500
-    print(f"[*] Đang sinh tập dữ liệu 2 lớp phân loại (n={n_samples})...")
+    print(f"[*] Đang khởi tạo tập dữ liệu phân loại 2 lớp mẫu (n={n_samples})...")
     X0 = np.random.randn(n_samples // 2, 2) + np.array([-1.5, -1.5])
     y0 = np.zeros(n_samples // 2, dtype=int)
     X1 = np.random.randn(n_samples // 2, 2) + np.array([1.5, 1.5])
@@ -92,12 +101,12 @@ def run_logistic_regression(show_plot=True):
 
     X_train_raw, X_test_raw, y_train, y_test = train_test_split_custom(X, y, test_size=0.2, random_state=42)
 
-    # Chuẩn hóa
+    # Chuẩn hóa dữ liệu
     scaler = LRStandardScaler()
     X_train = scaler.fit_transform(X_train_raw)
     X_test = scaler.transform(X_test_raw)
 
-    print("[*] Đang huấn luyện Logistic Regression với L2 Regularization & Early Stopping...")
+    print("[*] Đang huấn luyện Logistic Regression với Early Stopping & L2 Penalty...")
     clf = RobustLogisticRegression(lr=0.1, n_iters=1500, penalty='l2', lambda_param=0.01, tol=1e-5, verbose=True)
     clf.fit(X_train, y_train)
 
@@ -116,7 +125,7 @@ def run_logistic_regression(show_plot=True):
     print("-" * 50)
 
     if show_plot:
-        print("[*] Đang hiển thị biểu đồ trực quan hóa...")
+        print("[*] Đang hiển thị đồ thị trực quan hóa...")
         plt.figure(figsize=(12, 5))
         
         # Loss Curve
@@ -124,7 +133,7 @@ def run_logistic_regression(show_plot=True):
         plt.plot(clf.loss_history, color='blue', lw=2)
         plt.title("Logistic Regression - Learning Curve")
         plt.xlabel("Epoch")
-        plt.ylabel("Binary Cross-Entropy Loss")
+        plt.ylabel("Cross-Entropy Loss")
         plt.grid(True, linestyle="--", alpha=0.6)
 
         # Decision Boundary
@@ -146,11 +155,11 @@ def run_logistic_regression(show_plot=True):
 
 
 # =====================================================================
-# 2. RUN KNN CLASSIFIER (FROM SCRATCH)
+# 2. CHỨC NĂNG 2: K-NEAREST NEIGHBORS (FROM SCRATCH)
 # =====================================================================
 def run_knn(show_plot=True, k=7, weights='distance'):
     print("\n" + "=" * 65)
-    print(" [2] HUẤN LUYỆN VÀ ĐÁNH GIÁ: ROBUST K-NEAREST NEIGHBORS (FROM SCRATCH)")
+    print(" [2] K-NEAREST NEIGHBORS THUẦN TÚY (VECTORIZED DISTANCE + DISTANCE WEIGHTING)")
     print("=" * 65)
 
     np.random.seed(42)
@@ -168,7 +177,7 @@ def run_knn(show_plot=True, k=7, weights='distance'):
 
     X_train_raw, X_test_raw, y_train, y_test = train_test_split_custom(X, y, test_size=0.2, random_state=42)
 
-    # Chuẩn hóa
+    # Chuẩn hóa dữ liệu
     scaler = KNNStandardScaler()
     X_train = scaler.fit_transform(X_train_raw)
     X_test = scaler.transform(X_test_raw)
@@ -183,8 +192,11 @@ def run_knn(show_plot=True, k=7, weights='distance'):
 
     print("\n" + "-" * 50)
     print(" KẾT QUẢ ĐÁNH GIÁ TRÊN TẬP TEST:")
-    print(f" • Accuracy        : {metrics['Accuracy'] * 100:.2f}%")
-    print(f" • Confusion Matrix (3x3):\n{metrics['Confusion_Matrix']}")
+    print(f" • Accuracy        : {metrics['accuracy'] * 100:.2f}%")
+    print(f" • Precision       : {metrics['precision'] * 100:.2f}% (weighted)")
+    print(f" • Recall          : {metrics['recall'] * 100:.2f}% (weighted)")
+    print(f" • F1-Score        : {metrics['f1_score'] * 100:.2f}% (weighted)")
+    print(f" • Confusion Matrix (3x3):\n{np.array(metrics['confusion_matrix'])}")
     print("-" * 50)
 
     if show_plot:
@@ -210,11 +222,11 @@ def run_knn(show_plot=True, k=7, weights='distance'):
 
 
 # =====================================================================
-# 3. RUN HISTOGRAM GRADIENT BOOSTING (FROM SCRATCH)
+# 3. CHỨC NĂNG 3: HISTOGRAM GRADIENT BOOSTING (FROM SCRATCH)
 # =====================================================================
 def run_hgb(show_plot=True, n_estimators=40, learning_rate=0.2, max_depth=4):
     print("\n" + "=" * 65)
-    print(" [3] HUẤN LUYỆN VÀ ĐÁNH GIÁ: ROBUST HIST GRADIENT BOOSTING (FROM SCRATCH)")
+    print(" [3] HISTOGRAM GRADIENT BOOSTING THUẦN TÚY (HISTOGRAM BINNING + DECISION TREES)")
     print("=" * 65)
 
     np.random.seed(42)
@@ -283,11 +295,11 @@ def run_hgb(show_plot=True, n_estimators=40, learning_rate=0.2, max_depth=4):
         plt.tight_layout()
         plt.show()
 
-    return hgb, {"Accuracy": test_acc, "n_trees": len(hgb.trees)}
+    return hgb, {"accuracy": test_acc, "n_trees": len(hgb.trees)}
 
 
 # =====================================================================
-# 4. RUN ALL 3 MODELS & COMPARE (SO SÁNH CẢ 3 MÔ HÌNH)
+# 4. CHỨC NĂNG 4: SO SÁNH CẢ 3 MÔ HÌNH (FULL COMPARISON)
 # =====================================================================
 def run_all_and_compare(show_plot=False):
     print("\n" + "#" * 70)
@@ -304,26 +316,26 @@ def run_all_and_compare(show_plot=False):
     _, hgb_metrics = run_hgb(show_plot=show_plot)
 
     # Bảng tổng hợp so sánh
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 75)
     print("                    BẢNG TỔNG HỢP SO SÁNH 3 MÔ HÌNH")
-    print("=" * 70)
+    print("=" * 75)
     print(f"{'Mô hình':<30} | {'Độ chính xác (Accuracy)':<25} | {'Ghi chú':<15}")
-    print("-" * 70)
+    print("-" * 75)
     print(f"{'1. Logistic Regression':<30} | {lr_metrics['Accuracy'] * 100:>20.2f}% | {'Linear Baseline':<15}")
-    print(f"{'2. K-Nearest Neighbors (KNN)':<30} | {knn_metrics['Accuracy'] * 100:>20.2f}% | {'Non-linear Multi':<15}")
-    print(f"{'3. HistGradientBoosting (HGB)':<30} | {hgb_metrics['Accuracy'] * 100:>20.2f}% | {'Ensemble Boosting':<15}")
-    print("=" * 70 + "\n")
+    print(f"{'2. K-Nearest Neighbors (KNN)':<30} | {knn_metrics['accuracy'] * 100:>20.2f}% | {'Non-linear Multi':<15}")
+    print(f"{'3. HistGradientBoosting (HGB)':<30} | {hgb_metrics['accuracy'] * 100:>20.2f}% | {'Ensemble Boosting':<15}")
+    print("=" * 75 + "\n")
 
 
 # =====================================================================
-# MENU GIAO DIỆN CONSOLE INTERACTIVE
+# MENU GIAO DIỆN TƯƠNG TÁC CONSOLE
 # =====================================================================
 def main_menu():
     while True:
         print("\n" + "=" * 65)
         print("    HỆ THỐNG MACHINE LEARNING THUẦN TÚY (FROM SCRATCH - NO SKLEARN)")
         print("=" * 65)
-        print("1. Logistic Regression (Gradient Descent + L2 + Early Stopping)")
+        print("1. Logistic Regression (Gradient Descent + L2 Regularization)")
         print("2. K-Nearest Neighbors (KNN Vectorized Distance + Weighted Voting)")
         print("3. HistGradientBoosting (Histogram Binning + Decision Trees Boosting)")
         print("4. Chạy toàn bộ & So sánh cả 3 mô hình")
@@ -341,7 +353,7 @@ def main_menu():
         elif choice == "4":
             run_all_and_compare(show_plot=False)
         elif choice == "0":
-            print("\nCảm ơn bạn đã sử dụng hệ thống! Tạm biệt.\n")
+            print("\nCảm ơn bạn đã sử dụng hệ thống Machine Learning! Tạm biệt.\n")
             break
         else:
             print("[!] Lựa chọn không hợp lệ. Vui lòng nhập từ 0 đến 4.")
@@ -349,11 +361,10 @@ def main_menu():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Machine Learning From Scratch - Pure Python & NumPy")
-    parser.add_argument("--mode", type=int, choices=[1, 2, 3, 4], help="Run mode directly (1-4)")
-    parser.add_argument("--no-plot", action="store_true", help="Disable matplotlib GUI popup")
+    parser.add_argument("--mode", type=int, choices=[1, 2, 3, 4], help="Chạy trực tiếp chế độ (1-4)")
+    parser.add_argument("--no-plot", action="store_true", help="Tắt hiển thị đồ thị Matplotlib (cho môi trường CLI/Headless)")
 
     args = parser.parse_args()
-
     show_plot = not args.no_plot
 
     if args.mode == 1:
