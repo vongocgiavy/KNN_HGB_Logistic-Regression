@@ -50,6 +50,96 @@ def train_test_split_custom(X, y, test_size=0.2, random_state=42):
     return X_arr[train_idx], X_arr[test_idx], y_arr[train_idx], y_arr[test_idx]
 
 
+class GridSearchCV_Custom:
+    """Bộ dò tìm siêu tham số tối ưu (Grid Search Cross-Validation) viết tay 100% bằng NumPy."""
+    def __init__(self, estimator_cls, param_grid, cv=3, verbose=True):
+        self.estimator_cls = estimator_cls
+        self.param_grid = param_grid
+        self.cv = cv
+        self.verbose = verbose
+        
+        self.best_params_ = None
+        self.best_score_ = -1.0
+        self.best_estimator_ = None
+        self.cv_results_ = []
+
+    def _generate_param_combinations(self):
+        import itertools
+        keys = list(self.param_grid.keys())
+        values = list(self.param_grid.values())
+        for combination in itertools.product(*values):
+            yield dict(zip(keys, combination))
+
+    def _k_fold_indices(self, n_samples):
+        indices = np.random.permutation(n_samples)
+        fold_sizes = np.full(self.cv, n_samples // self.cv, dtype=int)
+        fold_sizes[:n_samples % self.cv] += 1
+        current = 0
+        folds = []
+        for fold_size in fold_sizes:
+            folds.append(indices[current:current + fold_size])
+            current += fold_size
+        return folds
+
+    def fit(self, X, y):
+        X_arr = np.array(X)
+        y_arr = np.array(y)
+        n_samples = len(y_arr)
+
+        folds = self._k_fold_indices(n_samples)
+        combinations = list(self._generate_param_combinations())
+
+        if self.verbose:
+            print("\n" + "=" * 65)
+            print(f" [*] BẮT ĐẦU GRID SEARCH TỐI ƯU HÓA ({len(combinations)} Tổ hợp tham số x {self.cv}-Fold CV)")
+            print("=" * 65)
+
+        for idx, params in enumerate(combinations, start=1):
+            fold_scores = []
+            for k in range(self.cv):
+                val_idx = folds[k]
+                train_idx = np.concatenate([folds[j] for j in range(self.cv) if j != k])
+                
+                X_tr, y_tr = X_arr[train_idx], y_arr[train_idx]
+                X_va, y_va = X_arr[val_idx], y_arr[val_idx]
+                
+                model = self.estimator_cls(**params)
+                model.fit(X_tr, y_tr)
+                score = model.score(X_va, y_va)
+                fold_scores.append(score)
+
+            mean_score = float(np.mean(fold_scores))
+            std_score = float(np.std(fold_scores))
+
+            self.cv_results_.append({
+                "params": params,
+                "mean_score": mean_score,
+                "std_score": std_score
+            })
+
+            if self.verbose:
+                param_str = ", ".join(f"{k}={v}" for k, v in params.items())
+                print(f" [Candidate {idx:2d}/{len(combinations):2d}] {param_str} => {self.cv}-Fold Mean Acc: {mean_score*100:.2f}% (±{std_score*100:.2f}%)")
+
+            if mean_score > self.best_score_:
+                self.best_score_ = mean_score
+                self.best_params_ = params
+
+        if self.verbose:
+            print("-" * 65)
+            print(" [+] KẾT QUẢ TỐT NHẤT ĐẠT ĐƯỢC VỚI CÁC THAM SỐ SAU:")
+            print(f"     • learning_rate = {self.best_params_.get('learning_rate', 0.1)}")
+            print(f"     • max_depth     = {self.best_params_.get('max_depth', 5)}")
+            print(f"     • max_iter      = {self.best_params_.get('n_estimators', 200)}")
+            print(f"     • CV Accuracy   = {self.best_score_*100:.2f}%")
+            print("-" * 65 + "\n")
+
+        # Huấn luyện mô hình tốt nhất trên toàn bộ dữ liệu Train
+        self.best_estimator_ = self.estimator_cls(**self.best_params_)
+        self.best_estimator_.fit(X_arr, y_arr)
+        return self
+
+
 # =====================================================================
 # PHẦN 2. THUẬT TOÁN 1: LOGISTIC REGRESSION VIẾT TAY (FROM SCRATCH)
 # =====================================================================
@@ -662,11 +752,10 @@ def run_knn(show_plot=True, k=7, weights='distance'):
     return knn, metrics
 
 
-def run_hgb(show_plot=True, n_estimators=200, learning_rate=0.1, max_depth=5):
+def run_hgb(show_plot=True, n_estimators=200, learning_rate=0.1, max_depth=5, use_grid_search=True):
     print("\n" + "=" * 65)
-    print(" [3] HISTOGRAM GRADIENT BOOSTING (HGB) VIẾT TAY")
+    print(" [3] HISTOGRAM GRADIENT BOOSTING (HGB) TỐI ƯU HÓA BẰNG GRIDSEARCHCV")
     print("=" * 65)
-    print("(*) Thiết lập siêu tham số tối ưu: learning_rate = 0.1 | max_depth = 5 | max_iter = 200")
 
     np.random.seed(42)
     n_samples = 600
@@ -684,16 +773,26 @@ def run_hgb(show_plot=True, n_estimators=200, learning_rate=0.1, max_depth=5):
 
     X_train, X_test, y_train, y_test = train_test_split_custom(X, y, test_size=0.2, random_state=42)
 
-    print(f"[*] Huấn luyện HGB viết tay ({n_estimators} stages, lr={learning_rate}, depth={max_depth})...")
-    hgb = RobustHGBClassifier(
-        n_estimators=n_estimators,
-        learning_rate=learning_rate,
-        max_depth=max_depth,
-        max_bins=64,
-        l2_regularization=1.5,
-        verbose=True
-    )
-    hgb.fit(X_train, y_train)
+    if use_grid_search:
+        param_grid = {
+            "learning_rate": [0.05, 0.1, 0.2],
+            "max_depth": [3, 4, 5],
+            "n_estimators": [50, 100, 200]
+        }
+        grid = GridSearchCV_Custom(RobustHGBClassifier, param_grid=param_grid, cv=3, verbose=True)
+        grid.fit(X_train, y_train)
+        hgb = grid.best_estimator_
+    else:
+        print(f"[*] Huấn luyện HGB viết tay ({n_estimators} stages, lr={learning_rate}, depth={max_depth})...")
+        hgb = RobustHGBClassifier(
+            n_estimators=n_estimators,
+            learning_rate=learning_rate,
+            max_depth=max_depth,
+            max_bins=64,
+            l2_regularization=1.5,
+            verbose=True
+        )
+        hgb.fit(X_train, y_train)
 
     test_acc = hgb.score(X_test, y_test)
     print("\n" + "-" * 50)
