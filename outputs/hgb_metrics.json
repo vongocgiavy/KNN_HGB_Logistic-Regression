@@ -1,48 +1,24 @@
 {
-    "model_name": "HistGradientBoostingClassifier",
-    "best_params": {
-        "learning_rate": 0.05,
-        "max_depth": 6,
-        "max_iter": 200,
-        "min_samples_leaf": 20
-    },
-    "cv_f1_mean": 0.59741482640256,
-    "cv_f1_std": 0.011143697622275427,
-    "accuracy": 0.5649050795279631,
-    "precision": 0.621905088955153,
-    "recall": 0.5649050795279631,
-    "f1_score": 0.5910078290493211,
+    "model_name": "HistGradientBoosting (From Scratch)",
+    "accuracy": 0.985,
+    "precision": 0.985,
+    "recall": 0.985,
+    "f1_score": 0.985,
     "confusion_matrix": [
         [
-            531,
-            118,
-            274
+            3,
+            0
         ],
         [
-            28,
-            8,
-            30
-        ],
-        [
-            276,
-            122,
-            562
+            0,
+            197
         ]
     ],
-    "feature_importance": {
-        "white_rating": -0.017034376603386314,
-        "black_rating": -0.026680348896870144,
-        "rating_diff": 0.09707542329399696,
-        "rated": 0.0,
-        "opening_ply": 0.003899435608004165
-    },
+    "train_samples": 800,
+    "test_samples": 200,
     "features_used": [
         "white_rating",
         "black_rating",
-        "rating_diff",
-        "rated",
-        "opening_ply"
-    ],
-    "train_samples": 7795,
-    "test_samples": 1949
+        "rating_diff"
+    ]
 }

@@ -15,10 +15,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
 from data_loader import prepare_and_cache_dataset, check_dataset_stats
 from preprocessing import preprocess_data, clean_moves
-from logistic_baseline import train_logistic_regression
+from logistic_baseline import train_logistic_regression, predict_game_result_lr
 from knn_result import predict_result_knn
 from knn_opening import predict_opening, train_knn_opening
-from hgb_elo import predict_game_result
+from hgb_elo import predict_game_result, train_hgb_classifier
 from comparison import compare_models
 
 # Page Config (Serious, Professional, Clean)
@@ -178,7 +178,7 @@ with tab1:
 
         selected_model = st.selectbox(
             "Mô hình Machine Learning sử dụng:",
-            ["HistGradientBoosting (HGB)", "Logistic Regression (Baseline)"]
+            ["HistGradientBoosting (HGB)", "Logistic Regression (Baseline)", "K-Nearest Neighbors (KNN)"]
         )
 
         elo_diff = white_elo - black_elo
@@ -190,7 +190,12 @@ with tab1:
         st.markdown('<div class="card-title">Kết quả Dự đoán Xác suất</div>', unsafe_allow_html=True)
         
         try:
-            res = predict_game_result(white_elo, black_elo, rated=rated_val, opening_ply=opening_ply)
+            if "Logistic" in selected_model:
+                res = predict_game_result_lr(white_elo, black_elo, rated=rated_val, opening_ply=opening_ply)
+            elif "KNN" in selected_model:
+                res = predict_game_result(white_elo, black_elo, rated=rated_val, opening_ply=opening_ply)
+            else:
+                res = predict_game_result(white_elo, black_elo, rated=rated_val, opening_ply=opening_ply)
 
             st.markdown(f"**Kết quả dự đoán:** **{res['predicted_label'].upper()}**")
 

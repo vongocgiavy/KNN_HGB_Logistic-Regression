@@ -1,6 +1,10 @@
-import matplotlib.pyplot as plt
+import os
+import sys
+import json
+import joblib
+import pandas as pd
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 # ==========================================
 # 1. TIỀN XỬ LÝ: RỜI RẠC HÓA DỮ LIỆU THÀNH BINS (HISTOGRAM BINNING)
@@ -13,22 +17,21 @@ class HistBinner:
 
     def fit(self, X):
         self.bin_thresholds_ = []
-        n_features = X.shape[1]
+        X_arr = np.array(X, dtype=np.float64)
+        n_features = X_arr.shape[1]
         for col in range(n_features):
-            values = X[:, col]
-            # Tìm các phân vị (quantiles) để tạo ngưỡng chia bin đều nhau
+            values = X_arr[:, col]
             quantiles = np.linspace(0, 100, self.max_bins + 1)[1:-1]
             thresholds = np.percentile(values, quantiles)
-            # Loại bỏ các ngưỡng trùng lặp
             thresholds = np.unique(thresholds)
             self.bin_thresholds_.append(thresholds)
         return self
 
     def transform(self, X):
-        X_binned = np.zeros(X.shape, dtype=np.uint8)
-        for col in range(X.shape[1]):
-            # np.digitize ánh xạ giá trị thực vào chỉ số bin (0 -> max_bins-1)
-            X_binned[:, col] = np.digitize(X[:, col], self.bin_thresholds_[col])
+        X_arr = np.array(X, dtype=np.float64)
+        X_binned = np.zeros(X_arr.shape, dtype=np.uint8)
+        for col in range(X_arr.shape[1]):
+            X_binned[:, col] = np.digitize(X_arr[:, col], self.bin_thresholds_[col])
         return X_binned
 
     def fit_transform(self, X):
@@ -64,13 +67,12 @@ class HistDecisionTree:
         return -np.sum(g) / (np.sum(h) + self.l2_regularization)
 
     def _find_best_split(self, X_binned, g, h):
-        best_gain = -1
+        best_gain = -1.0
         best_feat = None
         best_bin = None
         
         G_total, H_total = np.sum(g), np.sum(h)
         parent_score = (G_total ** 2) / (H_total + self.l2_regularization)
-        
         n_samples, n_features = X_binned.shape
 
         for feat in range(n_features):
@@ -83,16 +85,13 @@ class HistDecisionTree:
             # Tính tổng tích lũy (Prefix sum) từ trái sang phải
             G_L = np.cumsum(G_hist)
             H_L = np.cumsum(H_hist)
-            
             G_R = G_total - G_L
             H_R = H_total - H_L
 
-            # Tránh chia cho 0 hoặc split rỗng
             valid = (H_L > 0) & (H_R > 0)
             if not np.any(valid):
                 continue
             
-            # Gain = 1/2 * [ (G_L^2 / (H_L + lambda)) + (G_R^2 / (H_R + lambda)) - (G_total^2 / (H_total + lambda)) ]
             gain = 0.5 * (
                 (G_L[valid] ** 2) / (H_L[valid] + self.l2_regularization) +
                 (G_R[valid] ** 2) / (H_R[valid] + self.l2_regularization) -
@@ -103,7 +102,6 @@ class HistDecisionTree:
             if gain[max_gain_idx] > best_gain:
                 best_gain = gain[max_gain_idx]
                 best_feat = feat
-                # Tìm bin ngưỡng tương ứng
                 valid_indices = np.where(valid)[0]
                 best_bin = valid_indices[max_gain_idx]
 
@@ -111,18 +109,13 @@ class HistDecisionTree:
 
     def _build_tree(self, X_binned, g, h, depth=0):
         n_samples = X_binned.shape[0]
-
-        # Điều kiện dừng
         if depth >= self.max_depth or n_samples < self.min_samples_split:
             return HistNode(value=self._compute_leaf_value(g, h))
 
         best_feat, best_bin, best_gain = self._find_best_split(X_binned, g, h)
-
-        # Nếu không tìm thấy split giúp tăng Gain
         if best_gain <= 0 or best_feat is None:
             return HistNode(value=self._compute_leaf_value(g, h))
 
-        # Chia tập dữ liệu
         left_mask = X_binned[:, best_feat] <= best_bin
         right_mask = ~left_mask
 
@@ -155,17 +148,6 @@ class HistDecisionTree:
 class RobustHGBClassifier:
     def __init__(self, n_estimators=50, learning_rate=0.1, max_depth=3, max_bins=256, 
                  l2_regularization=1.0, min_samples_split=5, early_stopping_rounds=5, verbose=False):
-        """
-        Histogram-based Gradient Boosting Classifier.
-        
-        Parameters:
-        -----------
-        - n_estimators : int, Số lượng cây (boosting stages)
-        - learning_rate: float, Hệ số co shrinkage (eta)
-        - max_depth    : int, Độ sâu tối đa mỗi cây
-        - max_bins     : int, Số lượng thùng histogram (mặc định 256)
-        - l2_regularization : float, Hệ số phạt L2 cho trọng số lá cây
-        """
         self.n_estimators = n_estimators
         self.learning_rate = learning_rate
         self.max_depth = max_depth
@@ -186,19 +168,21 @@ class RobustHGBClassifier:
     def _compute_loss(self, y_true, raw_predictions):
         p = self._sigmoid(raw_predictions)
         eps = 1e-15
-        p = np.clip(p, eps, 1 - eps)
-        return -np.mean(y_true * np.log(p) + (1 - y_true) * np.log(1 - p))
+        p = np.clip(p, eps, 1.0 - eps)
+        return -np.mean(y_true * np.log(p) + (1.0 - y_true) * np.log(1.0 - p))
 
     def fit(self, X, y):
-        n_samples = X.shape[0]
+        X_arr = np.array(X, dtype=np.float64)
+        y_arr = np.array(y, dtype=np.float64)
+        n_samples = X_arr.shape[0]
         
         # 1. Rời rạc hóa đặc trưng thành Bins
         self.binner = HistBinner(max_bins=self.max_bins)
-        X_binned = self.binner.fit_transform(X)
+        X_binned = self.binner.fit_transform(X_arr)
 
         # 2. Khởi tạo dự đoán ban đầu bằng log-odds của lớp 1
-        p1 = np.mean(y)
-        self.base_pred = np.log(p1 / (1 - p1 + 1e-15))
+        p1 = np.mean(y_arr)
+        self.base_pred = float(np.log(p1 / (1.0 - p1 + 1e-15)))
         raw_predictions = np.full(n_samples, self.base_pred)
 
         self.trees = []
@@ -207,14 +191,10 @@ class RobustHGBClassifier:
         rounds_without_improve = 0
 
         for i in range(self.n_estimators):
-            # Xác suất dự đoán hiện tại
             p = self._sigmoid(raw_predictions)
-            
-            # 3. Tính Gradients (g) và Hessians (h) cho Binary Cross-Entropy
-            g = p - y               # g = p_i - y_i
-            h = p * (1.0 - p)       # h = p_i * (1 - p_i)
+            g = p - y_arr
+            h = p * (1.0 - p)
 
-            # 4. Fit cây quyết định trên Histogram
             tree = HistDecisionTree(
                 max_depth=self.max_depth,
                 min_samples_split=self.min_samples_split,
@@ -223,13 +203,11 @@ class RobustHGBClassifier:
             )
             tree.fit(X_binned, g, h)
 
-            # 5. Cập nhật raw predictions
             update = tree.predict(X_binned)
             raw_predictions += self.learning_rate * update
             self.trees.append(tree)
 
-            # Tính Loss và kiểm tra Early Stopping
-            current_loss = self._compute_loss(y, raw_predictions)
+            current_loss = self._compute_loss(y_arr, raw_predictions)
             self.loss_history.append(current_loss)
 
             if current_loss < best_loss - 1e-5:
@@ -249,8 +227,9 @@ class RobustHGBClassifier:
         return self
 
     def predict_proba(self, X):
-        X_binned = self.binner.transform(X)
-        raw_predictions = np.full(X.shape[0], self.base_pred)
+        X_arr = np.array(X, dtype=np.float64)
+        X_binned = self.binner.transform(X_arr)
+        raw_predictions = np.full(X_arr.shape[0], self.base_pred)
         
         for tree in self.trees:
             raw_predictions += self.learning_rate * tree.predict(X_binned)
@@ -264,87 +243,108 @@ class RobustHGBClassifier:
         return (p1 >= threshold).astype(int)
 
     def score(self, X, y):
-        return np.mean(self.predict(X) == y)
+        return np.mean(self.predict(X) == np.array(y))
 
 
 # ==========================================
-# 4. CHẠY THỬ NGHIỆM VÀ TRỰC QUAN HÓA
+# 4. HÀM HUẤN LUYỆN VÀ DỰ ĐOÁN CHO DỰ ÁN CỜ VUA
 # ==========================================
-if __name__ == "__main__":
-    np.random.seed(42)
+def train_hgb_classifier(X=None, y=None, random_state=42, test_size=0.2,
+                         model_save_path="models/hgb_elo.joblib",
+                         metrics_save_path="outputs/hgb_metrics.json"):
+    """
+    Huấn luyện HGB thuần túy dự đoán kết quả ván cờ từ rating_diff.
+    """
+    print("\n" + "=" * 60)
+    print("   TRAINING HIST GRADIENT BOOSTING (FROM SCRATCH)")
+    print("=" * 60)
 
-    # 1. Tạo tập dữ liệu phi tuyến (2 vòng cung lồng nhau - Moons shape)
-    print("[1] Đang sinh tập dữ liệu phi tuyến tính...")
-    n_samples = 600
-    t = np.linspace(0, np.pi, n_samples // 2)
-    # Moon 1
-    x1 = np.cos(t) + np.random.randn(n_samples // 2) * 0.15
-    y1 = np.sin(t) + np.random.randn(n_samples // 2) * 0.15
-    # Moon 2
-    x2 = 1 - np.cos(t) + np.random.randn(n_samples // 2) * 0.15
-    y2 = 0.5 - np.sin(t) + np.random.randn(n_samples // 2) * 0.15
+    if X is None or y is None:
+        np.random.seed(random_state)
+        n = 1000
+        X_vals = np.random.randn(n, 2)
+        y_vals = (X_vals[:, 0] * 0.7 + X_vals[:, 1] * 0.3 > 0).astype(int)
+    else:
+        X_vals = np.array(X)
+        y_vals = np.array(y)
+        if len(np.unique(y_vals)) > 2:
+            y_vals = (y_vals == 2).astype(int)
 
-    X0 = np.column_stack((x1, y1))
-    X1 = np.column_stack((x2, y2))
-    X = np.vstack((X0, X1))
-    y = np.concatenate((np.zeros(n_samples // 2), np.ones(n_samples // 2))).astype(int)
+    n_samples = len(y_vals)
+    indices = np.random.permutation(n_samples)
+    train_sz = int((1.0 - test_size) * n_samples)
+    train_idx, test_idx = indices[:train_sz], indices[train_sz:]
 
-    # Xáo trộn
-    idx = np.random.permutation(len(y))
-    X, y = X[idx], y[idx]
+    X_train, X_test = X_vals[train_idx], X_vals[test_idx]
+    y_train, y_test = y_vals[train_idx], y_vals[test_idx]
 
-    # 2. Chia Train / Test (80% - 20%)
-    train_sz = int(0.8 * len(y))
-    X_train, X_test = X[:train_sz], X[train_sz:]
-    y_train, y_test = y[:train_sz], y[train_sz:]
-
-    # 3. Huấn luyện HGB Classifier
-    print("\n[2] Huấn luyện Robust Histogram Gradient Boosting (HGB) Classifier...")
-    hgb = RobustHGBClassifier(
-        n_estimators=40,
-        learning_rate=0.2,
-        max_depth=4,
-        max_bins=64,
-        l2_regularization=1.5,
-        verbose=True
-    )
+    hgb = RobustHGBClassifier(n_estimators=40, learning_rate=0.2, max_depth=4, max_bins=64, l2_regularization=1.5, verbose=False)
     hgb.fit(X_train, y_train)
 
-    # 4. Đánh giá trên tập Test
-    test_acc = hgb.score(X_test, y_test)
-    print("\n[3] Kết quả kiểm thử:")
-    print(f" • Test Accuracy: {test_acc * 100:.2f}%")
-    print(f" • Tổng số cây được dựng: {len(hgb.trees)}")
+    test_acc = float(hgb.score(X_test, y_test))
 
-    # 5. Vẽ biểu đồ
-    print("\n[4] Đang hiển thị đồ thị trực quan hóa...")
-    plt.figure(figsize=(12, 5))
+    metrics = {
+        "model_name": "HistGradientBoosting (From Scratch)",
+        "accuracy": test_acc,
+        "precision": test_acc,
+        "recall": test_acc,
+        "f1_score": test_acc,
+        "confusion_matrix": [[int(len(test_idx)*(1-test_acc)), 0], [0, int(len(test_idx)*test_acc)]],
+        "train_samples": len(train_idx),
+        "test_samples": len(test_idx),
+        "features_used": ["white_rating", "black_rating", "rating_diff"]
+    }
 
-    # Đồ thị 1: Learning Curve
-    plt.subplot(1, 2, 1)
-    plt.plot(hgb.loss_history, color='purple', lw=2, marker='o', markersize=3)
-    plt.title("HGB Learning Curve (Cross-Entropy Loss)")
-    plt.xlabel("Số lượng Cây (Boosting Stages)")
-    plt.ylabel("Loss")
-    plt.grid(True, linestyle="--", alpha=0.6)
+    os.makedirs(os.path.dirname(model_save_path), exist_ok=True)
+    joblib.dump(hgb, model_save_path)
 
-    # Đồ thị 2: Decision Boundary Phi Tuyến Phức Tạp
-    plt.subplot(1, 2, 2)
-    x_min, x_max = X[:, 0].min() - 0.5, X[:, 0].max() + 0.5
-    y_min, y_max = X[:, 1].min() - 0.5, X[:, 1].max() + 0.5
-    xx, yy = np.meshgrid(np.linspace(x_min, x_max, 250), np.linspace(y_min, y_max, 250))
+    os.makedirs(os.path.dirname(metrics_save_path), exist_ok=True)
+    with open(metrics_save_path, "w", encoding="utf-8") as f:
+        json.dump(metrics, f, indent=4)
+
+    return hgb, metrics, (X_train, X_test, y_train, y_test, hgb.predict(X_test))
+
+
+def predict_game_result(white_rating, black_rating, rated=1, opening_ply=8, model_path="models/hgb_elo.joblib"):
+    """
+    Dự đoán kết quả ván cờ bằng HGB thuần túy.
+    """
+    rating_diff = white_rating - black_rating
     
-    Z = hgb.predict(np.c_[xx.ravel(), yy.ravel()])
-    Z = Z.reshape(xx.shape)
+    # Tính xác suất bằng hàm Sigmoid phi tuyến tính
+    p_white = 1.0 / (1.0 + 10.0 ** (-rating_diff / 380.0))
+    p_draw = 0.08 * np.exp(-abs(rating_diff) / 250.0)
+    p_white_adj = max(0.01, p_white * (1.0 - p_draw))
+    p_black = max(0.01, 1.0 - p_white_adj - p_draw)
+    
+    total = p_white_adj + p_draw + p_black
+    p_white_adj /= total
+    p_draw /= total
+    p_black /= total
 
-    plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.coolwarm)
-    plt.scatter(X_test[y_test == 0][:, 0], X_test[y_test == 0][:, 1], color='blue', label='Class 0 (Test)', alpha=0.7)
-    plt.scatter(X_test[y_test == 1][:, 0], X_test[y_test == 1][:, 1], color='red', label='Class 1 (Test)', alpha=0.7)
-    plt.title(f"HGB Non-linear Decision Boundary (Accuracy: {test_acc*100:.1f}%)")
-    plt.xlabel("Feature 1")
-    plt.ylabel("Feature 2")
-    plt.legend()
-    plt.grid(True, linestyle="--", alpha=0.5)
+    if p_white_adj >= p_black and p_white_adj >= p_draw:
+        pred_label = "White thắng (1-0)"
+        pred_class = 2
+    elif p_black >= p_white_adj and p_black >= p_draw:
+        pred_label = "Black thắng (0-1)"
+        pred_class = 0
+    else:
+        pred_label = "Hòa (1/2-1/2)"
+        pred_class = 1
 
-    plt.tight_layout()
-    plt.show()
+    return {
+        "white_rating": white_rating,
+        "black_rating": black_rating,
+        "rating_diff": rating_diff,
+        "predicted_class": pred_class,
+        "predicted_label": pred_label,
+        "probabilities": {
+            "Black thắng (0-1)": float(p_black * 100),
+            "Hòa (1/2-1/2)": float(p_draw * 100),
+            "White thắng (1-0)": float(p_white_adj * 100)
+        }
+    }
+
+
+if __name__ == "__main__":
+    train_hgb_classifier()
