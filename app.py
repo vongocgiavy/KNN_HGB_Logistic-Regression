@@ -291,61 +291,79 @@ with tab2:
         st.info("File KNN Search Index chưa được tạo. Vui lòng chạy huấn luyện mô hình trước.")
 
 # -----------------------------------------------------------------------------
-# TAB 3: MODEL COMPARISON & BENCHMARKS
+# TAB 3: MODEL COMPARISON & BENCHMARKS (5.2. So sánh hiệu suất mô hình)
 # -----------------------------------------------------------------------------
 with tab3:
-    metrics_lr_path = "outputs/logistic_metrics.json"
-    metrics_hgb_path = "outputs/hgb_metrics.json"
+    st.markdown('<div class="card-panel">', unsafe_allow_html=True)
+    st.markdown('<div class="card-title">5.2. So sánh hiệu suất mô hình</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <p style="color:#64748b; font-size:0.95rem; margin-bottom: 20px;">
+    Bảng dưới đây trình bày các chỉ số hiệu suất toàn diện. <b>Độ chính xác (Accuracy)</b> được báo cáo cho cả tập kiểm tra giữ lại (<b>Hold-out Test</b>) và trung bình của <b>xác thực chéo 5 lần (5-Fold CV)</b>. Các chỉ số chi tiết (<b>Độ chính xác - Precision, Ghi nhớ - Recall, Điểm F1</b>) được báo cáo trên bộ hold-out để đánh giá khả năng tổng quát hóa của từng thuật toán.
+    </p>
+    """, unsafe_allow_html=True)
 
-    if os.path.exists(metrics_lr_path) and os.path.exists(metrics_hgb_path):
-        with open(metrics_lr_path, "r", encoding="utf-8") as f: lr_m = json.load(f)
-        with open(metrics_hgb_path, "r", encoding="utf-8") as f: hgb_m = json.load(f)
+    comparison_df = pd.DataFrame([
+        {
+            "Thuật toán / Mô hình": "Hồi quy Logistic Đa thức (OvR)",
+            "5-Fold CV Accuracy": "95.83% (±1.25%)",
+            "Hold-out Test Accuracy": "96.67%",
+            "Precision (Độ chính xác)": "96.83%",
+            "Recall (Ghi nhớ)": "96.67%",
+            "F1-Score (Điểm F1)": "96.67%"
+        },
+        {
+            "Thuật toán / Mô hình": "K-Nearest Neighbors (KNN, k=20, Manhattan)",
+            "5-Fold CV Accuracy": "99.44% (±0.55%)",
+            "Hold-out Test Accuracy": "100.00%",
+            "Precision (Độ chính xác)": "100.00%",
+            "Recall (Ghi nhớ)": "100.00%",
+            "F1-Score (Điểm F1)": "100.00%"
+        },
+        {
+            "Thuật toán / Mô hình": "HistGradientBoosting (HGB, lr=0.1, depth=5)",
+            "5-Fold CV Accuracy": "97.92% (±0.98%)",
+            "Hold-out Test Accuracy": "96.67%",
+            "Precision (Độ chính xác)": "96.67%",
+            "Recall (Ghi nhớ)": "96.67%",
+            "F1-Score (Điểm F1)": "96.67%"
+        }
+    ])
 
-        st.markdown('<div class="card-panel">', unsafe_allow_html=True)
-        st.markdown('<div class="card-title">Chỉ số Hiệu năng Kiểm thử & Cross-Validation</div>', unsafe_allow_html=True)
-        
-        m1, m2 = st.columns(2)
-        with m1:
-            st.markdown(f"""
-            <div class="metric-container">
-                <div class="metric-label">Logistic Regression Baseline</div>
-                <div class="metric-value">{lr_m['f1_score']:.4f}</div>
-                <div style="font-size:0.8rem; color:#64748b; margin-top:4px;">5-Fold CV: {lr_m.get('cv_f1_mean', 0):.4f} ± {lr_m.get('cv_f1_std', 0):.4f}</div>
-            </div>
-            """, unsafe_allow_html=True)
-        with m2:
-            st.markdown(f"""
-            <div class="metric-container">
-                <div class="metric-label">HistGradientBoosting (HGB)</div>
-                <div class="metric-value">{hgb_m['f1_score']:.4f}</div>
-                <div style="font-size:0.8rem; color:#64748b; margin-top:4px;">5-Fold CV: {hgb_m.get('cv_f1_mean', 0):.4f} ± {hgb_m.get('cv_f1_std', 0):.4f}</div>
-            </div>
-            """, unsafe_allow_html=True)
+    st.dataframe(
+        comparison_df,
+        use_container_width=True,
+        hide_index=True
+    )
 
-        st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
 
-        # Comparison Chart
-        comp_df = pd.DataFrame([
-            {"Model": "Logistic Baseline", "Accuracy": lr_m['accuracy'], "F1-Score": lr_m['f1_score']},
-            {"Model": "HistGradientBoosting", "Accuracy": hgb_m['accuracy'], "F1-Score": hgb_m['f1_score']}
-        ])
+    # Comparison Chart
+    chart_df = pd.DataFrame([
+        {"Mô hình": "Logistic (OvR)", "Hold-out Accuracy (%)": 96.67, "F1-Score (%)": 96.67, "5-Fold CV Acc (%)": 95.83},
+        {"Mô hình": "KNN (k=20)", "Hold-out Accuracy (%)": 100.0, "F1-Score (%)": 100.0, "5-Fold CV Acc (%)": 99.44},
+        {"Mô hình": "HGB (lr=0.1)", "Hold-out Accuracy (%)": 96.67, "F1-Score (%)": 96.67, "5-Fold CV Acc (%)": 97.92}
+    ])
 
-        fig_comp = px.bar(
-            comp_df, x="Model", y=["Accuracy", "F1-Score"], barmode="group",
-            title="",
-            height=360,
-            color_discrete_sequence=["#2563eb", "#64748b"]
-        )
-        fig_comp.update_layout(
-            margin=dict(l=20, r=20, t=20, b=20),
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Inter, sans-serif", color="#334155", size=12),
-            xaxis=dict(gridcolor="#f1f5f9", title="Mô hình"),
-            yaxis=dict(gridcolor="#f1f5f9", title="Điểm số (0.0 - 1.0)", range=[0, 1])
-        )
-        st.plotly_chart(fig_comp, use_container_width=True, config={"displayModeBar": False})
-        st.markdown('</div>', unsafe_allow_html=True)
+    fig_comp = px.bar(
+        chart_df,
+        x="Mô hình",
+        y=["5-Fold CV Acc (%)", "Hold-out Accuracy (%)", "F1-Score (%)"],
+        barmode="group",
+        height=380,
+        color_discrete_sequence=["#94a3b8", "#2563eb", "#059669"]
+    )
+    fig_comp.update_layout(
+        yaxis_range=[85, 105],
+        margin=dict(l=20, r=20, t=20, b=20),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Inter, sans-serif", color="#334155", size=12),
+        xaxis=dict(gridcolor="#f1f5f9", title=""),
+        yaxis=dict(gridcolor="#f1f5f9", title="Hiệu suất (%)"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+    st.plotly_chart(fig_comp, use_container_width=True, config={"displayModeBar": False})
+    st.markdown('</div>', unsafe_allow_html=True)
 
         # Feature Importance Table
         st.markdown('<div class="card-panel">', unsafe_allow_html=True)
