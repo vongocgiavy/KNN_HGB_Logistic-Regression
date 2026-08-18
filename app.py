@@ -280,43 +280,43 @@ button[data-baseweb="tab"][aria-selected="true"] {
     box-shadow: 0 6px 18px rgba(0,0,0,0.5), 0 0 15px rgba(56, 189, 248, 0.25) !important;
 }
 
-/* ── DROPDOWN / SELECTBOX / POPOVER ĐỐI LẬP MÀU SẮC TUYỆT ĐỐI ── */
+/* ── DROPDOWN / SELECTBOX / POPOVER LIST OPTIONS - CHỮ MÀU ĐEN TRÊN NỀN TRẮNG SÁNG ── */
 div[data-baseweb="popover"],
 div[data-baseweb="popover"] *,
 div[data-baseweb="menu"],
 div[data-baseweb="menu"] *,
 ul[role="listbox"],
 ul[role="listbox"] * {
-    background-color: #0b1120 !important;
-    background: #0b1120 !important;
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
 }
 
 div[data-baseweb="popover"] {
-    border: 2px solid #38bdf8 !important;
-    border-radius: 14px !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95), 0 0 30px rgba(56, 189, 248, 0.4) !important;
+    border: 2px solid #0284c7 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(2, 132, 199, 0.25) !important;
     overflow: hidden !important;
 }
 
-/* Các mục bên trong danh sách xổ xuống */
+/* Các mục bên trong danh sách xổ xuống - CHỮ MÀU ĐEN NỔI BẬT 100% */
 div[data-baseweb="popover"] li,
 div[data-baseweb="popover"] div[role="option"],
 li[role="option"],
 [data-baseweb="menu"] li {
-    background-color: #0b1120 !important;
-    color: #f8fafc !important;
-    -webkit-text-fill-color: #f8fafc !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
     font-size: 1.15rem !important;
     font-weight: 700 !important;
     padding: 12px 18px !important;
-    border-bottom: 1px solid #1e293b !important;
+    border-bottom: 1px solid #e2e8f0 !important;
     cursor: pointer !important;
     transition: all 0.15s ease !important;
 }
 
-/* Khi rê chuột vào mục hoặc mục đang chọn -> Nền Xanh Dương Đậm, Chữ Trắng Tinh */
+/* Khi rê chuột vào mục hoặc mục đang chọn -> Nền Xanh Dương Sáng, Chữ Trắng Tinh */
 div[data-baseweb="popover"] li:hover,
 div[data-baseweb="popover"] li[aria-selected="true"],
 li[role="option"]:hover,
@@ -343,7 +343,10 @@ div[data-baseweb="select"] > div {
     border-radius: 12px !important;
     font-size: 1.15rem !important;
     font-weight: 700 !important;
-    padding: 4px 8px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
 }
 div[data-baseweb="select"] > div:hover,
 div[data-baseweb="select"] > div:focus-within {
@@ -355,10 +358,14 @@ div[data-baseweb="select"] svg {
     color: #38bdf8 !important;
 }
 
-/* ── SỐ NƯỚC KHAI CUỘC (NUMBER INPUT & NÚT + / -) ── */
+/* ── SỐ NƯỚC KHAI CUỘC (NUMBER INPUT & NÚT + / -) - CHIỀU CAO BẰNG 48PX VỚI SELECTBOX ── */
 div[data-testid="stNumberInput"] {
     background-color: #090d16 !important;
     border-radius: 12px !important;
+}
+div[data-testid="stNumberInput"] > div {
+    height: 48px !important;
+    min-height: 48px !important;
 }
 div[data-testid="stNumberInput"] input {
     background-color: #090d16 !important;
@@ -367,6 +374,7 @@ div[data-testid="stNumberInput"] input {
     font-size: 1.25rem !important;
     font-weight: 800 !important;
     border: 1.5px solid #334155 !important;
+    height: 48px !important;
 }
 div[data-testid="stNumberInput"] button {
     background-color: #1e293b !important;
@@ -375,6 +383,7 @@ div[data-testid="stNumberInput"] button {
     border: 1.5px solid #334155 !important;
     font-weight: 800 !important;
     font-size: 1.2rem !important;
+    height: 48px !important;
     transition: all 0.2s ease !important;
 }
 div[data-testid="stNumberInput"] button:hover {
@@ -537,6 +546,8 @@ with tab1:
         try:
             if "Logistic" in selected_model:
                 res = predict_game_result_lr(white_elo, black_elo, rated=rated_val, opening_ply=opening_ply)
+            elif "KNN" in selected_model:
+                res = predict_result_knn(white_elo, black_elo, rated=rated_val, opening_ply=opening_ply)
             else:
                 res = predict_game_result(white_elo, black_elo, rated=rated_val, opening_ply=opening_ply)
 
@@ -582,6 +593,18 @@ with tab1:
             fig.update_traces(textfont_size=15, textfont_color="#ffffff",
                               marker_line_color="rgba(0,0,0,0)")
             st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+
+            # Giải thích trực quan nếu xác suất hai bên bám sát nhau (chênh lệch dưới 1.5%)
+            p_black = probs.get("Black thắng (0-1)", 0)
+            p_white = probs.get("White thắng (1-0)", 0)
+            if abs(p_black - p_white) < 1.5:
+                st.markdown(
+                    f'<div style="font-size:0.95rem; color:#f1f5f9; background:rgba(56,189,248,0.12); border-left:4px solid #38bdf8; padding:10px 14px; border-radius:8px; margin-top:10px;">'
+                    f'<b>Giải thích kết quả:</b> Xác suất của Bên Đen (<code>{p_black:.2f}%</code>) và Bên Trắng (<code>{p_white:.2f}%</code>) bám sát nhau. '
+                    f'Do hiển thị trên biểu đồ làm tròn 1 chữ số thập phân nên nhìn hai cột có giá trị tương đồng. '
+                    f'Mô hình đưa ra nhãn <b>{label.upper()}</b> dựa trên giá trị chưa làm tròn nhỉnh hơn chính xác <code>{abs(p_black - p_white):.2f}%</code>.</div>',
+                    unsafe_allow_html=True
+                )
 
         except Exception as e:
             st.error(f"Chưa có file mô hình huấn luyện. Vui lòng chạy `py src/main.py --mode 3` trước. ({e})")
