@@ -22,7 +22,6 @@ class StandardScaler:
         X_arr = np.array(X, dtype=np.float64)
         self.mean_ = np.mean(X_arr, axis=0)
         self.std_ = np.std(X_arr, axis=0)
-        # Tránh chia cho 0 nếu một đặc trưng có phương sai bằng 0
         self.std_[self.std_ == 0] = 1e-8
         return self
 
@@ -134,59 +133,31 @@ class GridSearchCV_Custom:
             print(f"     • CV Accuracy   = {self.best_score_*100:.2f}%")
             print("-" * 65 + "\n")
 
-        # Huấn luyện mô hình tốt nhất trên toàn bộ dữ liệu Train
         self.best_estimator_ = self.estimator_cls(**self.best_params_)
         self.best_estimator_.fit(X_arr, y_arr)
         return self
 
 
 # =====================================================================
-# PHẦN 2. THUẬT TOÁN 1: LOGISTIC REGRESSION VIẾT TAY (FROM SCRATCH)
+# PHẦN 2. THUẬT TOÁN 1: HỒI QUY LOGISTIC ĐA THỨC (ONE-VS-REST OVR)
 # =====================================================================
-class RobustLogisticRegression:
-    """
-    Mô hình Hồi quy Logistic viết tay:
-    - Thuật toán tối ưu Gradient Descent
-    - Hàm kích hoạt Sigmoid có chặn ngưỡng tránh tràn số học (Numerical Stability)
-    - Hỗ trợ hàm phạt Regularization (L1 / L2)
-    - Dừng sớm (Early Stopping) khi Gradient Norm đạt ngưỡng hội tụ
-    """
-    def __init__(self, lr=0.1, n_iters=1500, penalty='l2', lambda_param=0.01, tol=1e-5, verbose=False):
+class BinaryLogisticRegression:
+    """Mô hình Logistic nhị phân với Gradient Descent và L2 Regularization."""
+    def __init__(self, lr=0.1, n_iters=1500, penalty='l2', lambda_param=0.01, tol=1e-5):
         self.lr = lr
         self.n_iters = n_iters
         self.penalty = penalty
         self.lambda_param = lambda_param
         self.tol = tol
-        self.verbose = verbose
         
         self.weights = None
         self.bias = 0.0
         self.loss_history = []
 
     def _sigmoid(self, z):
-        """Hàm kích hoạt Sigmoid an toàn số học."""
         return 1.0 / (1.0 + np.exp(-np.clip(z, -500, 500)))
 
-    def compute_loss(self, y_true, y_pred_proba):
-        """Tính hàm mất mát Binary Cross-Entropy kết hợp phạt Regularization."""
-        m = len(y_true)
-        eps = 1e-15
-        p = np.clip(y_pred_proba, eps, 1.0 - eps)
-        
-        # Binary Cross-Entropy Loss
-        bce = - (1.0 / m) * np.sum(y_true * np.log(p) + (1.0 - y_true) * np.log(1.0 - p))
-        
-        # Thành phần phạt Regularization (không phạt bias)
-        reg = 0.0
-        if self.penalty == 'l2':
-            reg = (self.lambda_param / (2.0 * m)) * np.sum(self.weights ** 2)
-        elif self.penalty == 'l1':
-            reg = (self.lambda_param / m) * np.sum(np.abs(self.weights))
-            
-        return bce + reg
-
     def fit(self, X, y):
-        """Huấn luyện mô hình bằng thuật toán Gradient Descent."""
         X_arr = np.array(X, dtype=np.float64)
         y_arr = np.array(y, dtype=np.float64)
         n_samples, n_features = X_arr.shape
@@ -196,150 +167,77 @@ class RobustLogisticRegression:
         self.loss_history = []
 
         for epoch in range(self.n_iters):
-            # 1. Forward Pass
             linear_out = np.dot(X_arr, self.weights) + self.bias
             y_pred = self._sigmoid(linear_out)
 
-            # 2. Tính Loss
-            loss = self.compute_loss(y_arr, y_pred)
-            self.loss_history.append(loss)
-
-            # 3. Backward Pass (Tính Đạo hàm Gradient)
             dw = (1.0 / n_samples) * np.dot(X_arr.T, (y_pred - y_arr))
             db = (1.0 / n_samples) * np.sum(y_pred - y_arr)
 
-            # Thêm đạo hàm Regularization
             if self.penalty == 'l2':
                 dw += (self.lambda_param / n_samples) * self.weights
-            elif self.penalty == 'l1':
-                dw += (self.lambda_param / n_samples) * np.sign(self.weights)
 
-            # 4. Kiểm tra điều kiện hội tụ sớm (Early Stopping)
-            grad_norm = np.linalg.norm(dw)
-            if grad_norm < self.tol:
-                if self.verbose:
-                    print(f" -> Hội tụ sớm tại epoch {epoch} (Gradient Norm: {grad_norm:.6f} < {self.tol})")
+            if np.linalg.norm(dw) < self.tol:
                 break
 
-            # 5. Cập nhật tham số
             self.weights -= self.lr * dw
             self.bias -= self.lr * db
-
-            if self.verbose and epoch % (self.n_iters // 10 or 1) == 0:
-                print(f"Epoch {epoch:4d}/{self.n_iters} | Loss: {loss:.5f} | Grad Norm: {grad_norm:.6f}")
 
         return self
 
     def predict_proba(self, X):
-        """Dự đoán xác suất [P(y=0), P(y=1)]."""
         X_arr = np.array(X, dtype=np.float64)
         linear_out = np.dot(X_arr, self.weights) + self.bias
-        p1 = self._sigmoid(linear_out)
-        p0 = 1.0 - p1
-        return np.column_stack((p0, p1))
+        return self._sigmoid(linear_out)
 
-    def predict(self, X, threshold=0.5):
-        """Dự đoán nhãn nhị phân {0, 1}."""
-        p1 = self.predict_proba(X)[:, 1]
-        return (p1 >= threshold).astype(int)
+
+class MultinomialLogisticRegression_OvR:
+    """
+    Hồi quy Logistic Đa thức (Multinomial Logistic Regression):
+    - Triển khai phương pháp One-vs-Rest (OvR)
+    - Ước lượng tập hợp các hồi quy logistic nhị phân riêng biệt
+    - Xử lý phân loại đa lớp không thứ tự
+    """
+    def __init__(self, lr=0.1, n_iters=1500, penalty='l2', lambda_param=0.01):
+        self.lr = lr
+        self.n_iters = n_iters
+        self.penalty = penalty
+        self.lambda_param = lambda_param
+        self.models = {}
+        self.classes_ = None
+
+    def fit(self, X, y):
+        X_arr = np.array(X, dtype=np.float64)
+        y_arr = np.array(y)
+        self.classes_ = np.unique(y_arr)
+        self.models = {}
+
+        # Huấn luyện mô hình nhị phân riêng cho từng lớp (OvR)
+        for c in self.classes_:
+            y_binary = (y_arr == c).astype(int)
+            clf = BinaryLogisticRegression(lr=self.lr, n_iters=self.n_iters, penalty=self.penalty, lambda_param=self.lambda_param)
+            clf.fit(X_arr, y_binary)
+            self.models[c] = clf
+
+        return self
+
+    def predict_proba(self, X):
+        X_arr = np.array(X, dtype=np.float64)
+        probs_dict = {}
+        for c in self.classes_:
+            probs_dict[c] = self.models[c].predict_proba(X_arr)
+            
+        prob_matrix = np.column_stack([probs_dict[c] for c in self.classes_])
+        # Chuẩn hóa Softmax xác suất tổng = 1
+        sum_p = np.sum(prob_matrix, axis=1, keepdims=True)
+        sum_p[sum_p == 0] = 1.0
+        return prob_matrix / sum_p
+
+    def predict(self, X):
+        probs = self.predict_proba(X)
+        return self.classes_[np.argmax(probs, axis=1)]
 
     def score(self, X, y):
-        """Tính tỷ lệ dự đoán chính xác Accuracy."""
         return np.mean(self.predict(X) == np.array(y))
-
-
-def evaluate_classification_report(y_true, y_pred, class_names=None):
-    """
-    Tính toán chi tiết và in Báo cáo Đánh giá Hiệu suất Toàn diện (Viết tay 100% bằng NumPy):
-    - Độ chính xác tổng thể (Overall Accuracy)
-    - Độ chính xác theo từng lớp (Precision per Class)
-    - Khả năng nhớ lại theo từng lớp (Recall per Class)
-    - Điểm F1 hài hòa (F1-Score per Class)
-    - Trung bình có trọng số (Weighted Average) & Ma trận nhầm lẫn (Confusion Matrix)
-    """
-    y_t = np.array(y_true)
-    y_p = np.array(y_pred)
-    classes = np.unique(np.concatenate([y_t, y_p]))
-    n_classes = len(classes)
-    
-    # 1. Xây dựng ma trận nhầm lẫn (Confusion Matrix)
-    cm = np.zeros((n_classes, n_classes), dtype=int)
-    for t, p in zip(y_t, y_p):
-        i = np.where(classes == t)[0][0]
-        j = np.where(classes == p)[0][0]
-        cm[i, j] += 1
-        
-    total_samples = len(y_t)
-    overall_accuracy = float(np.sum(np.diag(cm)) / total_samples) if total_samples > 0 else 0.0
-    
-    # 2. Tính Precision, Recall, F1 cho từng lớp
-    per_class_metrics = []
-    supports = []
-    precisions = []
-    recalls = []
-    f1s = []
-    
-    for i, c in enumerate(classes):
-        tp = cm[i, i]
-        fp = np.sum(cm[:, i]) - tp
-        fn = np.sum(cm[i, :]) - tp
-        support = int(np.sum(cm[i, :]))
-        
-        prec = float(tp / (tp + fp)) if (tp + fp) > 0 else 0.0
-        rec = float(tp / (tp + fn)) if (tp + fn) > 0 else 0.0
-        f1 = float(2 * prec * rec / (prec + rec)) if (prec + rec) > 0 else 0.0
-        
-        name = class_names[i] if (class_names and i < len(class_names)) else f"Lớp {c}"
-        per_class_metrics.append({
-            "class": name,
-            "precision": prec,
-            "recall": rec,
-            "f1": f1,
-            "support": support
-        })
-        precisions.append(prec)
-        recalls.append(rec)
-        f1s.append(f1)
-        supports.append(support)
-        
-    # 3. Tính Weighted Average & Macro Average
-    total_support = sum(supports) if sum(supports) > 0 else 1
-    weighted_precision = float(np.sum(np.array(precisions) * np.array(supports)) / total_support)
-    weighted_recall = float(np.sum(np.array(recalls) * np.array(supports)) / total_support)
-    weighted_f1 = float(np.sum(np.array(f1s) * np.array(supports)) / total_support)
-    
-    # 4. In bảng báo cáo chi tiết
-    print("\n" + "=" * 70)
-    print("           BÁO CÁO ĐÁNH GIÁ CHỈ SỐ HIỆU SUẤT MÔ HÌNH")
-    print("=" * 70)
-    print(f" • Độ chính xác tổng thể (Overall Accuracy): {overall_accuracy * 100:.2f}%\n")
-    print(f"{'Lớp đối tượng':<25} | {'Precision (Độ CX)':<18} | {'Recall (Độ nhớ)':<16} | {'F1-Score':<10} | {'Mẫu (Support)':<12}")
-    print("-" * 70)
-    for row in per_class_metrics:
-        print(f"{row['class']:<25} | {row['precision']*100:>16.2f}% | {row['recall']*100:>14.2f}% | {row['f1']*100:>8.2f}% | {row['support']:>12d}")
-    print("-" * 70)
-    print(f"{'Trung bình trọng số':<25} | {weighted_precision*100:>16.2f}% | {weighted_recall*100:>14.2f}% | {weighted_f1*100:>8.2f}% | {total_support:>12d}")
-    print("=" * 70)
-    print("Ma trận nhầm lẫn (Confusion Matrix):")
-    print(cm)
-    print("=" * 70 + "\n")
-
-    return {
-        "Accuracy": overall_accuracy,
-        "Precision": weighted_precision,
-        "Recall": weighted_recall,
-        "F1-Score": weighted_f1,
-        "Confusion_Matrix": cm,
-        "Per_Class": per_class_metrics
-    }
-
-
-def evaluate_logistic_metrics(y_true, y_pred):
-    return evaluate_classification_report(y_true, y_pred, class_names=["Lớp 0 (Âm tính)", "Lớp 1 (Dương tính)"])
-
-
-def evaluate_multiclass_metrics(y_true, y_pred, classes=None):
-    return evaluate_classification_report(y_true, y_pred, class_names=[f"Lớp {c}" for c in (classes if classes is not None else [0, 1, 2])])
 
 
 # =====================================================================
@@ -348,12 +246,11 @@ def evaluate_multiclass_metrics(y_true, y_pred, classes=None):
 class RobustKNNClassifier:
     """
     Thuật toán K-Láng giềng gần nhất (KNN) viết tay:
-    - Tối ưu hóa ma trận khoảng cách Vectorized (Vectorized Distance Matrix)
-    - Hỗ trợ đa dạng độ đo: Euclidean, Manhattan, Minkowski
-    - Hỗ trợ bỏ phiếu trọng số theo nghịch đảo khoảng cách (Distance-weighted Voting)
-    - Phân loại đa lớp phi tuyến tính (Multi-class Classification)
+    - Khoảng cách: Manhattan (L1 norm), Euclidean (L2 norm), Minkowski
+    - Trọng số: 'distance' (ưu tiên điểm gần) hoặc 'uniform'
+    - Tham số tối ưu: knn_metric = 'manhattan', knn_n_neighbors = 20, knn_weights = 'distance'
     """
-    def __init__(self, n_neighbors=7, metric='euclidean', p=2, weights='distance'):
+    def __init__(self, n_neighbors=20, metric='manhattan', p=1, weights='distance'):
         self.n_neighbors = n_neighbors
         self.metric = metric
         self.p = p
@@ -364,21 +261,20 @@ class RobustKNNClassifier:
         self.classes_ = None
 
     def fit(self, X, y):
-        """Lưu trữ tập huấn luyện (Lazy Learning)."""
         self.X_train = np.array(X, dtype=np.float64)
         self.y_train = np.array(y)
         self.classes_ = np.unique(self.y_train)
         return self
 
     def _compute_distances(self, X):
-        """Tính toán ma trận khoảng cách song song bằng phép toán ma trận."""
         X_arr = np.array(X, dtype=np.float64)
-        if self.metric == 'euclidean':
-            # ||A - B||^2 = ||A||^2 + ||B||^2 - 2 * A * B_T
+        if self.metric == 'manhattan':
+            # Khoảng cách Manhattan L1: sum(|x_i - y_i|)
+            return np.sum(np.abs(X_arr[:, np.newaxis, :] - self.X_train[np.newaxis, :, :]), axis=2)
+        elif self.metric == 'euclidean':
+            # Khoảng cách Euclidean L2 vector hóa
             dists_sq = np.sum(X_arr**2, axis=1, keepdims=True) + np.sum(self.X_train**2, axis=1) - 2 * np.dot(X_arr, self.X_train.T)
             return np.sqrt(np.maximum(dists_sq, 0.0))
-        elif self.metric == 'manhattan':
-            return np.sum(np.abs(X_arr[:, np.newaxis, :] - self.X_train[np.newaxis, :, :]), axis=2)
         elif self.metric == 'minkowski':
             diff = np.abs(X_arr[:, np.newaxis, :] - self.X_train[np.newaxis, :, :])
             return np.sum(diff ** self.p, axis=2) ** (1.0 / self.p)
@@ -386,7 +282,6 @@ class RobustKNNClassifier:
             raise ValueError(f"Không hỗ trợ độ đo '{self.metric}'")
 
     def predict_proba(self, X):
-        """Dự đoán phân phối xác suất cho từng lớp."""
         distances = self._compute_distances(X)
         k = min(self.n_neighbors, self.X_train.shape[0])
         knn_indices = np.argpartition(distances, k - 1, axis=1)[:, :k]
@@ -416,34 +311,11 @@ class RobustKNNClassifier:
         return np.array(probabilities)
 
     def predict(self, X):
-        """Dự đoán nhãn có trọng số bình chọn cao nhất."""
         probs = self.predict_proba(X)
         return self.classes_[np.argmax(probs, axis=1)]
 
     def score(self, X, y):
-        """Tính Accuracy trên tập dữ liệu."""
         return np.mean(self.predict(X) == np.array(y))
-
-
-def evaluate_multiclass_metrics(y_true, y_pred, classes=None):
-    """Tính toán ma trận nhầm lẫn và chỉ số cho bài toán đa lớp viết tay."""
-    y_t = np.array(y_true)
-    y_p = np.array(y_pred)
-    if classes is None:
-        classes = np.unique(np.concatenate([y_t, y_p]))
-    
-    n_classes = len(classes)
-    cm = np.zeros((n_classes, n_classes), dtype=int)
-    for t, p in zip(y_t, y_p):
-        i = np.where(classes == t)[0][0]
-        j = np.where(classes == p)[0][0]
-        cm[i, j] += 1
-        
-    accuracy = float(np.sum(np.diag(cm)) / len(y_t)) if len(y_t) > 0 else 0.0
-    return {
-        "Accuracy": accuracy,
-        "Confusion_Matrix": cm
-    }
 
 
 # =====================================================================
@@ -478,7 +350,6 @@ class HistBinner:
 
 
 class HistNode:
-    """Node trong cây quyết định dựa trên Histogram."""
     def __init__(self, feature=None, threshold_bin=None, left=None, right=None, value=None):
         self.feature = feature
         self.threshold_bin = threshold_bin
@@ -492,8 +363,7 @@ class HistNode:
 
 
 class HistDecisionTree:
-    """Cây quyết định tối ưu hóa dựa trên Histogram Gradients & Hessians."""
-    def __init__(self, max_depth=3, min_samples_split=5, l2_regularization=1.0, max_bins=256):
+    def __init__(self, max_depth=5, min_samples_split=5, l2_regularization=1.0, max_bins=256):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.l2_regularization = l2_regularization
@@ -501,7 +371,6 @@ class HistDecisionTree:
         self.root = None
 
     def _compute_leaf_value(self, g, h):
-        """Tính giá trị tối ưu của lá: w = - sum(g) / (sum(h) + lambda)."""
         return -np.sum(g) / (np.sum(h) + self.l2_regularization)
 
     def _find_best_split(self, X_binned, g, h):
@@ -516,7 +385,6 @@ class HistDecisionTree:
         for feat in range(n_features):
             feat_bins = X_binned[:, feat]
             
-            # Tạo Histogram tích lũy Gradient và Hessian theo từng bin
             G_hist = np.bincount(feat_bins, weights=g, minlength=self.max_bins)
             H_hist = np.bincount(feat_bins, weights=h, minlength=self.max_bins)
             
@@ -581,13 +449,11 @@ class HistDecisionTree:
 
 class RobustHGBClassifier:
     """
-    Thuật toán Histogram-based Gradient Boosting Classifier viết tay:
-    - Chia dữ liệu vào Histogram Bins (tốc độ cao)
-    - Tối ưu hóa chuỗi cây quyết định (Boosting Stages)
-    - Tự động dừng sớm (Early Stopping) theo dõi Cross-Entropy Loss
+    Thuật toán Tăng cường Gradient bằng biểu đồ tần suất (HistGradientBoosting):
+    - Siêu tham số tối ưu: learning_rate = 0.1, max_depth = 5, max_iter / n_estimators = 200
     """
-    def __init__(self, n_estimators=50, learning_rate=0.1, max_depth=3, max_bins=256, 
-                 l2_regularization=1.0, min_samples_split=5, early_stopping_rounds=5, verbose=False):
+    def __init__(self, n_estimators=200, learning_rate=0.1, max_depth=5, max_bins=256, 
+                 l2_regularization=1.0, min_samples_split=5, early_stopping_rounds=10, verbose=False):
         self.n_estimators = n_estimators
         self.learning_rate = learning_rate
         self.max_depth = max_depth
@@ -616,11 +482,9 @@ class RobustHGBClassifier:
         y_arr = np.array(y, dtype=np.float64)
         n_samples = X_arr.shape[0]
         
-        # 1. Rời rạc hóa đặc trưng
         self.binner = HistBinner(max_bins=self.max_bins)
         X_binned = self.binner.fit_transform(X_arr)
 
-        # 2. Khởi tạo dự đoán ban đầu bằng Log-Odds
         p1 = np.mean(y_arr)
         self.base_pred = float(np.log(p1 / (1.0 - p1 + 1e-15)))
         raw_preds = np.full(n_samples, self.base_pred)
@@ -632,12 +496,9 @@ class RobustHGBClassifier:
 
         for i in range(self.n_estimators):
             p = self._sigmoid(raw_preds)
-            
-            # 3. Tính Gradients (g) & Hessians (h)
             g = p - y_arr
             h = p * (1.0 - p)
 
-            # 4. Huấn luyện cây quyết định
             tree = HistDecisionTree(
                 max_depth=self.max_depth,
                 min_samples_split=self.min_samples_split,
@@ -646,12 +507,10 @@ class RobustHGBClassifier:
             )
             tree.fit(X_binned, g, h)
 
-            # 5. Cập nhật dự đoán
             update = tree.predict(X_binned)
             raw_preds += self.learning_rate * update
             self.trees.append(tree)
 
-            # Đánh giá Loss
             cur_loss = self._compute_loss(y_arr, raw_preds)
             self.loss_history.append(cur_loss)
 
@@ -692,80 +551,143 @@ class RobustHGBClassifier:
 
 
 # =====================================================================
-# PHẦN 5. GIAO DIỆN ĐIỀU KHIỂN & CHẠY THỰC NGHIỆM TỪNG MÔ HÌNH
+# PHẦN 5. HÀM ĐÁNH GIÁ CHỈ SỐ TOÀN DIỆN (CLASSIFICATION REPORT)
+# =====================================================================
+def evaluate_classification_report(y_true, y_pred, class_names=None):
+    y_t = np.array(y_true)
+    y_p = np.array(y_pred)
+    classes = np.unique(np.concatenate([y_t, y_p]))
+    n_classes = len(classes)
+    
+    cm = np.zeros((n_classes, n_classes), dtype=int)
+    for t, p in zip(y_t, y_p):
+        i = np.where(classes == t)[0][0]
+        j = np.where(classes == p)[0][0]
+        cm[i, j] += 1
+        
+    total_samples = len(y_t)
+    overall_accuracy = float(np.sum(np.diag(cm)) / total_samples) if total_samples > 0 else 0.0
+    
+    per_class_metrics = []
+    supports = []
+    precisions = []
+    recalls = []
+    f1s = []
+    
+    for i, c in enumerate(classes):
+        tp = cm[i, i]
+        fp = np.sum(cm[:, i]) - tp
+        fn = np.sum(cm[i, :]) - tp
+        support = int(np.sum(cm[i, :]))
+        
+        prec = float(tp / (tp + fp)) if (tp + fp) > 0 else 0.0
+        rec = float(tp / (tp + fn)) if (tp + fn) > 0 else 0.0
+        f1 = float(2 * prec * rec / (prec + rec)) if (prec + rec) > 0 else 0.0
+        
+        name = class_names[i] if (class_names and i < len(class_names)) else f"Lớp {c}"
+        per_class_metrics.append({
+            "class": name,
+            "precision": prec,
+            "recall": rec,
+            "f1": f1,
+            "support": support
+        })
+        precisions.append(prec)
+        recalls.append(rec)
+        f1s.append(f1)
+        supports.append(support)
+        
+    total_support = sum(supports) if sum(supports) > 0 else 1
+    weighted_precision = float(np.sum(np.array(precisions) * np.array(supports)) / total_support)
+    weighted_recall = float(np.sum(np.array(recalls) * np.array(supports)) / total_support)
+    weighted_f1 = float(np.sum(np.array(f1s) * np.array(supports)) / total_support)
+    
+    print("\n" + "=" * 70)
+    print("           BÁO CÁO ĐÁNH GIÁ CHỈ SỐ HIỆU SUẤT MÔ HÌNH")
+    print("=" * 70)
+    print(f" • Độ chính xác tổng thể (Overall Accuracy): {overall_accuracy * 100:.2f}%\n")
+    print(f"{'Lớp đối tượng':<25} | {'Precision (Độ CX)':<18} | {'Recall (Độ nhớ)':<16} | {'F1-Score':<10} | {'Mẫu (Support)':<12}")
+    print("-" * 70)
+    for row in per_class_metrics:
+        print(f"{row['class']:<25} | {row['precision']*100:>16.2f}% | {row['recall']*100:>14.2f}% | {row['f1']*100:>8.2f}% | {row['support']:>12d}")
+    print("-" * 70)
+    print(f"{'Trung bình trọng số':<25} | {weighted_precision*100:>16.2f}% | {weighted_recall*100:>14.2f}% | {weighted_f1*100:>8.2f}% | {total_support:>12d}")
+    print("=" * 70)
+    print("Ma trận nhầm lẫn (Confusion Matrix):")
+    print(cm)
+    print("=" * 70 + "\n")
+
+    return {
+        "Accuracy": overall_accuracy,
+        "Precision": weighted_precision,
+        "Recall": weighted_recall,
+        "F1-Score": weighted_f1,
+        "Confusion_Matrix": cm,
+        "Per_Class": per_class_metrics
+    }
+
+
+# =====================================================================
+# PHẦN 6. GIAO DIỆN ĐIỀU KHIỂN & CHẠY THỰC NGHIỆM TỪNG MÔ HÌNH
 # =====================================================================
 def run_logistic_regression(show_plot=True):
     print("\n" + "=" * 65)
-    print(" [1] LOGISTIC REGRESSION VIẾT TAY (GRADIENT DESCENT + L2)")
+    print(" [1] HỒI QUY LOGISTIC ĐA THỨC (MULTINOMIAL LOGISTIC REGRESSION - OvR)")
     print("=" * 65)
 
     np.random.seed(42)
-    n_samples = 500
-    print(f"[*] Khởi tạo dữ liệu phân loại 2 lớp mẫu (n={n_samples})...")
-    X0 = np.random.randn(n_samples // 2, 2) + np.array([-1.5, -1.5])
-    y0 = np.zeros(n_samples // 2, dtype=int)
-    X1 = np.random.randn(n_samples // 2, 2) + np.array([1.5, 1.5])
-    y1 = np.ones(n_samples // 2, dtype=int)
+    n_per_class = 150
+    print(f"[*] Khởi tạo dữ liệu 3 lớp không thứ tự (n={n_per_class * 3})...")
+    X0 = np.random.randn(n_per_class, 2) + np.array([-2.0, -1.0])
+    y0 = np.zeros(n_per_class, dtype=int)
+    X1 = np.random.randn(n_per_class, 2) + np.array([2.0, -1.0])
+    y1 = np.ones(n_per_class, dtype=int)
+    X2 = np.random.randn(n_per_class, 2) + np.array([0.0, 2.0])
+    y2 = np.full(n_per_class, 2, dtype=int)
 
-    X = np.vstack((X0, X1))
-    y = np.concatenate((y0, y1))
+    X = np.vstack((X0, X1, X2))
+    y = np.concatenate((y0, y1, y2))
 
     X_train_raw, X_test_raw, y_train, y_test = train_test_split_custom(X, y, test_size=0.2, random_state=42)
 
-    # Chuẩn hóa dữ liệu
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train_raw)
     X_test = scaler.transform(X_test_raw)
 
-    print("[*] Đang huấn luyện Logistic Regression viết tay...")
-    clf = RobustLogisticRegression(lr=0.1, n_iters=1500, penalty='l2', lambda_param=0.01, tol=1e-5, verbose=True)
+    print("[*] Đang huấn luyện Hồi quy Logistic Đa thức (One-vs-Rest OvR)...")
+    clf = MultinomialLogisticRegression_OvR(lr=0.1, n_iters=1500, penalty='l2', lambda_param=0.01)
     clf.fit(X_train, y_train)
 
     y_test_pred = clf.predict(X_test)
-    metrics = evaluate_logistic_metrics(y_test, y_test_pred)
-
-    print("\n" + "-" * 50)
-    print(" KẾT QUẢ ĐÁNH GIÁ TRÊN TẬP TEST:")
-    print(f" • Accuracy        : {metrics['Accuracy'] * 100:.2f}%")
-    print(f" • Precision       : {metrics['Precision'] * 100:.2f}%")
-    print(f" • Recall          : {metrics['Recall'] * 100:.2f}%")
-    print(f" • F1-Score        : {metrics['F1-Score'] * 100:.2f}%")
-    print(f" • Confusion Matrix:\n{metrics['Confusion_Matrix']}")
-    print(f" • Trọng số (Weights): {clf.weights}, Bias: {clf.bias:.4f}")
-    print("-" * 50)
+    metrics = evaluate_classification_report(y_test, y_test_pred, class_names=["Lớp 0 (Black)", "Lớp 1 (Draw)", "Lớp 2 (White)"])
 
     if show_plot:
-        print("[*] Đang hiển thị đồ thị...")
-        plt.figure(figsize=(12, 5))
+        print("[*] Đang hiển thị đồ thị Ranh giới phân loại đa thức...")
+        plt.figure(figsize=(8, 6))
+        x_min, x_max = X_train[:, 0].min() - 1, X_train[:, 0].max() + 1
+        y_min, y_max = X_train[:, 1].min() - 1, X_train[:, 1].max() + 1
+        xx, yy = np.meshgrid(np.linspace(x_min, x_max, 200), np.linspace(y_min, y_max, 200))
         
-        plt.subplot(1, 2, 1)
-        plt.plot(clf.loss_history, color='blue', lw=2)
-        plt.title("Logistic Regression - Learning Curve")
-        plt.xlabel("Epoch")
-        plt.ylabel("Binary Cross-Entropy Loss")
-        plt.grid(True, linestyle="--", alpha=0.6)
+        Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
+        Z = Z.reshape(xx.shape)
 
-        plt.subplot(1, 2, 2)
-        x0_vals = np.linspace(X_train[:, 0].min() - 1, X_train[:, 0].max() + 1, 100)
-        x1_vals = -(clf.weights[0] * x0_vals + clf.bias) / clf.weights[1]
-        plt.scatter(X_train[y_train == 0][:, 0], X_train[y_train == 0][:, 1], color='red', label='Class 0', alpha=0.6)
-        plt.scatter(X_train[y_train == 1][:, 0], X_train[y_train == 1][:, 1], color='green', label='Class 1', alpha=0.6)
-        plt.plot(x0_vals, x1_vals, color='black', linestyle='--', lw=2, label='Decision Boundary')
-        plt.title("Logistic Regression - Decision Boundary")
+        plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.coolwarm)
+        plt.scatter(X_train[:, 0], X_train[:, 1], c=y_train, cmap=plt.cm.coolwarm, edgecolors='k', s=40)
+        plt.title("Multinomial Logistic Regression (OvR Decision Boundary)")
         plt.xlabel("Feature 1 (Standardized)")
         plt.ylabel("Feature 2 (Standardized)")
-        plt.legend()
-        plt.grid(True, linestyle="--", alpha=0.6)
+        plt.grid(True, linestyle="--", alpha=0.5)
         plt.tight_layout()
         plt.show()
 
     return clf, metrics
 
 
-def run_knn(show_plot=True, k=7, weights='distance'):
+def run_knn(show_plot=True, k=20, metric='manhattan', weights='distance'):
     print("\n" + "=" * 65)
     print(" [2] K-NEAREST NEIGHBORS (KNN) VIẾT TAY")
     print("=" * 65)
+    print(f"(*) Tham số cấu hình: knn_metric = '{metric}' | knn_n_neighbors = {k} | knn_weights = '{weights}'")
 
     np.random.seed(42)
     n_per_class = 150
@@ -786,18 +708,12 @@ def run_knn(show_plot=True, k=7, weights='distance'):
     X_train = scaler.fit_transform(X_train_raw)
     X_test = scaler.transform(X_test_raw)
 
-    print(f"[*] Huấn luyện KNN viết tay (k={k}, metric='euclidean', weights='{weights}')...")
-    knn = RobustKNNClassifier(n_neighbors=k, metric='euclidean', weights=weights)
+    print(f"[*] Huấn luyện KNN viết tay (k={k}, metric='{metric}', weights='{weights}')...")
+    knn = RobustKNNClassifier(n_neighbors=k, metric=metric, weights=weights)
     knn.fit(X_train, y_train)
 
     y_test_pred = knn.predict(X_test)
-    metrics = evaluate_multiclass_metrics(y_test, y_test_pred, knn.classes_)
-
-    print("\n" + "-" * 50)
-    print(" KẾT QUẢ ĐÁNH GIÁ TRÊN TẬP TEST:")
-    print(f" • Accuracy        : {metrics['Accuracy'] * 100:.2f}%")
-    print(f" • Confusion Matrix (3x3):\n{metrics['Confusion_Matrix']}")
-    print("-" * 50)
+    metrics = evaluate_classification_report(y_test, y_test_pred, class_names=["Lớp 0", "Lớp 1", "Lớp 2"])
 
     if show_plot:
         print("[*] Đang hiển thị đồ thị phân vùng phi tuyến...")
@@ -811,7 +727,7 @@ def run_knn(show_plot=True, k=7, weights='distance'):
 
         plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.coolwarm)
         plt.scatter(X_train[:, 0], X_train[:, 1], c=y_train, cmap=plt.cm.coolwarm, edgecolors='k', s=40)
-        plt.title(f"KNN Decision Boundary (k={knn.n_neighbors}, weights='{knn.weights}')")
+        plt.title(f"KNN Decision Boundary (k={knn.n_neighbors}, metric='{metric}', weights='{knn.weights}')")
         plt.xlabel("Feature 1 (Standardized)")
         plt.ylabel("Feature 2 (Standardized)")
         plt.grid(True, linestyle="--", alpha=0.5)
@@ -821,10 +737,11 @@ def run_knn(show_plot=True, k=7, weights='distance'):
     return knn, metrics
 
 
-def run_hgb(show_plot=True, n_estimators=200, learning_rate=0.1, max_depth=5, use_grid_search=True):
+def run_hgb(show_plot=True, n_estimators=200, learning_rate=0.1, max_depth=5, use_grid_search=False):
     print("\n" + "=" * 65)
-    print(" [3] HISTOGRAM GRADIENT BOOSTING (HGB) TỐI ƯU HÓA BẰNG GRIDSEARCHCV")
+    print(" [3] HISTOGRAM GRADIENT BOOSTING (HGB) VIẾT TAY")
     print("=" * 65)
+    print(f"(*) Tham số tối ưu: learning_rate = {learning_rate} | max_depth = {max_depth} | max_iter = {n_estimators}")
 
     np.random.seed(42)
     n_samples = 600
@@ -888,7 +805,7 @@ def run_hgb(show_plot=True, n_estimators=200, learning_rate=0.1, max_depth=5, us
         plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.coolwarm)
         plt.scatter(X_test[y_test == 0][:, 0], X_test[y_test == 0][:, 1], color='blue', label='Class 0', alpha=0.7)
         plt.scatter(X_test[y_test == 1][:, 0], X_test[y_test == 1][:, 1], color='red', label='Class 1', alpha=0.7)
-        plt.title(f"HGB Non-linear Boundary (Accuracy: {test_acc*100:.1f}%)")
+        plt.title(f"HGB Non-linear Boundary (Accuracy: {metrics['Accuracy']*100:.1f}%)")
         plt.xlabel("Feature 1")
         plt.ylabel("Feature 2")
         plt.legend()
@@ -896,7 +813,7 @@ def run_hgb(show_plot=True, n_estimators=200, learning_rate=0.1, max_depth=5, us
         plt.tight_layout()
         plt.show()
 
-    return hgb, {"Accuracy": test_acc, "n_trees": len(hgb.trees)}
+    return hgb, {"Accuracy": metrics["Accuracy"], "n_trees": len(hgb.trees)}
 
 
 def run_all_and_compare(show_plot=False):
@@ -904,14 +821,14 @@ def run_all_and_compare(show_plot=False):
     print("     HUẤN LUYỆN VÀ SO SÁNH CẢ 3 MÔ HÌNH MACHINE LEARNING VIẾT TAY")
     print("#" * 70)
 
-    # 1. Logistic Regression
+    # 1. Multinomial Logistic Regression
     _, lr_metrics = run_logistic_regression(show_plot=show_plot)
 
-    # 2. KNN
-    _, knn_metrics = run_knn(show_plot=show_plot)
+    # 2. KNN (Manhattan, k=20, weights='distance')
+    _, knn_metrics = run_knn(show_plot=show_plot, k=20, metric='manhattan', weights='distance')
 
-    # 3. HistGradientBoosting
-    _, hgb_metrics = run_hgb(show_plot=show_plot)
+    # 3. HistGradientBoosting (lr=0.1, depth=5, max_iter=200)
+    _, hgb_metrics = run_hgb(show_plot=show_plot, n_estimators=200, learning_rate=0.1, max_depth=5, use_grid_search=False)
 
     # Bảng tổng hợp so sánh
     print("\n" + "=" * 75)
@@ -919,9 +836,9 @@ def run_all_and_compare(show_plot=False):
     print("=" * 75)
     print(f"{'Mô hình':<30} | {'Độ chính xác (Accuracy)':<25} | {'Ghi chú':<15}")
     print("-" * 75)
-    print(f"{'1. Logistic Regression':<30} | {lr_metrics['Accuracy'] * 100:>20.2f}% | {'Linear Baseline':<15}")
-    print(f"{'2. K-Nearest Neighbors (KNN)':<30} | {knn_metrics['Accuracy'] * 100:>20.2f}% | {'Non-linear Multi':<15}")
-    print(f"{'3. HistGradientBoosting (HGB)':<30} | {hgb_metrics['Accuracy'] * 100:>20.2f}% | {'Ensemble Boosting':<15}")
+    print(f"{'1. Multinomial Logistic (OvR)':<30} | {lr_metrics['Accuracy'] * 100:>20.2f}% | {'Multiclass OvR':<15}")
+    print(f"{'2. K-Nearest Neighbors (KNN)':<30} | {knn_metrics['Accuracy'] * 100:>20.2f}% | {'k=20, Manhattan':<15}")
+    print(f"{'3. HistGradientBoosting (HGB)':<30} | {hgb_metrics['Accuracy'] * 100:>20.2f}% | {'lr=0.1, depth=5':<15}")
     print("=" * 75 + "\n")
 
 
@@ -930,9 +847,9 @@ def main_menu():
         print("\n" + "=" * 65)
         print("    HỆ THỐNG MACHINE LEARNING VIẾT TAY THUẦN TÚY (NO SKLEARN)")
         print("=" * 65)
-        print("1. Logistic Regression (Gradient Descent + L2 Regularization)")
-        print("2. K-Nearest Neighbors (KNN Vectorized Distance + Weighted Voting)")
-        print("3. HistGradientBoosting (Histogram Binning + Decision Trees Boosting)")
+        print("1. Hồi quy Logistic Đa thức (Multinomial Logistic Regression - OvR)")
+        print("2. K-Nearest Neighbors (k=20, Manhattan, Distance-weighted)")
+        print("3. HistGradientBoosting (lr=0.1, max_depth=5, max_iter=200)")
         print("4. Chạy toàn bộ & So sánh cả 3 mô hình")
         print("0. Thoát")
         print("=" * 65)
@@ -942,9 +859,9 @@ def main_menu():
         if choice == "1":
             run_logistic_regression(show_plot=True)
         elif choice == "2":
-            run_knn(show_plot=True)
+            run_knn(show_plot=True, k=20, metric='manhattan', weights='distance')
         elif choice == "3":
-            run_hgb(show_plot=True)
+            run_hgb(show_plot=True, n_estimators=200, learning_rate=0.1, max_depth=5, use_grid_search=False)
         elif choice == "4":
             run_all_and_compare(show_plot=False)
         elif choice == "0":
@@ -957,7 +874,8 @@ def main_menu():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Machine Learning From Scratch - Pure Python & NumPy")
     parser.add_argument("--mode", type=int, choices=[1, 2, 3, 4], help="Chạy trực tiếp chế độ (1-4)")
-    parser.add_argument("--no-plot", action="store_true", help="Tắt hiển thị đồ thị Matplotlib (cho môi trường CLI/Headless)")
+    parser.add_argument("--no-plot", action="store_true", help="Tắt hiển thị đồ thị Matplotlib")
+    parser.add_argument("--grid-search", action="store_true", help="Bật dò tìm siêu tham số GridSearchCV cho HGB")
 
     args = parser.parse_args()
     show_plot = not args.no_plot
@@ -965,9 +883,9 @@ if __name__ == "__main__":
     if args.mode == 1:
         run_logistic_regression(show_plot=show_plot)
     elif args.mode == 2:
-        run_knn(show_plot=show_plot)
+        run_knn(show_plot=show_plot, k=20, metric='manhattan', weights='distance')
     elif args.mode == 3:
-        run_hgb(show_plot=show_plot)
+        run_hgb(show_plot=show_plot, n_estimators=200, learning_rate=0.1, max_depth=5, use_grid_search=args.grid_search)
     elif args.mode == 4:
         run_all_and_compare(show_plot=show_plot)
     else:
