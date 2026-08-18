@@ -280,39 +280,120 @@ button[data-baseweb="tab"][aria-selected="true"] {
     box-shadow: 0 6px 18px rgba(0,0,0,0.5), 0 0 15px rgba(56, 189, 248, 0.25) !important;
 }
 
-/* ── Dropdown / Selectbox Glassmorphic Popup ── */
-[data-baseweb="popover"], [data-baseweb="menu"], [data-baseweb="select"] ul, 
-div[data-baseweb="select"] div[role="listbox"], ul[role="listbox"] {
-    background: rgba(15, 23, 42, 0.94) !important;
-    backdrop-filter: blur(28px) saturate(190%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
-    border: 1px solid rgba(56, 189, 248, 0.4) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(56, 189, 248, 0.25) !important;
-    padding: 10px !important;
-    animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-@keyframes popIn {
-    from { opacity: 0; transform: translateY(-10px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
+/* ── DROPDOWN / SELECTBOX / POPOVER ĐỐI LẬP MÀU SẮC TUYỆT ĐỐI ── */
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] *,
+div[data-baseweb="menu"],
+div[data-baseweb="menu"] *,
+ul[role="listbox"],
+ul[role="listbox"] * {
+    background-color: #0b1120 !important;
+    background: #0b1120 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
 
-[data-baseweb="menu"] li, [data-baseweb="select"] li, div[role="option"] {
-    color: #ffffff !important;
-    font-size: 1.1rem !important;
-    font-weight: 600 !important;
-    padding: 0.75rem 1.1rem !important;
-    border-radius: 10px !important;
+div[data-baseweb="popover"] {
+    border: 2px solid #38bdf8 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.95), 0 0 30px rgba(56, 189, 248, 0.4) !important;
+    overflow: hidden !important;
+}
+
+/* Các mục bên trong danh sách xổ xuống */
+div[data-baseweb="popover"] li,
+div[data-baseweb="popover"] div[role="option"],
+li[role="option"],
+[data-baseweb="menu"] li {
+    background-color: #0b1120 !important;
+    color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    padding: 12px 18px !important;
+    border-bottom: 1px solid #1e293b !important;
+    cursor: pointer !important;
     transition: all 0.15s ease !important;
 }
-[data-baseweb="menu"] li:hover, [data-baseweb="select"] li:hover, div[role="option"]:hover,
-[aria-selected="true"] {
-    background: linear-gradient(90deg, rgba(56, 189, 248, 0.3) 0%, rgba(129, 140, 248, 0.25) 100%) !important;
+
+/* Khi rê chuột vào mục hoặc mục đang chọn -> Nền Xanh Dương Đậm, Chữ Trắng Tinh */
+div[data-baseweb="popover"] li:hover,
+div[data-baseweb="popover"] li[aria-selected="true"],
+li[role="option"]:hover,
+li[role="option"][aria-selected="true"],
+div[role="option"]:hover,
+[data-baseweb="menu"] li:hover {
+    background-color: #0284c7 !important;
+    background: #0284c7 !important;
     color: #ffffff !important;
-    transform: translateX(4px);
+    -webkit-text-fill-color: #ffffff !important;
+    font-weight: 800 !important;
 }
 
-/* ── Textarea & Inputs ── */
+/* ── KHUNG SELECTBOX CHÍNH TRÊN GIAO DIỆN ── */
+div[data-baseweb="select"],
+div[data-baseweb="select"] > div,
+div[data-baseweb="select"] * {
+    background-color: #090d16 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+div[data-baseweb="select"] > div {
+    border: 1.5px solid #334155 !important;
+    border-radius: 12px !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    padding: 4px 8px !important;
+}
+div[data-baseweb="select"] > div:hover,
+div[data-baseweb="select"] > div:focus-within {
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.35) !important;
+}
+div[data-baseweb="select"] svg {
+    fill: #38bdf8 !important;
+    color: #38bdf8 !important;
+}
+
+/* ── SỐ NƯỚC KHAI CUỘC (NUMBER INPUT & NÚT + / -) ── */
+div[data-testid="stNumberInput"] {
+    background-color: #090d16 !important;
+    border-radius: 12px !important;
+}
+div[data-testid="stNumberInput"] input {
+    background-color: #090d16 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    font-size: 1.25rem !important;
+    font-weight: 800 !important;
+    border: 1.5px solid #334155 !important;
+}
+div[data-testid="stNumberInput"] button {
+    background-color: #1e293b !important;
+    color: #38bdf8 !important;
+    -webkit-text-fill-color: #38bdf8 !important;
+    border: 1.5px solid #334155 !important;
+    font-weight: 800 !important;
+    font-size: 1.2rem !important;
+    transition: all 0.2s ease !important;
+}
+div[data-testid="stNumberInput"] button:hover {
+    background-color: #0284c7 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    border-color: #38bdf8 !important;
+}
+
+/* ── CHỈ SỐ SLIDER (1800, 1500) ── */
+[data-testid="stSlider"] div[data-testid="stMarkdownContainer"] p {
+    color: #38bdf8 !important;
+    -webkit-text-fill-color: #38bdf8 !important;
+    font-weight: 900 !important;
+    font-size: 1.35rem !important;
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+/* ── Ô NHẬP NƯỚC CỜ (TEXTAREA) ── */
 .stTextArea, [data-baseweb="textarea"], [data-baseweb="input"] {
     background-color: #090d16 !important;
     border-radius: 14px !important;
@@ -325,7 +406,7 @@ textarea, [data-baseweb="textarea"] textarea, input, [data-baseweb="input"] inpu
     font-family: 'JetBrains Mono', monospace, sans-serif !important;
     font-weight: 600 !important;
     line-height: 1.65 !important;
-    border: 1px solid #1e293b !important;
+    border: 1.5px solid #334155 !important;
     border-radius: 12px !important;
     padding: 14px 16px !important;
     caret-color: #38bdf8 !important;
@@ -338,24 +419,6 @@ input:focus, [data-baseweb="input"] input:focus {
     box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.35), inset 0 2px 6px rgba(0,0,0,0.6) !important;
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
-}
-
-/* ── Selectbox Container ── */
-[data-baseweb="select"] > div {
-    background: #090d16 !important;
-    border: 1px solid #1e293b !important;
-    border-radius: 12px !important;
-    color: #ffffff !important;
-    font-size: 1.1rem !important;
-    font-weight: 600 !important;
-    transition: all 0.2s ease !important;
-}
-[data-baseweb="select"] > div:hover {
-    border-color: #38bdf8 !important;
-}
-[data-baseweb="select"] > div:focus-within {
-    border-color: #38bdf8 !important;
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.35) !important;
 }
 
 /* ── Dataframe Table Styling ── */
