@@ -39,7 +39,7 @@ class StandardScaler:
 # 2. THUẬT TOÁN KNN CLASSIFIER THUẦN TÚY (ROBUST KNN FROM SCRATCH)
 # =====================================================================
 class RobustKNNClassifier:
-    def __init__(self, n_neighbors=7, metric='euclidean', p=2, weights='distance'):
+    def __init__(self, n_neighbors=20, metric='manhattan', p=1, weights='distance'):
         """
         KNN Classifier thuần túy tối ưu hóa ma trận khoảng cách Vectorized.
         
