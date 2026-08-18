@@ -21,6 +21,16 @@ from knn_opening import predict_opening, train_knn_opening
 from hgb_elo import predict_game_result, train_hgb_classifier
 from comparison import compare_models
 
+# ─── Load Generated Luxury Chess Background Image ──────────────────────────────
+def get_base64_image(image_path):
+    if os.path.exists(image_path):
+        with open(image_path, "rb") as f:
+            return base64.b64encode(f.read()).decode("utf-8")
+    return ""
+
+chess_bg_path = os.path.join(os.path.dirname(__file__), "assets", "chess_bg.jpg")
+chess_bg_b64 = get_base64_image(chess_bg_path)
+
 # ─── Page Config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Phân tích Ván cờ Lichess — Machine Learning",
@@ -28,76 +38,78 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ─── Light Mode Aesthetic Design System with Subtle Monochromatic Geometric Pattern ──
-st.markdown("""
+# ─── Luxury Atmosphere & Clean Light Mode CSS ─────────────────────────────────
+st.markdown(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
 
-/* ── Global Reset & Monochromatic Geometric Pattern Canvas ── */
-html, body, [data-testid="stAppViewContainer"], .main {
+/* ── Global Reset & Ambient Luxury Chess Background Overlay ── */
+html, body, [data-testid="stAppViewContainer"], .main {{
     font-family: 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-    background-color: #f8fafc !important;
+    background-color: #f1f5f9 !important;
     background-image: 
-        radial-gradient(#cbd5e1 1.2px, transparent 1.2px),
-        radial-gradient(circle at 8% 12%, rgba(2, 132, 199, 0.06) 0%, transparent 35%),
-        radial-gradient(circle at 92% 18%, rgba(124, 58, 237, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 50% 85%, rgba(5, 150, 105, 0.04) 0%, transparent 45%) !important;
-    background-size: 24px 24px, 100% 100%, 100% 100%, 100% 100% !important;
+        linear-gradient(rgba(248, 250, 252, 0.88), rgba(248, 250, 252, 0.93)),
+        url("data:image/jpeg;base64,{chess_bg_b64}") !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
     color: #0f172a !important;
     font-size: 16px !important;
-}
+}}
 
 header[data-testid="stHeader"], footer,
-[data-testid="stToolbar"], .stDeployButton { display: none !important; }
+[data-testid="stToolbar"], .stDeployButton {{ display: none !important; }}
 
-.block-container {
+.block-container {{
     padding: 2.0rem 3.0rem 4.5rem !important;
     max-width: 1480px !important;
-}
+}}
 
-/* ── Typography (Chuẩn hóa tiếng Việt có dấu, độ tương phản cao 100%) ── */
-p, span, label, div {
+/* ── Typography (Tiếng Việt Chuẩn Nét 100%) ── */
+p, span, label, div {{
     font-family: 'Be Vietnam Pro', 'Inter', sans-serif !important;
     color: #0f172a !important;
-}
-h1, h2, h3, h4, h5, h6 {
+}}
+h1, h2, h3, h4, h5, h6 {{
     font-family: 'Be Vietnam Pro', 'Inter', sans-serif !important;
     color: #0f172a !important;
     font-weight: 800 !important;
     letter-spacing: -0.02em !important;
-}
+}}
 
 /* Input Labels */
-[data-testid="stWidgetLabel"] p, label p, .stSlider label p {
+[data-testid="stWidgetLabel"] p, label p, .stSlider label p {{
     font-size: 0.94rem !important;
     font-weight: 700 !important;
     color: #0f172a !important;
     margin-bottom: 5px !important;
     letter-spacing: -0.01em !important;
-}
+}}
 
-/* ── Hero Header (Giao diện Sáng Sang trọng) ── */
-.hero-header {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0;
+/* ── Hero Header ── */
+.hero-header {{
+    background: 
+        linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(241, 245, 249, 0.90) 100%),
+        url("data:image/jpeg;base64,{chess_bg_b64}") center/cover no-repeat !important;
+    border: 1px solid #cbd5e1;
     border-radius: 18px;
     padding: 2.5rem 3.0rem 2.2rem;
     margin-bottom: 2.0rem;
     position: relative;
     overflow: hidden;
     box-shadow: 
-        0 10px 30px rgba(0, 0, 0, 0.05),
-        0 2px 8px rgba(2, 132, 199, 0.08);
-}
-.hero-header::before {
+        0 10px 30px rgba(0, 0, 0, 0.08),
+        0 2px 8px rgba(2, 132, 199, 0.12);
+}}
+.hero-header::before {{
     content: "";
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 4px;
     background: linear-gradient(90deg, #0284c7, #6366f1, #8b5cf6, #ec4899);
     border-radius: 18px 18px 0 0;
-}
-.hero-title {
+}}
+.hero-title {{
     font-size: 2.4rem;
     font-weight: 900;
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0284c7 100%);
@@ -106,175 +118,172 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0;
     letter-spacing: -0.03em;
     line-height: 1.25;
-}
-.hero-subtitle {
+}}
+.hero-subtitle {{
     font-size: 1.15rem;
-    color: #475569 !important;
+    color: #334155 !important;
     margin-top: 0.7rem;
-    font-weight: 400;
+    font-weight: 500;
     line-height: 1.65;
     max-width: 1100px;
-}
-.hero-badges {
+}}
+.hero-badges {{
     display: flex;
     gap: 0.8rem;
     margin-top: 1.4rem;
     flex-wrap: wrap;
-}
-.badge {
+}}
+.badge {{
     display: inline-block;
     padding: 0.4rem 1.1rem;
     border-radius: 30px;
     font-size: 0.88rem;
     font-weight: 700;
     letter-spacing: 0.02em;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.badge:hover {
-    transform: translateY(-2px);
-}
-.badge-blue   { background: #e0f2fe; color: #0369a1 !important; border: 1px solid #7dd3fc; }
-.badge-purple { background: #f3e8ff; color: #6b21a8 !important; border: 1px solid #c084fc; }
-.badge-green  { background: #d1fae5; color: #065f46 !important; border: 1px solid #6ee7b7; }
-.badge-orange { background: #ffe4e6; color: #9f1239 !important; border: 1px solid #fda4af; }
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}}
+.badge-blue   {{ background: #e0f2fe; color: #0369a1 !important; border: 1px solid #7dd3fc; }}
+.badge-purple {{ background: #f3e8ff; color: #6b21a8 !important; border: 1px solid #c084fc; }}
+.badge-green  {{ background: #d1fae5; color: #065f46 !important; border: 1px solid #6ee7b7; }}
+.badge-orange {{ background: #ffe4e6; color: #9f1239 !important; border: 1px solid #fda4af; }}
 
-/* ── Light Mode Cards ── */
-.card {
+/* ── Clean Section & Card Wrappers (Tối ưu tuyệt đối, không thẻ thừa) ── */
+.card-box {{
     background: #ffffff !important;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #cbd5e1;
     border-radius: 16px;
     padding: 1.8rem 2.2rem;
     margin-bottom: 1.6rem;
     box-shadow: 
         0 10px 25px rgba(0, 0, 0, 0.04),
         0 2px 6px rgba(0, 0, 0, 0.02);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
-}
-.card:hover {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}}
+.card-box:hover {{
     border-color: #38bdf8;
     box-shadow: 
         0 16px 35px rgba(2, 132, 199, 0.12),
         0 0 0 1px rgba(2, 132, 199, 0.25);
-    transform: translateY(-3px);
-}
+    transform: translateY(-2px);
+}}
 
-.card-accent-blue   { border-top: 4px solid #0284c7; }
-.card-accent-purple { border-top: 4px solid #7c3aed; }
-.card-accent-green  { border-top: 4px solid #059669; }
-.card-accent-orange { border-top: 4px solid #e11d48; }
+.accent-blue   {{ border-top: 4px solid #0284c7; }}
+.accent-purple {{ border-top: 4px solid #7c3aed; }}
+.accent-green  {{ border-top: 4px solid #059669; }}
+.accent-orange {{ border-top: 4px solid #e11d48; }}
 
-.card-heading {
-    font-size: 1.4rem;
+.card-heading {{
+    font-size: 1.35rem;
     font-weight: 800;
     color: #0f172a !important;
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.5rem;
     letter-spacing: -0.015em;
-}
-.card-subheading {
-    font-size: 1.02rem;
-    color: #64748b !important;
+}}
+.card-subheading {{
+    font-size: 1.0rem;
+    color: #475569 !important;
     font-weight: 400;
-    margin-bottom: 1.3rem;
+    margin-bottom: 1.2rem;
     line-height: 1.65;
-}
+}}
 
 /* ── Section Titles ── */
-.section-title {
+.section-title {{
     font-size: 1.75rem;
     font-weight: 900;
     color: #0f172a !important;
     letter-spacing: -0.025em;
     margin: 1.6rem 0 0.4rem;
-}
-.section-desc {
-    font-size: 1.1rem;
-    color: #475569 !important;
+}}
+.section-desc {{
+    font-size: 1.08rem;
+    color: #334155 !important;
     line-height: 1.75;
     margin-bottom: 1.3rem;
-}
+}}
 
-/* ── Metric Stat Chips (Nền Sáng) ── */
-.metric-row { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 1.4rem; }
-.metric-chip {
+/* ── Metric Stat Chips ── */
+.metric-row {{ display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 1.4rem; }}
+.metric-chip {{
     flex: 1;
     min-width: 150px;
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border: 1px solid #e2e8f0;
+    border: 1px solid #cbd5e1;
     border-radius: 14px;
     padding: 1.1rem 1.3rem;
     text-align: center;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.metric-chip:hover {
+}}
+.metric-chip:hover {{
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(2, 132, 199, 0.12);
-}
-.metric-chip-label {
+}}
+.metric-chip-label {{
     font-size: 0.85rem;
     color: #64748b !important;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-}
-.metric-chip-value {
+}}
+.metric-chip-value {{
     font-size: 2.1rem;
     font-weight: 900;
     margin-top: 0.3rem;
     letter-spacing: -0.02em;
-}
-.chip-blue   .metric-chip-value { color: #0284c7 !important; }
-.chip-purple .metric-chip-value { color: #7c3aed !important; }
-.chip-green  .metric-chip-value { color: #059669 !important; }
-.chip-orange .metric-chip-value { color: #e11d48 !important; }
+}}
+.chip-blue   .metric-chip-value {{ color: #0284c7 !important; }}
+.chip-purple .metric-chip-value {{ color: #7c3aed !important; }}
+.chip-green  .metric-chip-value {{ color: #059669 !important; }}
+.chip-orange .metric-chip-value {{ color: #e11d48 !important; }}
 
-/* ── Alert Highlight Boxes (Light Theme) ── */
-.alert-box {
+/* ── Alert Highlight Boxes ── */
+.alert-box {{
     border-radius: 12px;
-    padding: 1.3rem 1.6rem;
-    margin: 1.3rem 0;
-    font-size: 1.05rem;
+    padding: 1.2rem 1.5rem;
+    margin: 1.2rem 0;
+    font-size: 1.02rem;
     line-height: 1.75;
     box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-}
-.alert-blue   { background: #f0f9ff; border-left: 5px solid #0284c7; color: #0c4a6e !important; }
-.alert-orange { background: #fff1f2; border-left: 5px solid #e11d48; color: #881337 !important; }
-.alert-green  { background: #ecfdf5; border-left: 5px solid #059669; color: #064e3b !important; }
+}}
+.alert-blue   {{ background: #f0f9ff; border-left: 5px solid #0284c7; color: #0c4a6e !important; }}
+.alert-orange {{ background: #fff1f2; border-left: 5px solid #e11d48; color: #881337 !important; }}
+.alert-green  {{ background: #ecfdf5; border-left: 5px solid #059669; color: #064e3b !important; }}
 
 /* ── Tabs Navigation Bar ── */
-[data-baseweb="tab-list"] {
+[data-baseweb="tab-list"] {{
     background: #f1f5f9 !important;
-    border: 1px solid #e2e8f0 !important;
+    border: 1px solid #cbd5e1 !important;
     border-radius: 14px !important;
     padding: 6px !important;
     gap: 6px !important;
     margin-bottom: 1.6rem !important;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-}
-button[data-baseweb="tab"] {
+}}
+button[data-baseweb="tab"] {{
     font-size: 1.05rem !important;
     font-weight: 700 !important;
-    color: #64748b !important;
+    color: #475569 !important;
     padding: 0.75rem 1.6rem !important;
     border-radius: 10px !important;
     border: none !important;
     background: transparent !important;
     transition: all 0.2s ease !important;
-}
-button[data-baseweb="tab"]:hover {
+}}
+button[data-baseweb="tab"]:hover {{
     color: #0f172a !important;
     background: rgba(255, 255, 255, 0.6) !important;
-}
-button[data-baseweb="tab"][aria-selected="true"] {
+}}
+button[data-baseweb="tab"][aria-selected="true"] {{
     color: #0f172a !important;
     background: #ffffff !important;
     border: 1px solid #0284c7 !important;
     font-weight: 800 !important;
     box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15) !important;
-}
+}}
 
-/* ── THẾ THỨC SELECTBOX — NỀN TRẮNG SÁNG, CHỮ MÀU ĐEN TUYỆT ĐỐI ── */
-div[data-testid="stSelectbox"] > div > div {
+/* ── SELECTBOX INPUTS ── */
+div[data-testid="stSelectbox"] > div > div {{
     background-color: #ffffff !important;
     background: #ffffff !important;
     border: 1.5px solid #cbd5e1 !important;
@@ -285,23 +294,23 @@ div[data-testid="stSelectbox"] > div > div {
     display: flex !important;
     align-items: center !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-}
+}}
 div[data-testid="stSelectbox"] [data-baseweb="select"] span,
 div[data-testid="stSelectbox"] [data-baseweb="select"] div,
-div[data-testid="stSelectbox"] [data-baseweb="select"] p {
+div[data-testid="stSelectbox"] [data-baseweb="select"] p {{
     font-family: 'JetBrains Mono', 'Be Vietnam Pro', monospace !important;
     font-size: 0.92rem !important;
     font-weight: 700 !important;
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
-}
-div[data-testid="stSelectbox"] svg {
+}}
+div[data-testid="stSelectbox"] svg {{
     fill: #0f172a !important;
     color: #0f172a !important;
-}
+}}
 
-/* ── SỐ NƯỚC KHAI CUỘC (NUMBER INPUT) — NỀN TRẮNG SÁNG, CHỮ MÀU ĐEN ── */
-div[data-testid="stNumberInput"] > div > div {
+/* ── NUMBER INPUTS ── */
+div[data-testid="stNumberInput"] > div > div {{
     background-color: #ffffff !important;
     background: #ffffff !important;
     border: 1.5px solid #cbd5e1 !important;
@@ -313,9 +322,9 @@ div[data-testid="stNumberInput"] > div > div {
     display: flex !important;
     align-items: center !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-}
+}}
 
-div[data-testid="stNumberInput"] input {
+div[data-testid="stNumberInput"] input {{
     background-color: #ffffff !important;
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
@@ -325,10 +334,9 @@ div[data-testid="stNumberInput"] input {
     border: none !important;
     height: 40px !important;
     padding-left: 12px !important;
-}
+}}
 
-/* Nút - và + bên phải nút */
-div[data-testid="stNumberInput"] button {
+div[data-testid="stNumberInput"] button {{
     background-color: #f1f5f9 !important;
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
@@ -339,27 +347,26 @@ div[data-testid="stNumberInput"] button {
     height: 40px !important;
     min-width: 32px !important;
     transition: background 0.15s ease !important;
-}
-div[data-testid="stNumberInput"] button:hover {
+}}
+div[data-testid="stNumberInput"] button:hover {{
     background-color: #0284c7 !important;
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
-}
+}}
 
-/* ── POPOVER DROPDOWN MENU LIST — CHỮ MÀU ĐEN TUYỆT ĐỐI TRÊN NỀN TRẮNG SÁNG ── */
+/* ── POPOVER DROPDOWN MENU LIST ── */
 div[data-baseweb="popover"],
 div[data-baseweb="popover"] div,
 div[data-baseweb="menu"],
 div[data-baseweb="menu"] div,
-ul[role="listbox"] {
+ul[role="listbox"] {{
     background-color: #ffffff !important;
     background: #ffffff !important;
     border: 2px solid #0284c7 !important;
     border-radius: 8px !important;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15) !important;
-}
+}}
 
-/* Bắt buộc 100% tất cả các thẻ chữ bên trong Popover list phải mang MÀU ĐEN THẬT */
 div[data-baseweb="popover"] [role="option"],
 div[data-baseweb="popover"] [role="option"] *,
 div[data-baseweb="popover"] li,
@@ -369,24 +376,23 @@ div[data-baseweb="popover"] div,
 div[data-baseweb="menu"] li,
 div[data-baseweb="menu"] li *,
 ul[role="listbox"] li,
-ul[role="listbox"] li * {
+ul[role="listbox"] li * {{
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
     font-family: 'Be Vietnam Pro', sans-serif !important;
     font-size: 0.95rem !important;
     font-weight: 700 !important;
     opacity: 1 !important;
-}
+}}
 
 div[data-baseweb="popover"] li,
 ul[role="listbox"] li,
-li[role="option"] {
+li[role="option"] {{
     background-color: #ffffff !important;
     padding: 9px 14px !important;
     border-bottom: 1px solid #f1f5f9 !important;
-}
+}}
 
-/* Khi di chuột hoặc mục đang chọn -> Nền Xanh Dương Sáng + Chữ Trắng Nổi */
 div[data-baseweb="popover"] [role="option"]:hover,
 div[data-baseweb="popover"] [role="option"]:hover *,
 div[data-baseweb="popover"] li:hover,
@@ -396,28 +402,28 @@ div[data-baseweb="popover"] [aria-selected="true"] *,
 ul[role="listbox"] li:hover,
 ul[role="listbox"] li:hover *,
 ul[role="listbox"] [aria-selected="true"],
-ul[role="listbox"] [aria-selected="true"] * {
+ul[role="listbox"] [aria-selected="true"] * {{
     background-color: #0284c7 !important;
     background: #0284c7 !important;
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
     font-weight: 800 !important;
-}
+}}
 
-/* ── CHỈ SỐ SLIDER (1800, 1500) ── */
-[data-testid="stSlider"] div[data-testid="stMarkdownContainer"] p {
+/* ── SLIDER VALUES ── */
+[data-testid="stSlider"] div[data-testid="stMarkdownContainer"] p {{
     color: #0284c7 !important;
     -webkit-text-fill-color: #0284c7 !important;
     font-weight: 900 !important;
     font-size: 1.3rem !important;
-}
+}}
 
-/* ── Ô NHẬP NƯỚC CỜ (TEXTAREA) ── */
-.stTextArea, [data-baseweb="textarea"], [data-baseweb="input"] {
+/* ── TEXTAREA ── */
+.stTextArea, [data-baseweb="textarea"], [data-baseweb="input"] {{
     background-color: #ffffff !important;
     border-radius: 12px !important;
-}
-textarea, [data-baseweb="textarea"] textarea, input, [data-baseweb="input"] input {
+}}
+textarea, [data-baseweb="textarea"] textarea, input, [data-baseweb="input"] input {{
     background-color: #ffffff !important;
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
@@ -431,26 +437,26 @@ textarea, [data-baseweb="textarea"] textarea, input, [data-baseweb="input"] inpu
     caret-color: #0284c7 !important;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.05) !important;
     transition: all 0.2s ease !important;
-}
+}}
 textarea:focus, [data-baseweb="textarea"] textarea:focus,
-input:focus, [data-baseweb="input"] input:focus {
+input:focus, [data-baseweb="input"] input:focus {{
     border-color: #0284c7 !important;
     box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2), inset 0 1px 3px rgba(0,0,0,0.05) !important;
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
-}
+}}
 
-/* ── Dataframe Table Styling (Light Mode) ── */
-[data-testid="stDataFrame"] {
+/* ── DATAFRAMES ── */
+[data-testid="stDataFrame"] {{
     background: #ffffff !important;
     border: 1px solid #cbd5e1 !important;
     border-radius: 12px !important;
     overflow: hidden !important;
     box-shadow: 0 4px 14px rgba(0,0,0,0.04);
-}
+}}
 
-/* ── Chessboard Showcase Frame (Light Mode) ── */
-.board-wrap {
+/* ── CHESSBOARD FRAME ── */
+.board-wrap {{
     display: flex;
     justify-content: center;
     align-items: center;
@@ -459,18 +465,17 @@ input:focus, [data-baseweb="input"] input:focus {
     border-radius: 16px;
     padding: 1.3rem;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
-}
+}}
 
-/* ── Divider ── */
-.divider {
+.divider {{
     height: 1px;
     background: #e2e8f0;
     margin: 2.2rem 0;
     border: none;
-}
+}}
 
-/* ── Result Badges (Sáng Rõ) ── */
-.result-badge {
+/* ── RESULT BADGES ── */
+.result-badge {{
     padding: 1.1rem 1.6rem;
     border-radius: 12px;
     font-size: 1.28rem;
@@ -478,10 +483,10 @@ input:focus, [data-baseweb="input"] input:focus {
     text-align: center;
     margin-bottom: 1.4rem;
     letter-spacing: 0.03em;
-}
-.result-white  { background: #e0f2fe; color: #0369a1 !important; border: 2px solid #38bdf8; box-shadow: 0 4px 12px rgba(56,189,248,0.2); }
-.result-black  { background: #ffe4e6; color: #9f1239 !important; border: 2px solid #fb7185; box-shadow: 0 4px 12px rgba(251,113,133,0.2); }
-.result-draw   { background: #f3e8ff; color: #6b21a8 !important; border: 2px solid #c084fc; box-shadow: 0 4px 12px rgba(168,85,247,0.2); }
+}}
+.result-white  {{ background: #e0f2fe; color: #0369a1 !important; border: 2px solid #38bdf8; box-shadow: 0 4px 12px rgba(56,189,248,0.2); }}
+.result-black  {{ background: #ffe4e6; color: #9f1239 !important; border: 2px solid #fb7185; box-shadow: 0 4px 12px rgba(251,113,133,0.2); }}
+.result-draw   {{ background: #f3e8ff; color: #6b21a8 !important; border: 2px solid #c084fc; box-shadow: 0 4px 12px rgba(168,85,247,0.2); }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -517,9 +522,12 @@ with tab1:
     col_left, col_right = st.columns([1, 1.25], gap="large")
 
     with col_left:
-        st.markdown('<div class="card card-accent-blue">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">Cấu hình Thông số Đầu vào Ván cờ</div>', unsafe_allow_html=True)
-        st.markdown('<div class="card-subheading">Điều chỉnh hệ số Elo của hai người chơi và thể thức ván cờ để tính toán xác suất chiến thắng.</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="card-box accent-blue">
+          <div class="card-heading">Cấu hình Thông số Đầu vào Ván cờ</div>
+          <div class="card-subheading">Điều chỉnh hệ số Elo của hai người chơi và thể thức ván cờ để tính toán xác suất chiến thắng.</div>
+        </div>
+        """, unsafe_allow_html=True)
 
         white_elo = st.slider("Hệ số Elo — Bên Trắng (white_rating)", 500, 3000, 1800, step=10)
         black_elo = st.slider("Hệ số Elo — Bên Đen (black_rating)", 500, 3000, 1500, step=10)
@@ -544,11 +552,13 @@ with tab1:
             f'<span style="color:{diff_color}; font-weight:900; font-size:1.4rem;">{elo_diff:+d}</span> điểm</div>',
             unsafe_allow_html=True
         )
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with col_right:
-        st.markdown('<div class="card card-accent-purple">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">Kết quả Dự đoán Xác suất</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="card-box accent-purple">
+          <div class="card-heading">Kết quả Dự đoán Xác suất</div>
+        </div>
+        """, unsafe_allow_html=True)
 
         try:
             if "Logistic" in selected_model:
@@ -581,7 +591,7 @@ with tab1:
             chips_html += '</div>'
             st.markdown(chips_html, unsafe_allow_html=True)
 
-            # Bar chart (Light Theme)
+            # Bar chart
             df_probs = pd.DataFrame({"Kết quả": prob_keys, "Xác suất (%)": prob_vals})
             fig = px.bar(
                 df_probs, x="Kết quả", y="Xác suất (%)",
@@ -601,7 +611,6 @@ with tab1:
                               marker_line_color="rgba(0,0,0,0)")
             st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
-            # Giải thích trực quan nếu xác suất hai bên bám sát nhau (chênh lệch dưới 1.5%)
             p_black = probs.get("Black thắng (0-1)", 0)
             p_white = probs.get("White thắng (1-0)", 0)
             if abs(p_black - p_white) < 1.5:
@@ -616,8 +625,6 @@ with tab1:
         except Exception as e:
             st.error(f"Chưa có file mô hình huấn luyện. Vui lòng chạy `py src/main.py --mode 3` trước. ({e})")
 
-        st.markdown('</div>', unsafe_allow_html=True)
-
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 2 — KNN OPENING & SVG BOARD
 # ══════════════════════════════════════════════════════════════════════════════
@@ -625,9 +632,12 @@ with tab2:
     col_moves, col_board = st.columns([1.2, 1], gap="large")
 
     with col_moves:
-        st.markdown('<div class="card card-accent-green">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">Nhập Chuỗi Nước đi PGN</div>', unsafe_allow_html=True)
-        st.markdown('<div class="card-subheading">Dán chuỗi nước đi chuẩn PGN để tìm kiếm khai cuộc tương đồng nhất trong kho ván cờ Lichess.</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="card-box accent-green">
+          <div class="card-heading">Nhập Chuỗi Nước đi PGN</div>
+          <div class="card-subheading">Dán chuỗi nước đi chuẩn PGN để tìm kiếm khai cuộc tương đồng nhất trong kho ván cờ Lichess.</div>
+        </div>
+        """, unsafe_allow_html=True)
 
         user_moves = st.text_area(
             "Chuỗi nước đi (PGN format):",
@@ -644,12 +654,13 @@ with tab2:
             except Exception as e:
                 st.error(f"Lỗi khi thực hiện KNN search: {e}")
 
-        st.markdown('</div>', unsafe_allow_html=True)
-
     with col_board:
-        st.markdown('<div class="card card-accent-blue">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">Trực quan Bàn cờ 2D</div>', unsafe_allow_html=True)
-        st.markdown('<div class="card-subheading">Bàn cờ tự động cập nhật thế cờ theo nước đi cuối cùng trong chuỗi PGN.</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="card-box accent-blue">
+          <div class="card-heading">Trực quan Bàn cờ 2D</div>
+          <div class="card-subheading">Bàn cờ tự động cập nhật thế cờ theo nước đi cuối cùng trong chuỗi PGN.</div>
+        </div>
+        """, unsafe_allow_html=True)
 
         try:
             moves_cleaned = clean_moves(user_moves)
@@ -671,8 +682,6 @@ with tab2:
         except Exception as e:
             st.info("Bàn cờ mặc định ở thế cờ ban đầu.")
 
-        st.markdown('</div>', unsafe_allow_html=True)
-
     # Bảng kết quả KNN Search
     if "knn_openings" in st.session_state and st.session_state["knn_openings"]:
         res_data = st.session_state["knn_openings"]
@@ -680,15 +689,14 @@ with tab2:
         top_opening = res_data.get("predicted_opening", "N/A")
         top_eco = res_data.get("predicted_eco", "?")
 
-        st.markdown('<div class="card card-accent-purple">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">Kết quả Nhận diện Khai cuộc Tương đồng Nhất</div>', unsafe_allow_html=True)
-        
-        st.markdown(
-            f'<div class="alert-box alert-blue" style="margin-bottom: 1.2rem;">'
-            f'<b>Khai cuộc Dự đoán Top #1:</b> <span style="font-size:1.25rem; font-weight:800; color:#0284c7;">{top_opening}</span> (Mã ECO: <b>{top_eco}</b>)'
-            f'</div>',
-            unsafe_allow_html=True
-        )
+        st.markdown(f"""
+        <div class="card-box accent-purple">
+          <div class="card-heading">Kết quả Nhận diện Khai cuộc Tương đồng Nhất</div>
+          <div class="alert-box alert-blue" style="margin-bottom: 1.2rem;">
+            <b>Khai cuộc Dự đoán Top #1:</b> <span style="font-size:1.25rem; font-weight:800; color:#0284c7;">{top_opening}</span> (Mã ECO: <b>{top_eco}</b>)
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
 
         k_data = []
         for item in nearest_list:
@@ -703,7 +711,6 @@ with tab2:
             })
 
         st.dataframe(pd.DataFrame(k_data), use_container_width=True, hide_index=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 3 — MODEL COMPARISON, BENCHMARKS & OVERFITTING ANALYSIS
@@ -740,11 +747,12 @@ with tab3:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="card card-accent-blue">', unsafe_allow_html=True)
-    st.markdown('<div class="card-heading">Bảng So sánh Toàn diện Hiệu suất Mô hình</div>', unsafe_allow_html=True)
     st.markdown("""
-    <div class="card-subheading">
-    Bộ phân loại <b>Tăng cường Gradient Biểu đồ Histogram (HistGradientBoosting)</b> đạt hiệu suất vượt trội trên tất cả các chỉ số, với độ chính xác giữ lại <b>83,19%</b> và kết quả xác thực chéo nhất quán. Đáng chú ý, sự đồng bộ chặt chẽ giữa điểm số giữ lại và điểm xác thực chéo trên tất cả các mô hình cho thấy sự tổng quát hóa vững chắc mà không bị quá khớp.
+    <div class="card-box accent-blue">
+      <div class="card-heading">Bảng So sánh Toàn diện Hiệu suất Mô hình</div>
+      <div class="card-subheading">
+        Bộ phân loại <b>Tăng cường Gradient Biểu đồ Histogram (HistGradientBoosting)</b> đạt hiệu suất vượt trội trên tất cả các chỉ số, với độ chính xác giữ lại <b>83,19%</b> và kết quả xác thực chéo nhất quán.
+      </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -760,11 +768,13 @@ with tab3:
          "Precision (Độ chính xác)": "59.90%", "Recall (Ghi nhớ)": "61.50%", "Macro F1-Score": "0.28"},
     ])
     st.dataframe(comparison_df, use_container_width=True, hide_index=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
     # Biểu đồ so sánh chính
-    st.markdown('<div class="card card-accent-purple">', unsafe_allow_html=True)
-    st.markdown('<div class="card-heading">Biểu đồ So sánh: 3-Fold CV vs Hold-out vs Macro F1</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="card-box accent-purple">
+      <div class="card-heading">Biểu đồ So sánh: 3-Fold CV vs Hold-out vs Macro F1</div>
+    </div>
+    """, unsafe_allow_html=True)
 
     chart_df = pd.DataFrame([
         {"Mô hình": "HistGradientBoosting (HGB)", "Hold-out Accuracy (%)": 83.19, "3-Fold CV Acc (%)": 83.05, "Macro F1 (x100)": 82.0},
@@ -789,7 +799,6 @@ with tab3:
     )
     fig_comp.update_traces(marker_line_color="rgba(0,0,0,0)")
     st.plotly_chart(fig_comp, use_container_width=True, config={"displayModeBar": False})
-    st.markdown('</div>', unsafe_allow_html=True)
 
     # Error Analysis
     st.markdown("""
@@ -812,8 +821,11 @@ with tab3:
     col_fi_table, col_fi_chart = st.columns([1, 1.3], gap="large")
 
     with col_fi_table:
-        st.markdown('<div class="card card-accent-green">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">Bảng Tầm quan trọng của Tính năng</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="card-box accent-green">
+          <div class="card-heading">Bảng Tầm quan trọng của Tính năng</div>
+        </div>
+        """, unsafe_allow_html=True)
         fi_df = pd.DataFrame([
             {"Tính năng (Feature)": "rating_diff (Chênh lệch Elo)", "Ý nghĩa cờ vua": "White Elo - Black Elo (Quyết định cao nhất)", "HGB": "0.5842", "Logistic (|Coef|)": "0.4912"},
             {"Tính năng (Feature)": "white_rating (Elo Bên Trắng)", "Ý nghĩa cờ vua": "Đẳng cấp và kỹ năng người cầm quân Trắng", "HGB": "0.2150", "Logistic (|Coef|)": "0.2310"},
@@ -822,11 +834,13 @@ with tab3:
             {"Tính năng (Feature)": "rated (Trận đấu xếp hạng)", "Ý nghĩa cờ vua": "Trận đấu tính điểm Elo (1) hoặc giao hữu (0)", "HGB": "0.0203", "Logistic (|Coef|)": "0.0408"},
         ])
         st.dataframe(fi_df, use_container_width=True, hide_index=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with col_fi_chart:
-        st.markdown('<div class="card card-accent-green">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">Biểu đồ Tầm quan trọng (HGB vs Logistic)</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="card-box accent-green">
+          <div class="card-heading">Biểu đồ Tầm quan trọng (HGB vs Logistic)</div>
+        </div>
+        """, unsafe_allow_html=True)
         features = ["rated", "opening_ply", "black_rating", "white_rating", "rating_diff"]
         hgb_scores = [0.0203, 0.0385, 0.1420, 0.2150, 0.5842]
         lr_scores  = [0.0408, 0.0520, 0.1850, 0.2310, 0.4912]
@@ -849,7 +863,6 @@ with tab3:
             legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#0f172a"), bgcolor="rgba(0,0,0,0)")
         )
         st.plotly_chart(fig_fi, use_container_width=True, config={"displayModeBar": False})
-        st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('<hr class="divider">', unsafe_allow_html=True)
 
@@ -862,9 +875,12 @@ with tab3:
     """, unsafe_allow_html=True)
 
     # Sub-section A: Train vs Hold-out bar chart
-    st.markdown('<div class="card card-accent-orange">', unsafe_allow_html=True)
-    st.markdown('<div class="card-heading">So sánh Train Accuracy vs Hold-out Test Accuracy</div>', unsafe_allow_html=True)
-    st.markdown('<div class="card-subheading">Khoảng cách chênh lệch (Train - Hold-out) càng nhỏ chứng minh mô hình tổng quát hóa tốt. L2 Regularization và Early Stopping giúp kiểm soát chặt chẽ hiện tượng quá khớp.</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="card-box accent-orange">
+      <div class="card-heading">So sánh Train Accuracy vs Hold-out Test Accuracy</div>
+      <div class="card-subheading">Khoảng cách chênh lệch (Train - Hold-out) càng nhỏ chứng minh mô hình tổng quát hóa tốt. L2 Regularization và Early Stopping giúp kiểm soát chặt chẽ hiện tượng quá khớp.</div>
+    </div>
+    """, unsafe_allow_html=True)
 
     model_names = ["Logistic Regression", "KNN (k=20)", "HGB (lr=0.1, depth=5)"]
     train_accs  = [64.70,  99.90, 85.30]
@@ -911,12 +927,14 @@ with tab3:
     • <b>HistGradientBoosting:</b> Gap <b>+2.1%</b> — kiểm soát Overfitting xuất sắc nhờ cơ chế L2 Regularization (1.5) và dừng sớm (Early Stopping).
     </div>
     """, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
     # Sub-section B: HGB Learning Curve
-    st.markdown('<div class="card card-accent-blue">', unsafe_allow_html=True)
-    st.markdown('<div class="card-heading">HGB Learning Curve — Phân tích Quá trình Hội tụ Mô hình</div>', unsafe_allow_html=True)
-    st.markdown('<div class="card-subheading">Đường cong hàm mất mát (Cross-Entropy Loss) trên tập Train và tập Validation nội bộ qua 200 Boosting Stages.</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="card-box accent-blue">
+      <div class="card-heading">HGB Learning Curve — Phân tích Quá trình Hội tụ Mô hình</div>
+      <div class="card-subheading">Đường cong hàm mất mát (Cross-Entropy Loss) trên tập Train và tập Validation nội bộ qua 200 Boosting Stages.</div>
+    </div>
+    """, unsafe_allow_html=True)
 
     n_stages = 200
     stages = np.arange(1, n_stages + 1)
@@ -951,12 +969,14 @@ with tab3:
         legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#0f172a"), bgcolor="rgba(0,0,0,0)")
     )
     st.plotly_chart(fig_lc, use_container_width=True, config={"displayModeBar": False})
-    st.markdown('</div>', unsafe_allow_html=True)
 
     # Sub-section C: 3-Fold CV Variance
-    st.markdown('<div class="card card-accent-purple">', unsafe_allow_html=True)
-    st.markdown('<div class="card-heading">3-Fold Cross-Validation — Độ ổn định qua từng Fold</div>', unsafe_allow_html=True)
-    st.markdown('<div class="card-subheading">Độ chính xác Validation của từng mô hình qua 3 Fold chia dữ liệu độc lập. Đường thẳng nằm ngang chứng tỏ thuật toán ổn định và không phụ thuộc vào may rủi dữ liệu.</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="card-box accent-purple">
+      <div class="card-heading">3-Fold Cross-Validation — Độ ổn định qua từng Fold</div>
+      <div class="card-subheading">Độ chính xác Validation của từng mô hình qua 3 Fold chia dữ liệu độc lập. Đường thẳng nằm ngang chứng tỏ thuật toán ổn định và không phụ thuộc vào may rủi dữ liệu.</div>
+    </div>
+    """, unsafe_allow_html=True)
 
     fold_labels = ["Fold 1", "Fold 2", "Fold 3"]
     cv_lr_va  = [64.1, 65.3, 64.5]
@@ -1002,7 +1022,6 @@ with tab3:
     • <b>HistGradientBoosting:</b> Độ chính xác cao vượt trội (83.19%), đường hội tụ Learning Curve mượt mà, kiểm soát rủi ro quá khớp hoàn hảo.
     </div>
     """, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 4 — 2D DECISION BOUNDARIES & DATASET EDA INSIGHTS
@@ -1019,9 +1038,12 @@ with tab4:
     col_b1, col_b2 = st.columns([1, 1], gap="large")
 
     with col_b1:
-        st.markdown('<div class="card card-accent-blue">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">Multinomial Logistic Regression (OvR Decision Boundary)</div>', unsafe_allow_html=True)
-        st.markdown('<div class="card-subheading">Ranh giới phân chia tuyến tính One-vs-Rest giữa 3 lớp: Trắng thắng (Xanh dương), Đen thắng (Đỏ mận) và Hòa (Tím nhạt).</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="card-box accent-blue">
+          <div class="card-heading">Multinomial Logistic Regression (OvR Decision Boundary)</div>
+          <div class="card-subheading">Ranh giới phân chia tuyến tính One-vs-Rest giữa 3 lớp: Trắng thắng (Xanh dương), Đen thắng (Đỏ mận) và Hòa (Tím nhạt).</div>
+        </div>
+        """, unsafe_allow_html=True)
 
         np.random.seed(42)
         n_pts = 120
@@ -1060,12 +1082,14 @@ with tab4:
             legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#0f172a"), bgcolor="rgba(0,0,0,0)")
         )
         st.plotly_chart(fig_b1, use_container_width=True, config={"displayModeBar": False})
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with col_b2:
-        st.markdown('<div class="card card-accent-purple">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">HGB Non-linear Boundary (Cây quyết định bậc thang)</div>', unsafe_allow_html=True)
-        st.markdown('<div class="card-subheading">Khả năng phân tách phi tuyến phân mảnh dạng bậc thang của HistGradientBoosting giúp bắt trọn ranh giới phức tạp.</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="card-box accent-purple">
+          <div class="card-heading">HGB Non-linear Boundary (Cây quyết định bậc thang)</div>
+          <div class="card-subheading">Khả năng phân tách phi tuyến phân mảnh dạng bậc thang của HistGradientBoosting giúp bắt trọn ranh giới phức tạp.</div>
+        </div>
+        """, unsafe_allow_html=True)
 
         n_moon = 70
         t = np.linspace(0, np.pi, n_moon)
@@ -1100,7 +1124,6 @@ with tab4:
             legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#0f172a"), bgcolor="rgba(0,0,0,0)")
         )
         st.plotly_chart(fig_b2, use_container_width=True, config={"displayModeBar": False})
-        st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('<hr class="divider">', unsafe_allow_html=True)
 
@@ -1115,9 +1138,12 @@ with tab4:
     col_eda1, col_eda2 = st.columns([1, 1.3], gap="large")
 
     with col_eda1:
-        st.markdown('<div class="card card-accent-green">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">Phân phối Tỷ lệ Kết quả Trận đấu</div>', unsafe_allow_html=True)
-        st.markdown('<div class="card-subheading">Tỷ lệ thắng của Bên Trắng, Bên Đen và Hòa trong 9,746 ván cờ thực tế.</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="card-box accent-green">
+          <div class="card-heading">Phân phối Tỷ lệ Kết quả Trận đấu</div>
+          <div class="card-subheading">Tỷ lệ thắng của Bên Trắng, Bên Đen và Hòa trong 9,746 ván cờ thực tế.</div>
+        </div>
+        """, unsafe_allow_html=True)
 
         res_labels = ["Trắng thắng (1-0)", "Đen thắng (0-1)", "Hòa (1/2-1/2)"]
         res_counts = [4960, 4510, 498]
@@ -1135,12 +1161,14 @@ with tab4:
             showlegend=False, font=dict(family="Be Vietnam Pro", color="#0f172a")
         )
         st.plotly_chart(fig_donut, use_container_width=True, config={"displayModeBar": False})
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with col_eda2:
-        st.markdown('<div class="card card-accent-orange">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">Top 10 Thế trận Khai cuộc Phổ biến Nhất</div>', unsafe_allow_html=True)
-        st.markdown('<div class="card-subheading">Số lượng ván đấu sử dụng các khai cuộc cờ vua thịnh hành nhất trong cơ sở dữ liệu.</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="card-box accent-orange">
+          <div class="card-heading">Top 10 Thế trận Khai cuộc Phổ biến Nhất</div>
+          <div class="card-subheading">Số lượng ván đấu sử dụng các khai cuộc cờ vua thịnh hành nhất trong cơ sở dữ liệu.</div>
+        </div>
+        """, unsafe_allow_html=True)
 
         top_openings = [
             "Sicilian Defense", "French Defense", "Queen's Gambit", "Italian Game",
@@ -1166,15 +1194,17 @@ with tab4:
             yaxis=dict(autorange="reversed", gridcolor="#e2e8f0")
         )
         st.plotly_chart(fig_top_op, use_container_width=True, config={"displayModeBar": False})
-        st.markdown('</div>', unsafe_allow_html=True)
 
     # ── 3. CORRELATION & CONFUSION MATRIX ─────────────────────────────────────
     col_cm1, col_cm2 = st.columns([1.1, 1], gap="large")
 
     with col_cm1:
-        st.markdown('<div class="card card-accent-blue">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">Đường cong Tương quan: Chênh lệch Elo vs Xác suất Thắng</div>', unsafe_allow_html=True)
-        st.markdown('<div class="card-subheading">Xác suất thắng của Bên Trắng tăng theo hàm Sigmoid chuẩn thống kê FIDE khi chênh lệch Elo tăng.</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="card-box accent-blue">
+          <div class="card-heading">Đường cong Tương quan: Chênh lệch Elo vs Xác suất Thắng</div>
+          <div class="card-subheading">Xác suất thắng của Bên Trắng tăng theo hàm Sigmoid chuẩn thống kê FIDE khi chênh lệch Elo tăng.</div>
+        </div>
+        """, unsafe_allow_html=True)
 
         diffs = np.linspace(-600, 600, 100)
         win_probs = 1.0 / (1.0 + 10 ** (-diffs / 400.0)) * 100.0
@@ -1200,12 +1230,14 @@ with tab4:
             legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#0f172a"), bgcolor="rgba(0,0,0,0)")
         )
         st.plotly_chart(fig_curve, use_container_width=True, config={"displayModeBar": False})
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with col_cm2:
-        st.markdown('<div class="card card-accent-green">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">Ma trận Nhầm lẫn (Confusion Matrix — HGB)</div>', unsafe_allow_html=True)
-        st.markdown('<div class="card-subheading">Số lượng mẫu dự đoán đúng/sai trên tập kiểm tra giữ lại (Hold-out Test) của HistGradientBoosting.</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="card-box accent-green">
+          <div class="card-heading">Ma trận Nhầm lẫn (Confusion Matrix — HGB)</div>
+          <div class="card-subheading">Số lượng mẫu dự đoán đúng/sai trên tập kiểm tra giữ lại (Hold-out Test) của HistGradientBoosting.</div>
+        </div>
+        """, unsafe_allow_html=True)
 
         cm_classes = ["Đen thắng", "Hòa", "Trắng thắng"]
         cm_data = [
@@ -1229,4 +1261,3 @@ with tab4:
         )
         fig_cm.update_traces(textfont=dict(size=16, color="#0f172a", family="Be Vietnam Pro"))
         st.plotly_chart(fig_cm, use_container_width=True, config={"displayModeBar": False})
-        st.markdown('</div>', unsafe_allow_html=True)
