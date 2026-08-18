@@ -33,20 +33,20 @@ chess_bg_b64 = get_base64_image(chess_bg_path)
 
 # ─── Page Config ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Phân tích Ván cờ Lichess — Machine Learning",
+    page_title="Phân tích Ván cờ Lichess — Stitch AI Design System",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# ─── Luxury Atmosphere & Clean Light Mode CSS ─────────────────────────────────
+# ─── Stitch - Design with AI (Google Material 3 AI UI Standard System) ──────
 st.markdown(f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
 
-/* ── Global Reset & Ambient Luxury Chess Background Overlay ── */
+/* ── Stitch Canvas & Tonal Surface Background Overlay ── */
 html, body, [data-testid="stAppViewContainer"], .main {{
-    font-family: 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-    background-color: #f1f5f9 !important;
+    font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    background-color: #f8fafc !important;
     background-image: 
         linear-gradient(rgba(248, 250, 252, 0.88), rgba(248, 250, 252, 0.93)),
         url("data:image/jpeg;base64,{chess_bg_b64}") !important;
@@ -65,16 +65,16 @@ header[data-testid="stHeader"], footer,
     max-width: 1480px !important;
 }}
 
-/* ── Typography (Tiếng Việt Chuẩn Nét 100%) ── */
+/* ── Typography System (Stitch M3 Specs) ── */
 p, span, label, div {{
-    font-family: 'Be Vietnam Pro', 'Inter', sans-serif !important;
+    font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', 'Inter', sans-serif !important;
     color: #0f172a !important;
 }}
 h1, h2, h3, h4, h5, h6 {{
-    font-family: 'Be Vietnam Pro', 'Inter', sans-serif !important;
+    font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', sans-serif !important;
     color: #0f172a !important;
     font-weight: 800 !important;
-    letter-spacing: -0.02em !important;
+    letter-spacing: -0.025em !important;
 }}
 
 /* Input Labels */
@@ -86,20 +86,20 @@ h1, h2, h3, h4, h5, h6 {{
     letter-spacing: -0.01em !important;
 }}
 
-/* ── Hero Header ── */
+/* ── Stitch Hero Header ── */
 .hero-header {{
     background: 
-        linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(241, 245, 249, 0.90) 100%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 245, 249, 0.92) 100%),
         url("data:image/jpeg;base64,{chess_bg_b64}") center/cover no-repeat !important;
-    border: 1px solid #cbd5e1;
-    border-radius: 18px;
+    border: 1px solid #e2e8f0;
+    border-radius: 24px;
     padding: 2.5rem 3.0rem 2.2rem;
     margin-bottom: 2.0rem;
     position: relative;
     overflow: hidden;
     box-shadow: 
-        0 10px 30px rgba(0, 0, 0, 0.08),
-        0 2px 8px rgba(2, 132, 199, 0.12);
+        0 12px 32px rgba(15, 23, 42, 0.05),
+        0 2px 8px rgba(2, 132, 199, 0.08);
 }}
 .hero-header::before {{
     content: "";
@@ -107,11 +107,11 @@ h1, h2, h3, h4, h5, h6 {{
     top: 0; left: 0; right: 0;
     height: 4px;
     background: linear-gradient(90deg, #0284c7, #6366f1, #8b5cf6, #ec4899);
-    border-radius: 18px 18px 0 0;
+    border-radius: 24px 24px 0 0;
 }}
 .hero-title {{
-    font-size: 2.4rem;
-    font-weight: 900;
+    font-size: 2.45rem;
+    font-weight: 800;
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0284c7 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -135,35 +135,38 @@ h1, h2, h3, h4, h5, h6 {{
 }}
 .badge {{
     display: inline-block;
-    padding: 0.4rem 1.1rem;
+    padding: 0.45rem 1.2rem;
     border-radius: 30px;
     font-size: 0.88rem;
     font-weight: 700;
     letter-spacing: 0.02em;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}}
+.badge:hover {{
+    transform: translateY(-2px);
 }}
 .badge-blue   {{ background: #e0f2fe; color: #0369a1 !important; border: 1px solid #7dd3fc; }}
 .badge-purple {{ background: #f3e8ff; color: #6b21a8 !important; border: 1px solid #c084fc; }}
 .badge-green  {{ background: #d1fae5; color: #065f46 !important; border: 1px solid #6ee7b7; }}
 .badge-orange {{ background: #ffe4e6; color: #9f1239 !important; border: 1px solid #fda4af; }}
 
-/* ── Clean Section & Card Wrappers (Tối ưu tuyệt đối, không thẻ thừa) ── */
+/* ── Stitch Surface Containers (Material 3 Cards) ── */
 .card-box {{
     background: #ffffff !important;
-    border: 1px solid #cbd5e1;
-    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
     padding: 1.8rem 2.2rem;
     margin-bottom: 1.6rem;
     box-shadow: 
-        0 10px 25px rgba(0, 0, 0, 0.04),
-        0 2px 6px rgba(0, 0, 0, 0.02);
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        0 8px 24px rgba(15, 23, 42, 0.04),
+        0 2px 6px rgba(15, 23, 42, 0.02);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
 }}
 .card-box:hover {{
     border-color: #38bdf8;
     box-shadow: 
-        0 16px 35px rgba(2, 132, 199, 0.12),
-        0 0 0 1px rgba(2, 132, 199, 0.25);
+        0 16px 36px rgba(2, 132, 199, 0.12),
+        0 0 0 2px rgba(2, 132, 199, 0.2);
     transform: translateY(-2px);
 }}
 
@@ -190,7 +193,7 @@ h1, h2, h3, h4, h5, h6 {{
 /* ── Section Titles ── */
 .section-title {{
     font-size: 1.75rem;
-    font-weight: 900;
+    font-weight: 800;
     color: #0f172a !important;
     letter-spacing: -0.025em;
     margin: 1.6rem 0 0.4rem;
@@ -202,17 +205,17 @@ h1, h2, h3, h4, h5, h6 {{
     margin-bottom: 1.3rem;
 }}
 
-/* ── Metric Stat Chips ── */
+/* ── Stitch Tonal Metric Stat Chips ── */
 .metric-row {{ display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 1.4rem; }}
 .metric-chip {{
     flex: 1;
     min-width: 150px;
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border: 1px solid #cbd5e1;
-    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
     padding: 1.1rem 1.3rem;
     text-align: center;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }}
 .metric-chip:hover {{
@@ -228,7 +231,7 @@ h1, h2, h3, h4, h5, h6 {{
 }}
 .metric-chip-value {{
     font-size: 2.1rem;
-    font-weight: 900;
+    font-weight: 800;
     margin-top: 0.3rem;
     letter-spacing: -0.02em;
 }}
@@ -237,35 +240,35 @@ h1, h2, h3, h4, h5, h6 {{
 .chip-green  .metric-chip-value {{ color: #059669 !important; }}
 .chip-orange .metric-chip-value {{ color: #e11d48 !important; }}
 
-/* ── Alert Highlight Boxes ── */
+/* ── Stitch Alert Highlight Boxes ── */
 .alert-box {{
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 1.2rem 1.5rem;
     margin: 1.2rem 0;
     font-size: 1.02rem;
     line-height: 1.75;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
 }}
 .alert-blue   {{ background: #f0f9ff; border-left: 5px solid #0284c7; color: #0c4a6e !important; }}
 .alert-orange {{ background: #fff1f2; border-left: 5px solid #e11d48; color: #881337 !important; }}
 .alert-green  {{ background: #ecfdf5; border-left: 5px solid #059669; color: #064e3b !important; }}
 
-/* ── Tabs Navigation Bar ── */
+/* ── Stitch Floating Tab Bar ── */
 [data-baseweb="tab-list"] {{
     background: #f1f5f9 !important;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 14px !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 16px !important;
     padding: 6px !important;
     gap: 6px !important;
     margin-bottom: 1.6rem !important;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.05);
 }}
 button[data-baseweb="tab"] {{
     font-size: 1.05rem !important;
     font-weight: 700 !important;
     color: #475569 !important;
     padding: 0.75rem 1.6rem !important;
-    border-radius: 10px !important;
+    border-radius: 12px !important;
     border: none !important;
     background: transparent !important;
     transition: all 0.2s ease !important;
@@ -279,7 +282,7 @@ button[data-baseweb="tab"][aria-selected="true"] {{
     background: #ffffff !important;
     border: 1px solid #0284c7 !important;
     font-weight: 800 !important;
-    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15) !important;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.15) !important;
 }}
 
 /* ── SELECTBOX INPUTS ── */
@@ -287,18 +290,18 @@ div[data-testid="stSelectbox"] > div > div {{
     background-color: #ffffff !important;
     background: #ffffff !important;
     border: 1.5px solid #cbd5e1 !important;
-    border-radius: 8px !important;
+    border-radius: 10px !important;
     height: 40px !important;
     min-height: 40px !important;
     max-height: 40px !important;
     display: flex !important;
     align-items: center !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
 }}
 div[data-testid="stSelectbox"] [data-baseweb="select"] span,
 div[data-testid="stSelectbox"] [data-baseweb="select"] div,
 div[data-testid="stSelectbox"] [data-baseweb="select"] p {{
-    font-family: 'JetBrains Mono', 'Be Vietnam Pro', monospace !important;
+    font-family: 'JetBrains Mono', 'Plus Jakarta Sans', monospace !important;
     font-size: 0.92rem !important;
     font-weight: 700 !important;
     color: #0f172a !important;
@@ -314,14 +317,14 @@ div[data-testid="stNumberInput"] > div > div {{
     background-color: #ffffff !important;
     background: #ffffff !important;
     border: 1.5px solid #cbd5e1 !important;
-    border-radius: 8px !important;
+    border-radius: 10px !important;
     height: 40px !important;
     min-height: 40px !important;
     max-height: 40px !important;
     overflow: hidden !important;
     display: flex !important;
     align-items: center !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
 }}
 
 div[data-testid="stNumberInput"] input {{
@@ -363,8 +366,8 @@ ul[role="listbox"] {{
     background-color: #ffffff !important;
     background: #ffffff !important;
     border: 2px solid #0284c7 !important;
-    border-radius: 8px !important;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.15) !important;
 }}
 
 div[data-baseweb="popover"] [role="option"],
@@ -379,7 +382,7 @@ ul[role="listbox"] li,
 ul[role="listbox"] li * {{
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
-    font-family: 'Be Vietnam Pro', sans-serif !important;
+    font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', sans-serif !important;
     font-size: 0.95rem !important;
     font-weight: 700 !important;
     opacity: 1 !important;
@@ -414,7 +417,7 @@ ul[role="listbox"] [aria-selected="true"] * {{
 [data-testid="stSlider"] div[data-testid="stMarkdownContainer"] p {{
     color: #0284c7 !important;
     -webkit-text-fill-color: #0284c7 !important;
-    font-weight: 900 !important;
+    font-weight: 800 !important;
     font-size: 1.3rem !important;
 }}
 
@@ -432,16 +435,16 @@ textarea, [data-baseweb="textarea"] textarea, input, [data-baseweb="input"] inpu
     font-weight: 600 !important;
     line-height: 1.65 !important;
     border: 1.5px solid #cbd5e1 !important;
-    border-radius: 10px !important;
+    border-radius: 12px !important;
     padding: 12px 14px !important;
     caret-color: #0284c7 !important;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05) !important;
+    box-shadow: inset 0 1px 3px rgba(15,23,42,0.05) !important;
     transition: all 0.2s ease !important;
 }}
 textarea:focus, [data-baseweb="textarea"] textarea:focus,
 input:focus, [data-baseweb="input"] input:focus {{
     border-color: #0284c7 !important;
-    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2), inset 0 1px 3px rgba(0,0,0,0.05) !important;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2), inset 0 1px 3px rgba(15,23,42,0.05) !important;
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
 }}
@@ -450,9 +453,9 @@ input:focus, [data-baseweb="input"] input:focus {{
 [data-testid="stDataFrame"] {{
     background: #ffffff !important;
     border: 1px solid #cbd5e1 !important;
-    border-radius: 12px !important;
+    border-radius: 14px !important;
     overflow: hidden !important;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+    box-shadow: 0 4px 14px rgba(15,23,42,0.04);
 }}
 
 /* ── CHESSBOARD FRAME ── */
@@ -462,9 +465,9 @@ input:focus, [data-baseweb="input"] input:focus {{
     align-items: center;
     background: radial-gradient(circle, #ffffff 0%, #f1f5f9 100%);
     border: 1px solid #cbd5e1;
-    border-radius: 16px;
+    border-radius: 18px;
     padding: 1.3rem;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
 }}
 
 .divider {{
@@ -477,9 +480,9 @@ input:focus, [data-baseweb="input"] input:focus {{
 /* ── RESULT BADGES ── */
 .result-badge {{
     padding: 1.1rem 1.6rem;
-    border-radius: 12px;
+    border-radius: 14px;
     font-size: 1.28rem;
-    font-weight: 900;
+    font-weight: 800;
     text-align: center;
     margin-bottom: 1.4rem;
     letter-spacing: 0.03em;
@@ -493,7 +496,7 @@ input:focus, [data-baseweb="input"] input:focus {{
 # ─── Hero Header ───────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="hero-header">
-  <div class="hero-title">Hệ thống Phân tích Ván cờ Lichess — Machine Learning</div>
+  <div class="hero-title">Hệ thống Phân tích Ván cờ Lichess — Stitch AI System</div>
   <div class="hero-subtitle">
     Dự đoán xác suất kết quả trận đấu, nhận diện khai cuộc và trực quan hóa ranh giới quyết định.
     Toàn bộ thuật toán được tự xây dựng từ đầu bằng Python và NumPy thuần túy — <b>100% From Scratch (Không sử dụng Scikit-Learn)</b>.
@@ -603,7 +606,7 @@ with tab1:
                 yaxis_range=[0, 100], showlegend=False,
                 margin=dict(l=10, r=10, t=10, b=10),
                 paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                font=dict(family="Be Vietnam Pro, sans-serif", color="#0f172a", size=14),
+                font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=14),
                 xaxis=dict(gridcolor="#e2e8f0", title=""),
                 yaxis=dict(gridcolor="#e2e8f0", title="Xác suất (%)", title_font=dict(size=14, color="#0f172a")),
             )
@@ -791,7 +794,7 @@ with tab3:
         yaxis_range=[0, 100],
         margin=dict(l=10, r=10, t=10, b=10),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Be Vietnam Pro, sans-serif", color="#0f172a", size=14),
+        font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=14),
         xaxis=dict(gridcolor="#e2e8f0", title=""),
         yaxis=dict(gridcolor="#e2e8f0", title="Điểm số (%)", title_font=dict(size=14, color="#0f172a")),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1,
@@ -857,7 +860,7 @@ with tab3:
             barmode="group", height=300,
             margin=dict(l=10, r=10, t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
+            font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
             xaxis=dict(gridcolor="#e2e8f0", title="Tầm quan trọng (Tỷ trọng tương đối)", title_font=dict(color="#0f172a")),
             yaxis=dict(gridcolor="#e2e8f0"),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#0f172a"), bgcolor="rgba(0,0,0,0)")
@@ -905,14 +908,14 @@ with tab3:
         fig_ov.add_annotation(
             x=model_names[i], y=max(t, h) + 6.5,
             text=f"Gap: {gap:+.1f}%", showarrow=False,
-            font=dict(size=14, color=col, family="Be Vietnam Pro", weight="bold"), bgcolor="rgba(0,0,0,0)"
+            font=dict(size=14, color=col, family="Plus Jakarta Sans, Be Vietnam Pro", weight="bold"), bgcolor="rgba(0,0,0,0)"
         )
 
     fig_ov.update_layout(
         barmode="group", height=380,
         margin=dict(l=10, r=10, t=40, b=10),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Be Vietnam Pro, sans-serif", color="#0f172a", size=14),
+        font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=14),
         xaxis=dict(gridcolor="#e2e8f0", title=""),
         yaxis=dict(gridcolor="#e2e8f0", title="Accuracy (%)", range=[0, 115], title_font=dict(color="#0f172a")),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#0f172a"), bgcolor="rgba(0,0,0,0)")
@@ -963,7 +966,7 @@ with tab3:
         height=350,
         margin=dict(l=10, r=10, t=10, b=10),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Be Vietnam Pro, sans-serif", color="#0f172a", size=14),
+        font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=14),
         xaxis=dict(gridcolor="#e2e8f0", title="Boosting Stage", title_font=dict(color="#0f172a")),
         yaxis=dict(gridcolor="#e2e8f0", title="Cross-Entropy Loss", title_font=dict(color="#0f172a")),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#0f172a"), bgcolor="rgba(0,0,0,0)")
@@ -1007,7 +1010,7 @@ with tab3:
         height=340,
         margin=dict(l=10, r=10, t=10, b=10),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Be Vietnam Pro, sans-serif", color="#0f172a", size=14),
+        font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=14),
         xaxis=dict(gridcolor="#e2e8f0", title=""),
         yaxis=dict(gridcolor="#e2e8f0", title="Accuracy (%)", range=[55, 105], title_font=dict(color="#0f172a")),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#0f172a"), bgcolor="rgba(0,0,0,0)")
@@ -1076,7 +1079,7 @@ with tab4:
         fig_b1.update_layout(
             height=380, margin=dict(l=10, r=10, t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
+            font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
             xaxis=dict(gridcolor="#e2e8f0", title="Feature 1 (Standardized Rating Diff)"),
             yaxis=dict(gridcolor="#e2e8f0", title="Feature 2 (Standardized White Rating)"),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#0f172a"), bgcolor="rgba(0,0,0,0)")
@@ -1118,7 +1121,7 @@ with tab4:
         fig_b2.update_layout(
             height=380, margin=dict(l=10, r=10, t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
+            font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
             xaxis=dict(gridcolor="#e2e8f0", title="Feature 1 (Rating Difference)"),
             yaxis=dict(gridcolor="#e2e8f0", title="Feature 2 (Opening Moves Count)"),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#0f172a"), bgcolor="rgba(0,0,0,0)")
@@ -1152,13 +1155,13 @@ with tab4:
         fig_donut = go.Figure(data=[go.Pie(
             labels=res_labels, values=res_counts, hole=0.58,
             marker=dict(colors=res_colors, line=dict(color='#ffffff', width=2.0)),
-            textinfo='label+percent', textfont=dict(size=13, color='#ffffff', family="Be Vietnam Pro"),
+            textinfo='label+percent', textfont=dict(size=13, color='#ffffff', family="Plus Jakarta Sans, Be Vietnam Pro"),
             hoverinfo='label+value+percent'
         )])
         fig_donut.update_layout(
             height=340, margin=dict(l=10, r=10, t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            showlegend=False, font=dict(family="Be Vietnam Pro", color="#0f172a")
+            showlegend=False, font=dict(family="Plus Jakarta Sans, Be Vietnam Pro", color="#0f172a")
         )
         st.plotly_chart(fig_donut, use_container_width=True, config={"displayModeBar": False})
 
@@ -1189,7 +1192,7 @@ with tab4:
         fig_top_op.update_layout(
             height=340, margin=dict(l=10, r=10, t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
+            font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
             xaxis=dict(gridcolor="#e2e8f0", title="Số lượng ván đấu"),
             yaxis=dict(autorange="reversed", gridcolor="#e2e8f0")
         )
@@ -1224,7 +1227,7 @@ with tab4:
         fig_curve.update_layout(
             height=340, margin=dict(l=10, r=10, t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
+            font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
             xaxis=dict(gridcolor="#e2e8f0", title="Chênh lệch Elo (Rating Difference = White - Black)"),
             yaxis=dict(gridcolor="#e2e8f0", title="Xác suất dự đoán (%)", range=[0, 105]),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#0f172a"), bgcolor="rgba(0,0,0,0)")
@@ -1256,8 +1259,8 @@ with tab4:
         fig_cm.update_layout(
             height=340, margin=dict(l=10, r=10, t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
+            font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
             coloraxis_showscale=False
         )
-        fig_cm.update_traces(textfont=dict(size=16, color="#0f172a", family="Be Vietnam Pro"))
+        fig_cm.update_traces(textfont=dict(size=16, color="#0f172a", family="Plus Jakarta Sans, Be Vietnam Pro"))
         st.plotly_chart(fig_cm, use_container_width=True, config={"displayModeBar": False})
