@@ -32,6 +32,9 @@ assets_dir = os.path.join(os.path.dirname(__file__), "assets")
 chess_bg_b64 = get_base64_image(os.path.join(assets_dir, "chess_bg.jpg"))
 chess_knight_b64 = get_base64_image(os.path.join(assets_dir, "chess_knight.jpg"))
 chess_analytics_b64 = get_base64_image(os.path.join(assets_dir, "chess_analytics.jpg"))
+cat_predict_3d_b64 = get_base64_image(os.path.join(assets_dir, "cat_predict_3d.jpg"))
+cat_benchmark_3d_b64 = get_base64_image(os.path.join(assets_dir, "cat_benchmark_3d.jpg"))
+cat_eda_3d_b64 = get_base64_image(os.path.join(assets_dir, "cat_eda_3d.jpg"))
 
 # ─── Page Config ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -40,19 +43,19 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ─── Premium E-Commerce / SaaS Portal CSS System ──────────────────────────────
+# ─── Glassmorphic 3D Creative UI/UX CSS Design System ─────────────────────────
 st.markdown(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
 
-/* ── Global Background Canvas ── */
+/* ── Global Canvas Background ── */
 html, body, [data-testid="stAppViewContainer"], .main {{
     font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', sans-serif !important;
     background-color: #f8fafc !important;
     background-image: 
-        radial-gradient(circle at 5% 5%, rgba(2, 132, 199, 0.06) 0%, transparent 35%),
-        radial-gradient(circle at 95% 15%, rgba(124, 58, 237, 0.05) 0%, transparent 40%),
-        linear-gradient(rgba(248, 250, 252, 0.90), rgba(248, 250, 252, 0.94)),
+        radial-gradient(circle at 10% 10%, rgba(2, 132, 199, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 15%, rgba(124, 58, 237, 0.07) 0%, transparent 45%),
+        linear-gradient(rgba(248, 250, 252, 0.88), rgba(248, 250, 252, 0.93)),
         url("data:image/jpeg;base64,{chess_bg_b64}") !important;
     background-size: cover !important;
     background-position: center !important;
@@ -77,7 +80,7 @@ header[data-testid="stHeader"], footer,
     background: rgba(255, 255, 255, 0.92) !important;
     backdrop-filter: blur(16px);
     border-bottom: 1px solid #e2e8f0;
-    padding: 0.95rem 2.0rem;
+    padding: 0.95rem 2.2rem;
     margin: 0 -3.0rem 2.0rem -3.0rem;
     display: flex;
     align-items: center;
@@ -125,18 +128,24 @@ header[data-testid="stHeader"], footer,
     box-shadow: 0 0 10px #10b981;
 }}
 
-/* ── HERO BANNER ── */
+/* ── HERO BANNER (CENTER-ALIGNED ELEGANT GLASSMORPHIC BANNER) ── */
 .hero-banner {{
     background: 
         linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(241, 245, 249, 0.88) 100%),
         url("data:image/jpeg;base64,{chess_bg_b64}") center/cover no-repeat !important;
-    border: 1px solid #cbd5e1;
-    border-radius: 24px;
-    padding: 2.8rem 3.5rem;
-    margin-bottom: 2.2rem;
+    border: 1px solid rgba(203, 213, 225, 0.8);
+    border-radius: 26px;
+    padding: 3.2rem 4.0rem 2.8rem;
+    margin-bottom: 2.4rem;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 15px 35px -10px rgba(15, 23, 42, 0.06);
+    box-shadow: 0 18px 40px -10px rgba(15, 23, 42, 0.07);
+    backdrop-filter: blur(16px);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }}
 .hero-banner::before {{
     content: "";
@@ -151,63 +160,88 @@ header[data-testid="stHeader"], footer,
     background: #e0f2fe;
     color: #0369a1 !important;
     border: 1px solid #7dd3fc;
-    padding: 0.35rem 1.0rem;
+    padding: 0.4rem 1.2rem;
     border-radius: 30px;
     font-size: 0.85rem;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 0.9rem;
+    letter-spacing: 0.07em;
+    margin-bottom: 1.0rem;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.12);
 }}
 .hero-main-title {{
-    font-size: 2.6rem;
+    font-size: 2.7rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0284c7 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 45%, #0284c7 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin: 0;
+    margin: 0 auto;
     letter-spacing: -0.03em;
-    line-height: 1.2;
+    line-height: 1.25;
+    text-align: center;
+    max-width: 1050px;
 }}
 .hero-desc {{
     font-size: 1.15rem;
     color: #334155 !important;
-    margin-top: 0.8rem;
+    margin: 0.9rem auto 0;
     font-weight: 500;
     line-height: 1.7;
-    max-width: 1100px;
+    max-width: 980px;
+    text-align: center;
 }}
 
-/* ── FEATURED CATEGORIES SHOWCASE GRID ── */
+/* ── FEATURED CATEGORIES SHOWCASE GRID (EVENLY SPACED WITH 3D AI ARTWORK) ── */
 .category-grid {{
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1.4rem;
-    margin-bottom: 2.2rem;
+    gap: 1.6rem;
+    margin-bottom: 2.5rem;
 }}
 .cat-card {{
-    background: #ffffff !important;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 18px;
-    padding: 1.4rem 1.6rem;
-    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.03);
-    transition: all 0.25s ease;
+    background: rgba(255, 255, 255, 0.90) !important;
+    backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(226, 232, 240, 0.9);
+    border-radius: 22px;
+    padding: 1.6rem 1.4rem;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
 }}
 .cat-card:hover {{
     border-color: #0284c7;
-    transform: translateY(-3px);
-    box-shadow: 0 12px 28px rgba(2, 132, 199, 0.12);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(2, 132, 199, 0.16), 0 0 0 2px rgba(2, 132, 199, 0.2);
+    background: #ffffff !important;
 }}
-.cat-icon {{
-    font-size: 1.8rem;
-    margin-bottom: 0.6rem;
+
+.cat-art-badge {{
+    width: 65px;
+    height: 65px;
+    border-radius: 16px;
+    object-fit: cover;
+    margin-bottom: 0.9rem;
+    border: 1.5px solid #cbd5e1;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
+    transition: transform 0.3s ease;
 }}
+.cat-card:hover .cat-art-badge {{
+    transform: scale(1.06) rotate(2deg);
+    border-color: #0284c7;
+}}
+
 .cat-title {{
-    font-size: 1.1rem;
+    font-size: 1.12rem;
     font-weight: 800;
     color: #0f172a !important;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.35rem;
+    letter-spacing: -0.015em;
 }}
 .cat-sub {{
     font-size: 0.88rem;
@@ -216,11 +250,12 @@ header[data-testid="stHeader"], footer,
     line-height: 1.5;
 }}
 
-/* ── E-COMMERCE CARD BOXES ── */
+/* ── CARD CONTAINERS ── */
 .card-box {{
-    background: #ffffff !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(14px);
     border: 1px solid #cbd5e1;
-    border-radius: 20px;
+    border-radius: 22px;
     padding: 1.9rem 2.3rem;
     margin-bottom: 1.8rem;
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
@@ -252,15 +287,6 @@ header[data-testid="stHeader"], footer,
     line-height: 1.65;
 }}
 
-.art-card-header {{
-    width: 100%;
-    height: 140px;
-    border-radius: 14px;
-    object-fit: cover;
-    margin-bottom: 1.2rem;
-    border: 1px solid #e2e8f0;
-}}
-
 /* ── SECTION TITLES ── */
 .section-title {{
     font-size: 1.75rem;
@@ -283,7 +309,7 @@ header[data-testid="stHeader"], footer,
     min-width: 160px;
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border: 1px solid #cbd5e1;
-    border-radius: 16px;
+    border-radius: 18px;
     padding: 1.2rem 1.4rem;
     text-align: center;
     box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
@@ -308,7 +334,7 @@ header[data-testid="stHeader"], footer,
 
 /* ── ALERT BOXES ── */
 .alert-box {{
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 1.3rem 1.6rem;
     margin: 1.3rem 0;
     font-size: 1.02rem;
@@ -460,7 +486,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ─── HERO PROMO BANNER ────────────────────────────────────────────────────────
+# ─── HERO PROMO BANNER (CENTER-ALIGNED) ───────────────────────────────────────
 st.markdown("""
 <div class="hero-banner">
   <div class="hero-tagline">Nền tảng Phân tích Ván cờ Thông minh 2026</div>
@@ -472,26 +498,26 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ─── FEATURED CATEGORIES SHOWCASE GRID ────────────────────────────────────────
-st.markdown("""
+# ─── FEATURED CATEGORIES SHOWCASE GRID (WITH 3D AI ARTWORK BADGES) ─────────────
+st.markdown(f"""
 <div class="category-grid">
   <div class="cat-card">
-    <div class="cat-icon">🏆</div>
+    <img src="data:image/jpeg;base64,{cat_predict_3d_b64}" class="cat-art-badge" />
     <div class="cat-title">Dự đoán Thắng / Thua</div>
     <div class="cat-sub">HistGradientBoosting • Peak Acc 83.19%</div>
   </div>
   <div class="cat-card">
-    <div class="cat-icon">🐴</div>
+    <img src="data:image/jpeg;base64,{chess_knight_b64}" class="cat-art-badge" />
     <div class="cat-title">Nhận diện Khai cuộc</div>
     <div class="cat-sub">KNN Manhattan Search • PGN Format</div>
   </div>
   <div class="cat-card">
-    <div class="cat-icon">📊</div>
+    <img src="data:image/jpeg;base64,{cat_benchmark_3d_b64}" class="cat-art-badge" />
     <div class="cat-title">Báo cáo Benchmark</div>
     <div class="cat-sub">3-Fold CV • Zero Data Leakage</div>
   </div>
   <div class="cat-card">
-    <div class="cat-icon">♟️</div>
+    <img src="data:image/jpeg;base64,{cat_eda_3d_b64}" class="cat-art-badge" />
     <div class="cat-title">Ranh giới & EDA</div>
     <div class="cat-sub">2D Decision Boundaries & Lichess Insights</div>
   </div>
@@ -627,7 +653,7 @@ with tab2:
         <div class="card-box accent-green">
           <div style="display: flex; gap: 1.5rem; align-items: center; justify-content: space-between;">
             <div style="flex: 1;">
-              <div class="card-heading">🐴 Truy vấn & Nhận diện Khai cuộc KNN</div>
+              <div class="card-heading">Truy vấn & Nhận diện Khai cuộc KNN</div>
               <div class="card-subheading" style="margin-bottom:0;">Dán chuỗi nước đi chuẩn PGN để thuật toán K-Nearest Neighbors tìm kiếm các ván cờ tương đồng nhất trong kho dữ liệu Lichess.</div>
             </div>
             <div style="width: 140px; flex-shrink: 0;">
@@ -655,7 +681,7 @@ with tab2:
     with col_board:
         st.markdown("""
         <div class="card-box accent-blue">
-          <div class="card-heading">♟️ Trực quan Bàn cờ 2D Interactive</div>
+          <div class="card-heading">Trực quan Bàn cờ 2D Interactive</div>
           <div class="card-subheading">Bàn cờ tự động cập nhật thế cờ theo nước đi cuối cùng trong chuỗi PGN.</div>
         </div>
         """, unsafe_allow_html=True)
@@ -689,7 +715,7 @@ with tab2:
 
         st.markdown(f"""
         <div class="card-box accent-purple">
-          <div class="card-heading">🏆 Kết quả Nhận diện Khai cuộc Tương đồng Nhất</div>
+          <div class="card-heading">Kết quả Nhận diện Khai cuộc Tương đồng Nhất</div>
           <div class="alert-box alert-blue" style="margin-bottom: 1.2rem;">
             <b>Khai cuộc Dự đoán Top #1:</b> <span style="font-size:1.3rem; font-weight:800; color:#0284c7;">{top_opening}</span> (Mã ECO: <b>{top_eco}</b>)
           </div>
@@ -749,7 +775,7 @@ with tab3:
     <div class="card-box accent-blue">
       <div style="display: flex; gap: 1.8rem; align-items: center; justify-content: space-between;">
         <div style="flex: 1;">
-          <div class="card-heading">📈 Bảng So sánh Toàn diện Hiệu suất Mô hình Machine Learning</div>
+          <div class="card-heading">Bảng So sánh Toàn diện Hiệu suất Mô hình Machine Learning</div>
           <div class="card-subheading" style="margin-bottom:0;">
             Bộ phân loại <b>Tăng cường Gradient Biểu đồ Histogram (HistGradientBoosting)</b> đạt hiệu suất vượt trội trên tất cả các chỉ số, với độ chính xác giữ lại <b>83,19%</b> và kết quả xác thực chéo nhất quán.
           </div>
