@@ -1,229 +1,337 @@
 import os
 import sys
 import argparse
-import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
 # Ensure UTF-8 output encoding for Windows terminal
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-from data_loader import prepare_and_cache_dataset, check_dataset_stats
-from preprocessing import preprocess_data, clean_moves
-from logistic_baseline import train_logistic_regression
-from knn_result import train_knn_classifier, predict_result_knn
-from knn_opening import train_knn_opening, predict_opening
-from hgb_elo import train_hgb_classifier, predict_game_result
-from comparison import compare_models
+# Import 3 from-scratch models
+from logistic_baseline import (
+    StandardScaler as LRStandardScaler,
+    RobustLogisticRegression,
+    evaluate_metrics as evaluate_lr_metrics
+)
+from knn_opening import (
+    StandardScaler as KNNStandardScaler,
+    RobustKNNClassifier,
+    compute_multiclass_metrics as evaluate_knn_metrics
+)
+from hgb_elo import (
+    HistBinner,
+    HistDecisionTree,
+    RobustHGBClassifier
+)
 
 
-def load_or_process_all_data(max_games=100000):
-    """
-    Ensures dataset is loaded, cleaned, and features engineered.
-    """
-    df = prepare_and_cache_dataset(max_games=max_games)
-    df_clean, X, y, df_knn = preprocess_data(df)
-    return df_clean, X, y, df_knn
+def train_test_split_custom(X, y, test_size=0.2, random_state=42):
+    """Chia tập dữ liệu Train / Test thuần túy bằng NumPy."""
+    if random_state is not None:
+        np.random.seed(random_state)
+    n_samples = len(y)
+    indices = np.random.permutation(n_samples)
+    train_size = int((1.0 - test_size) * n_samples)
+    
+    train_idx = indices[:train_size]
+    test_idx = indices[train_size:]
+    
+    return X[train_idx], X[test_idx], y[train_idx], y[test_idx]
 
 
-def prompt_and_predict_result(model_name="HGB", predict_fn=predict_game_result, model_path="models/hgb_elo.joblib"):
-    """
-    Interactively prompts for White and Black rating and displays predicted Result probabilities.
-    """
-    try:
-        w_str = input("\nNhập Elo người chơi Trắng (white_rating) [Mặc định 1800]: ").strip()
-        w_rating = int(w_str) if w_str.isdigit() else 1800
-
-        b_str = input("Nhập Elo người chơi Đen (black_rating) [Mặc định 1500]: ").strip()
-        b_rating = int(b_str) if b_str.isdigit() else 1500
-    except Exception as e:
-        print(f"[!] Giá trị không hợp lệ. Dùng mặc định White=1800, Black=1500 ({e})")
-        w_rating, b_rating = 1800, 1500
-
-    res = predict_fn(w_rating, b_rating, model_path=model_path)
-    print("\n" + "=" * 60)
-    print(f"        KẾT QUẢ DỰ ĐOÁN VÁN CỜ BẰNG {model_name.upper()}")
-    print("=" * 60)
-    print(f"white_rating : {res['white_rating']}")
-    print(f"black_rating : {res['black_rating']}")
-    print(f"rating_diff  : {res['rating_diff']} ( = White - Black)")
-    print(f"\n=> ĐỰ ĐOÁN KẾT QUẢ: {res['predicted_label'].upper()}")
-    print("\nXác suất dự đoán từng kết quả:")
-    for label, prob in res["probabilities"].items():
-        bar = "█" * int(prob / 5)
-        print(f"  {label:<20}: {prob:>6.2f}% {bar}")
-    print("=" * 60 + "\n")
-
-
-def run_option_1(X=None, y=None, interactive=True):
-    """
-    1. Logistic Regression - BASELINE (5 Features -> Result)
-    """
-    print("\n>>> [CHỨC NĂNG 1] LOGISTIC REGRESSION (BASELINE DỰ ĐOÁN RESULT DỰA TRÊN 5 FEATURES)")
-    model_path = "models/logistic_baseline.joblib"
-    if not os.path.exists(model_path) or X is not None:
-        if X is None or y is None:
-            _, X, y, _ = load_or_process_all_data()
-        pipeline, metrics, _ = train_logistic_regression(X, y)
-    else:
-        metrics = {}
-
-    if interactive:
-        prompt_and_predict_result("Logistic Regression Baseline", predict_game_result, model_path=model_path)
-    return None, metrics
-
-
-def run_option_2(X=None, y=None, interactive=True):
-    """
-    2. HistGradientBoosting (HGB) - DỰ ĐOÁN RESULT (5 Features -> Result)
-    """
-    print("\n>>> [CHỨC NĂNG 2] HIST GRADIENT BOOSTING (HGB DỰ ĐOÁN RESULT DỰA TRÊN 5 FEATURES)")
-    model_path = "models/hgb_elo.joblib"
-    if not os.path.exists(model_path) or X is not None:
-        if X is None or y is None:
-            _, X, y, _ = load_or_process_all_data()
-        hgb_model, metrics, _, _ = train_hgb_classifier(X, y)
-    else:
-        metrics = {}
-
-    if interactive:
-        prompt_and_predict_result("HistGradientBoosting", predict_game_result, model_path=model_path)
-    return None, metrics
-
-
-def run_option_3(df_knn=None, k_value=5):
-    """
-    3. KNN - TÌM OPENING TƯƠNG TỰ (Moves -> Opening)
-    """
-    print("\n>>> [CHỨC NĂNG 3] KNN TÌM OPENING TƯƠNG TỰ DỰA TRÊN NƯỚC ĐỊ (MOVES)")
-
-    model_path = "models/knn_opening.joblib"
-    if not os.path.exists(model_path):
-        print("[!] KNN model index not found. Building index now...")
-        if df_knn is None:
-            _, _, _, df_knn = load_or_process_all_data()
-        train_knn_opening(df_knn)
-
-    moves_input = input("\nNhập chuỗi nước đi (Ví dụ: '1. e4 c5 2. Nf3 d6 3. d4' hoặc 'e4 c5 Nf3 d6 d4'): ").strip()
-    if not moves_input:
-        moves_input = "e4 c5 Nf3 d6 d4"
-        print(f"[i] Không nhập nước đi. Sử dụng nước đi mẫu: '{moves_input}'")
-
-    try:
-        k_in = input(f"Nhập số K ván gần nhất muốn lấy [Mặc định = {k_value}]: ").strip()
-        if k_in.isdigit():
-            k_value = int(k_in)
-    except Exception:
-        pass
-
-    result = predict_opening(moves_input, K=k_value, model_or_path=model_path)
-
-    if "error" in result:
-        print(f"[!] Lỗi: {result['error']}")
-        return
-
+# =====================================================================
+# 1. RUN LOGISTIC REGRESSION (FROM SCRATCH)
+# =====================================================================
+def run_logistic_regression(show_plot=True):
     print("\n" + "=" * 65)
-    print("                KẾT QUẢ TÌM OPENING TƯƠNG TỰ (KNN)")
+    print(" [1] HUẤN LUYỆN VÀ ĐÁNH GIÁ: ROBUST LOGISTIC REGRESSION (FROM SCRATCH)")
     print("=" * 65)
-    print(f"Chuỗi nước đi gốc    : {result['input_moves_raw']}")
-    print(f"Chuỗi nước đi đã xử lý: {result['input_moves_cleaned']}")
-    print(f"Opening dự đoán       : {result['predicted_opening']}")
-    print(f"Mã ECO dự đoán        : {result['predicted_eco']}")
-    print(f"Số ván gần nhất (K)   : {result['K']}")
-    print("-" * 65)
-    print(f"{'Hạng':<5} | {'Kc Distance':<11} | {'Độ tương đồng':<13} | {'ECO':<5} | {'Opening'}")
-    print("-" * 65)
 
-    for g in result["nearest_games"]:
-        print(f"{g['rank']:<5} | {g['distance']:<11.4f} | {g['similarity_percent']:<12.1f}% | {g['eco']:<5} | {g['opening']}")
+    np.random.seed(42)
+    n_samples = 500
+    print(f"[*] Đang sinh tập dữ liệu 2 lớp phân loại (n={n_samples})...")
+    X0 = np.random.randn(n_samples // 2, 2) + np.array([-1.5, -1.5])
+    y0 = np.zeros(n_samples // 2, dtype=int)
+    X1 = np.random.randn(n_samples // 2, 2) + np.array([1.5, 1.5])
+    y1 = np.ones(n_samples // 2, dtype=int)
 
-    print("-" * 65 + "\n")
+    X = np.vstack((X0, X1))
+    y = np.concatenate((y0, y1))
+
+    X_train_raw, X_test_raw, y_train, y_test = train_test_split_custom(X, y, test_size=0.2, random_state=42)
+
+    # Chuẩn hóa
+    scaler = LRStandardScaler()
+    X_train = scaler.fit_transform(X_train_raw)
+    X_test = scaler.transform(X_test_raw)
+
+    print("[*] Đang huấn luyện Logistic Regression với L2 Regularization & Early Stopping...")
+    clf = RobustLogisticRegression(lr=0.1, n_iters=1500, penalty='l2', lambda_param=0.01, tol=1e-5, verbose=True)
+    clf.fit(X_train, y_train)
+
+    # Đánh giá
+    y_test_pred = clf.predict(X_test)
+    metrics = evaluate_lr_metrics(y_test, y_test_pred)
+
+    print("\n" + "-" * 50)
+    print(" KẾT QUẢ ĐÁNH GIÁ TRÊN TẬP TEST:")
+    print(f" • Accuracy        : {metrics['Accuracy'] * 100:.2f}%")
+    print(f" • Precision       : {metrics['Precision'] * 100:.2f}%")
+    print(f" • Recall          : {metrics['Recall'] * 100:.2f}%")
+    print(f" • F1-Score        : {metrics['F1-Score'] * 100:.2f}%")
+    print(f" • Confusion Matrix:\n{metrics['Confusion_Matrix']}")
+    print(f" • Trọng số (Weights): {clf.weights}, Bias: {clf.bias:.4f}")
+    print("-" * 50)
+
+    if show_plot:
+        print("[*] Đang hiển thị biểu đồ trực quan hóa...")
+        plt.figure(figsize=(12, 5))
+        
+        # Loss Curve
+        plt.subplot(1, 2, 1)
+        plt.plot(clf.loss_history, color='blue', lw=2)
+        plt.title("Logistic Regression - Learning Curve")
+        plt.xlabel("Epoch")
+        plt.ylabel("Binary Cross-Entropy Loss")
+        plt.grid(True, linestyle="--", alpha=0.6)
+
+        # Decision Boundary
+        plt.subplot(1, 2, 2)
+        x0_vals = np.linspace(X_train[:, 0].min() - 1, X_train[:, 0].max() + 1, 100)
+        x1_vals = -(clf.weights[0] * x0_vals + clf.bias) / clf.weights[1]
+        plt.scatter(X_train[y_train == 0][:, 0], X_train[y_train == 0][:, 1], color='red', label='Class 0 (Train)', alpha=0.6)
+        plt.scatter(X_train[y_train == 1][:, 0], X_train[y_train == 1][:, 1], color='green', label='Class 1 (Train)', alpha=0.6)
+        plt.plot(x0_vals, x1_vals, color='black', linestyle='--', lw=2, label='Decision Boundary')
+        plt.title("Logistic Regression - Decision Boundary")
+        plt.xlabel("Feature 1 (Standardized)")
+        plt.ylabel("Feature 2 (Standardized)")
+        plt.legend()
+        plt.grid(True, linestyle="--", alpha=0.6)
+        plt.tight_layout()
+        plt.show()
+
+    return clf, metrics
 
 
-def run_option_4(max_games=100000):
-    """
-    4. Chạy toàn bộ pipeline: Parse dataset -> Preprocess -> Train LR -> Train HGB -> Train KNN Search -> Compare
-    """
+# =====================================================================
+# 2. RUN KNN CLASSIFIER (FROM SCRATCH)
+# =====================================================================
+def run_knn(show_plot=True, k=7, weights='distance'):
+    print("\n" + "=" * 65)
+    print(" [2] HUẤN LUYỆN VÀ ĐÁNH GIÁ: ROBUST K-NEAREST NEIGHBORS (FROM SCRATCH)")
+    print("=" * 65)
+
+    np.random.seed(42)
+    n_per_class = 150
+    print(f"[*] Đang sinh tập dữ liệu 3 lớp đa phân loại phi tuyến (n={n_per_class * 3})...")
+    X0 = np.random.randn(n_per_class, 2) * 0.7 + np.array([-2.0, -1.0])
+    y0 = np.zeros(n_per_class, dtype=int)
+    X1 = np.random.randn(n_per_class, 2) * 0.7 + np.array([2.0, -1.0])
+    y1 = np.ones(n_per_class, dtype=int)
+    X2 = np.random.randn(n_per_class, 2) * 0.7 + np.array([0.0, 2.0])
+    y2 = np.full(n_per_class, 2, dtype=int)
+
+    X = np.vstack((X0, X1, X2))
+    y = np.concatenate((y0, y1, y2))
+
+    X_train_raw, X_test_raw, y_train, y_test = train_test_split_custom(X, y, test_size=0.2, random_state=42)
+
+    # Chuẩn hóa
+    scaler = KNNStandardScaler()
+    X_train = scaler.fit_transform(X_train_raw)
+    X_test = scaler.transform(X_test_raw)
+
+    print(f"[*] Đang chạy phân loại với Robust KNN (k={k}, metric='euclidean', weights='{weights}')...")
+    knn = RobustKNNClassifier(n_neighbors=k, metric='euclidean', weights=weights)
+    knn.fit(X_train, y_train)
+
+    # Đánh giá
+    y_test_pred = knn.predict(X_test)
+    metrics = evaluate_knn_metrics(y_test, y_test_pred, knn.classes_)
+
+    print("\n" + "-" * 50)
+    print(" KẾT QUẢ ĐÁNH GIÁ TRÊN TẬP TEST:")
+    print(f" • Accuracy        : {metrics['Accuracy'] * 100:.2f}%")
+    print(f" • Confusion Matrix (3x3):\n{metrics['Confusion_Matrix']}")
+    print("-" * 50)
+
+    if show_plot:
+        print("[*] Đang hiển thị biểu đồ phân vùng quyết định phi tuyến...")
+        plt.figure(figsize=(8, 6))
+        x_min, x_max = X_train[:, 0].min() - 1, X_train[:, 0].max() + 1
+        y_min, y_max = X_train[:, 1].min() - 1, X_train[:, 1].max() + 1
+        xx, yy = np.meshgrid(np.linspace(x_min, x_max, 200), np.linspace(y_min, y_max, 200))
+        
+        Z = knn.predict(np.c_[xx.ravel(), yy.ravel()])
+        Z = Z.reshape(xx.shape)
+
+        plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.coolwarm)
+        plt.scatter(X_train[:, 0], X_train[:, 1], c=y_train, cmap=plt.cm.coolwarm, edgecolors='k', s=40)
+        plt.title(f"KNN Non-linear Decision Boundary (k={knn.n_neighbors}, weights='{knn.weights}')")
+        plt.xlabel("Feature 1 (Standardized)")
+        plt.ylabel("Feature 2 (Standardized)")
+        plt.grid(True, linestyle="--", alpha=0.5)
+        plt.tight_layout()
+        plt.show()
+
+    return knn, metrics
+
+
+# =====================================================================
+# 3. RUN HISTOGRAM GRADIENT BOOSTING (FROM SCRATCH)
+# =====================================================================
+def run_hgb(show_plot=True, n_estimators=40, learning_rate=0.2, max_depth=4):
+    print("\n" + "=" * 65)
+    print(" [3] HUẤN LUYỆN VÀ ĐÁNH GIÁ: ROBUST HIST GRADIENT BOOSTING (FROM SCRATCH)")
+    print("=" * 65)
+
+    np.random.seed(42)
+    n_samples = 600
+    print(f"[*] Đang sinh tập dữ liệu phi tuyến tính (Moons shape, n={n_samples})...")
+    t = np.linspace(0, np.pi, n_samples // 2)
+    x1 = np.cos(t) + np.random.randn(n_samples // 2) * 0.15
+    y1 = np.sin(t) + np.random.randn(n_samples // 2) * 0.15
+    x2 = 1 - np.cos(t) + np.random.randn(n_samples // 2) * 0.15
+    y2 = 0.5 - np.sin(t) + np.random.randn(n_samples // 2) * 0.15
+
+    X0 = np.column_stack((x1, y1))
+    X1 = np.column_stack((x2, y2))
+    X = np.vstack((X0, X1))
+    y = np.concatenate((np.zeros(n_samples // 2), np.ones(n_samples // 2))).astype(int)
+
+    X_train, X_test, y_train, y_test = train_test_split_custom(X, y, test_size=0.2, random_state=42)
+
+    print(f"[*] Đang huấn luyện HGB ({n_estimators} stages, lr={learning_rate}, depth={max_depth})...")
+    hgb = RobustHGBClassifier(
+        n_estimators=n_estimators,
+        learning_rate=learning_rate,
+        max_depth=max_depth,
+        max_bins=64,
+        l2_regularization=1.5,
+        verbose=True
+    )
+    hgb.fit(X_train, y_train)
+
+    test_acc = hgb.score(X_test, y_test)
+    print("\n" + "-" * 50)
+    print(" KẾT QUẢ ĐÁNH GIÁ TRÊN TẬP TEST:")
+    print(f" • Test Accuracy   : {test_acc * 100:.2f}%")
+    print(f" • Tổng số cây     : {len(hgb.trees)}")
+    print("-" * 50)
+
+    if show_plot:
+        print("[*] Đang hiển thị biểu đồ Learning Curve và Ranh giới quyết định...")
+        plt.figure(figsize=(12, 5))
+        
+        # Learning Curve
+        plt.subplot(1, 2, 1)
+        plt.plot(hgb.loss_history, color='purple', lw=2, marker='o', markersize=3)
+        plt.title("HGB Learning Curve (Cross-Entropy Loss)")
+        plt.xlabel("Boosting Stages")
+        plt.ylabel("Loss")
+        plt.grid(True, linestyle="--", alpha=0.6)
+
+        # Decision Boundary
+        plt.subplot(1, 2, 2)
+        x_min, x_max = X[:, 0].min() - 0.5, X[:, 0].max() + 0.5
+        y_min, y_max = X[:, 1].min() - 0.5, X[:, 1].max() + 0.5
+        xx, yy = np.meshgrid(np.linspace(x_min, x_max, 250), np.linspace(y_min, y_max, 250))
+        
+        Z = hgb.predict(np.c_[xx.ravel(), yy.ravel()])
+        Z = Z.reshape(xx.shape)
+
+        plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.coolwarm)
+        plt.scatter(X_test[y_test == 0][:, 0], X_test[y_test == 0][:, 1], color='blue', label='Class 0 (Test)', alpha=0.7)
+        plt.scatter(X_test[y_test == 1][:, 0], X_test[y_test == 1][:, 1], color='red', label='Class 1 (Test)', alpha=0.7)
+        plt.title(f"HGB Non-linear Decision Boundary (Accuracy: {test_acc*100:.1f}%)")
+        plt.xlabel("Feature 1")
+        plt.ylabel("Feature 2")
+        plt.legend()
+        plt.grid(True, linestyle="--", alpha=0.5)
+        plt.tight_layout()
+        plt.show()
+
+    return hgb, {"Accuracy": test_acc, "n_trees": len(hgb.trees)}
+
+
+# =====================================================================
+# 4. RUN ALL 3 MODELS & COMPARE (SO SÁNH CẢ 3 MÔ HÌNH)
+# =====================================================================
+def run_all_and_compare(show_plot=False):
     print("\n" + "#" * 70)
-    print("        CHẠY TOÀN BỘ PROJECT MACHINE LEARNING LICHESS CHESS")
+    print("     HUẤN LUYỆN VÀ SO SÁNH CẢ 3 MÔ HÌNH MACHINE LEARNING (FROM SCRATCH)")
     print("#" * 70)
 
-    # Step 1 & 2: Load & Preprocess
-    df_clean, X, y, df_knn = load_or_process_all_data(max_games=max_games)
+    # 1. Logistic Regression
+    _, lr_metrics = run_logistic_regression(show_plot=show_plot)
 
-    # Step 3: Logistic Regression Baseline
-    _, lr_metrics = run_option_1(X, y, interactive=False)
+    # 2. KNN
+    _, knn_metrics = run_knn(show_plot=show_plot)
 
-    # Step 4: HistGradientBoosting Classifier
-    _, hgb_metrics = run_option_2(X, y, interactive=False)
+    # 3. HistGradientBoosting
+    _, hgb_metrics = run_hgb(show_plot=show_plot)
 
-    # Step 5: KNN Opening Finder
-    artifacts_knn = train_knn_opening(df_knn, K_list=[3, 5, 7, 9])
-    demo_moves = "1. e4 c5 2. Nf3 d6 3. d4"
-    knn_res = predict_opening(demo_moves, K=5, model_or_path=artifacts_knn)
-    print(f"[+] Predicted Opening for '{demo_moves}': {knn_res['predicted_opening']} (ECO: {knn_res['predicted_eco']})")
+    # Bảng tổng hợp so sánh
+    print("\n" + "=" * 70)
+    print("                    BẢNG TỔNG HỢP SO SÁNH 3 MÔ HÌNH")
+    print("=" * 70)
+    print(f"{'Mô hình':<30} | {'Độ chính xác (Accuracy)':<25} | {'Ghi chú':<15}")
+    print("-" * 70)
+    print(f"{'1. Logistic Regression':<30} | {lr_metrics['Accuracy'] * 100:>20.2f}% | {'Linear Baseline':<15}")
+    print(f"{'2. K-Nearest Neighbors (KNN)':<30} | {knn_metrics['Accuracy'] * 100:>20.2f}% | {'Non-linear Multi':<15}")
+    print(f"{'3. HistGradientBoosting (HGB)':<30} | {hgb_metrics['Accuracy'] * 100:>20.2f}% | {'Ensemble Boosting':<15}")
+    print("=" * 70 + "\n")
 
-    # Step 6: Compare Baseline vs HGB
-    comp_df, report = compare_models(lr_metrics, hgb_metrics)
 
-    print("\n[+] HOÀN THÀNH CHẠY TOÀN BỘ DỰ ÁN PHÂN TÍCH VÀ SO SÁNH MÔ HÌNH!")
-    print("#" * 70 + "\n")
-
-
+# =====================================================================
+# MENU GIAO DIỆN CONSOLE INTERACTIVE
+# =====================================================================
 def main_menu():
-    """
-    Interactive Console Interface
-    """
     while True:
         print("\n" + "=" * 65)
-        print("     HỆ THỐNG MACHINE LEARNING PHÂN TÍCH VÁN CỜ LICHESS")
+        print("    HỆ THỐNG MACHINE LEARNING THUẦN TÚY (FROM SCRATCH - NO SKLEARN)")
         print("=" * 65)
-        print("1. Logistic Regression (BASELINE dự đoán Result từ 5 features)")
-        print("2. HistGradientBoosting (HGB dự đoán Result từ 5 features)")
-        print("3. KNN tìm Opening tương tự (Dựa trên chuỗi nước đi Moves)")
-        print("4. Chạy toàn bộ (Full Pipeline & So sánh mô hình)")
+        print("1. Logistic Regression (Gradient Descent + L2 + Early Stopping)")
+        print("2. K-Nearest Neighbors (KNN Vectorized Distance + Weighted Voting)")
+        print("3. HistGradientBoosting (Histogram Binning + Decision Trees Boosting)")
+        print("4. Chạy toàn bộ & So sánh cả 3 mô hình")
         print("0. Thoát")
         print("=" * 65)
 
         choice = input("Vui lòng chọn chức năng (0-4): ").strip()
 
         if choice == "1":
-            run_option_1()
+            run_logistic_regression(show_plot=True)
         elif choice == "2":
-            run_option_2()
+            run_knn(show_plot=True)
         elif choice == "3":
-            run_option_3()
+            run_hgb(show_plot=True)
         elif choice == "4":
-            run_option_4()
+            run_all_and_compare(show_plot=False)
         elif choice == "0":
-            print("\nCảm ơn bạn đã sử dụng hệ thống Machine Learning! Tạm biệt.\n")
+            print("\nCảm ơn bạn đã sử dụng hệ thống! Tạm biệt.\n")
             break
         else:
             print("[!] Lựa chọn không hợp lệ. Vui lòng nhập từ 0 đến 4.")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Lichess Chess ML System")
+    parser = argparse.ArgumentParser(description="Machine Learning From Scratch - Pure Python & NumPy")
     parser.add_argument("--mode", type=int, choices=[1, 2, 3, 4], help="Run mode directly (1-4)")
-    parser.add_argument("--moves", type=str, help="Input moves string for KNN mode 3")
-    parser.add_argument("--white-elo", type=int, default=1800, help="White Elo")
-    parser.add_argument("--black-elo", type=int, default=1500, help="Black Elo")
-    parser.add_argument("--max-games", type=int, default=100000, help="Max games to parse")
+    parser.add_argument("--no-plot", action="store_true", help="Disable matplotlib GUI popup")
 
     args = parser.parse_args()
 
+    show_plot = not args.no_plot
+
     if args.mode == 1:
-        run_option_1()
+        run_logistic_regression(show_plot=show_plot)
     elif args.mode == 2:
-        run_option_2()
+        run_knn(show_plot=show_plot)
     elif args.mode == 3:
-        model_path = "models/knn_opening.joblib"
-        if not os.path.exists(model_path):
-            _, _, _, df_knn = load_or_process_all_data(max_games=args.max_games)
-            train_knn_opening(df_knn)
-        moves = args.moves if args.moves else "e4 c5 Nf3 d6 d4"
-        res = predict_opening(moves, K=5, model_or_path=model_path)
-        print(f"Predicted Opening for '{moves}': {res['predicted_opening']} (ECO: {res['predicted_eco']})")
+        run_hgb(show_plot=show_plot)
     elif args.mode == 4:
-        run_option_4(max_games=args.max_games)
+        run_all_and_compare(show_plot=show_plot)
     else:
         main_menu()

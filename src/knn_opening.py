@@ -1,214 +1,223 @@
-import os
-import re
-import joblib
-import pandas as pd
+import matplotlib.pyplot as plt
 import numpy as np
-from collections import Counter
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.neighbors import NearestNeighbors
-from preprocessing import clean_moves
 
 
-def extract_main_opening_name(opening_str):
-    """
-    Extracts the root family of an opening (e.g., 'Sicilian Defense: Modern Variations' -> 'Sicilian Defense').
-    """
-    if not isinstance(opening_str, str) or opening_str == "?":
-        return "Unknown Opening"
-    # Split by colon or comma to get root family name
-    parts = re.split(r"[:,]", opening_str)
-    return parts[0].strip()
+# ==========================================
+# 1. TIỀN XỬ LÝ: CHUẨN HÓA DỮ LIỆU (CỰC KỲ QUAN TRỌNG VỚI KNN)
+# ==========================================
+class StandardScaler:
+    """KNN tính khoảng cách hình học nên bắt buộc các đặc trưng phải cùng thang đo."""
+    def __init__(self):
+        self.mean = None
+        self.std = None
+
+    def fit(self, X):
+        self.mean = np.mean(X, axis=0)
+        self.std = np.std(X, axis=0)
+        self.std[self.std == 0] = 1e-8
+        return self
+
+    def transform(self, X):
+        return (X - self.mean) / self.std
+
+    def fit_transform(self, X):
+        return self.fit(X).transform(X)
 
 
-def train_knn_opening(df_knn, K_list=[3, 5, 7, 9], model_save_path="models/knn_opening.joblib"):
-    """
-    Trains TF-IDF + NearestNeighbors model for opening prediction using MOVES ONLY.
+# ==========================================
+# 2. THUẬT TOÁN K-NEAREST NEIGHBORS HOÀN CHỈNH
+# ==========================================
+class RobustKNNClassifier:
+    def __init__(self, n_neighbors=5, metric='euclidean', p=2, weights='uniform'):
+        """
+        KNN Classifier tối ưu hóa vector hóa (Vectorized).
+        
+        Parameters:
+        -----------
+        - n_neighbors: int, Số lượng láng giềng gần nhất k
+        - metric     : str, Loại khoảng cách ('euclidean', 'manhattan', 'minkowski')
+        - p          : int/float, Bậc p cho khoảng cách Minkowski (khi metric='minkowski')
+        - weights    : str, 'uniform' (bầu cử ngang nhau) hoặc 'distance' (ưu tiên điểm gần)
+        """
+        self.n_neighbors = n_neighbors
+        self.metric = metric
+        self.p = p
+        self.weights = weights
+        
+        self.X_train = None
+        self.y_train = None
+        self.classes_ = None
 
-    CRITICAL RULES:
-    - Features used: Moves ONLY (first 15 moves to focus on opening phase).
-    - Ratings are strictly NOT used for opening retrieval.
-    """
-    print("\n" + "=" * 60)
-    print("           TRAINING KNN FOR SIMILAR OPENINGS (MOVES ONLY)")
-    print("=" * 60)
+    def fit(self, X, y):
+        """Lưu trữ dữ liệu huấn luyện (Lazy Learner)."""
+        self.X_train = np.array(X, dtype=np.float64)
+        self.y_train = np.array(y)
+        self.classes_ = np.unique(y)
+        return self
 
-    # Use first 15 moves for opening focus
-    if "CleanedMovesOpening" in df_knn.columns:
-        move_texts = df_knn["CleanedMovesOpening"].tolist()
-    else:
-        move_texts = df_knn["CleanedMoves"].apply(lambda m: " ".join(str(m).split()[:15])).tolist()
-    print(f"[*] Total games in KNN index: {len(move_texts):,}")
+    def _compute_distances(self, X):
+        """
+        Tính ma trận khoảng cách giữa tập X (m mẫu) và X_train (n mẫu).
+        Trả về ma trận kích thước (m, n).
+        """
+        if self.metric == 'euclidean':
+            # Tối ưu hóa Vectorized: ||A - B||^2 = ||A||^2 + ||B||^2 - 2(A.B_T)
+            # Giúp tính toán cực nhanh cho toàn bộ ma trận
+            dists_sq = np.sum(X**2, axis=1, keepdims=True) + np.sum(self.X_train**2, axis=1) - 2 * np.dot(X, self.X_train.T)
+            return np.sqrt(np.maximum(dists_sq, 0.0))
+        
+        elif self.metric == 'manhattan':
+            # Khoảng cách L1: sum(|x_i - y_i|)
+            return np.sum(np.abs(X[:, np.newaxis, :] - self.X_train[np.newaxis, :, :]), axis=2)
+        
+        elif self.metric == 'minkowski':
+            # Khoảng cách tổng quát L_p: (sum(|x_i - y_i|^p))^(1/p)
+            diff = np.abs(X[:, np.newaxis, :] - self.X_train[np.newaxis, :, :])
+            return np.sum(diff ** self.p, axis=2) ** (1.0 / self.p)
+        
+        else:
+            raise ValueError(f"Không hỗ trợ metric '{self.metric}'")
 
-    print("[*] Vectorizing moves with TF-IDF (word n-grams 1-4)...")
-    vectorizer = TfidfVectorizer(
-        token_pattern=r"\S+",
-        ngram_range=(1, 4),
-        min_df=2,
-        sublinear_tf=True
-    )
-    X_moves = vectorizer.fit_transform(move_texts)
-    print(f"[+] TF-IDF Matrix shape: {X_moves.shape} (Games x Features)")
+    def predict_proba(self, X):
+        """Dự đoán phân phối xác suất cho từng mẫu dữ liệu."""
+        X = np.array(X, dtype=np.float64)
+        distances = self._compute_distances(X)  # shape: (n_test, n_train)
+        
+        # Lấy chỉ số của k láng giềng gần nhất cho từng mẫu
+        knn_indices = np.argpartition(distances, self.n_neighbors, axis=1)[:, :self.n_neighbors]
+        
+        probabilities = []
+        eps = 1e-10 # Tránh chia cho 0 khi khoảng cách = 0
+        
+        for i in range(X.shape[0]):
+            k_idx = knn_indices[i]
+            k_dists = distances[i, k_idx]
+            k_labels = self.y_train[k_idx]
+            
+            # Tính trọng số phiếu bầu
+            if self.weights == 'distance':
+                weights_arr = 1.0 / (k_dists + eps)
+            else: # 'uniform'
+                weights_arr = np.ones_like(k_dists)
+                
+            # Tính tổng trọng số cho từng lớp
+            class_probs = []
+            for c in self.classes_:
+                weight_c = np.sum(weights_arr[k_labels == c])
+                class_probs.append(weight_c)
+                
+            # Chuẩn hóa về xác suất tổng = 1
+            class_probs = np.array(class_probs) / np.sum(weights_arr)
+            probabilities.append(class_probs)
+            
+        return np.array(probabilities)
 
-    max_k = max(K_list)
-    print(f"[*] Training NearestNeighbors (metric='cosine', max K={max_k})...")
-    knn_model = NearestNeighbors(n_neighbors=max_k, metric="cosine", algorithm="brute")
-    knn_model.fit(X_moves)
+    def predict(self, X):
+        """Dự đoán nhãn bằng cách chọn lớp có xác suất cao nhất."""
+        probs = self.predict_proba(X)
+        return self.classes_[np.argmax(probs, axis=1)]
 
-    # Store metadata DataFrame (only necessary columns to save memory)
-    metadata_cols = ["White", "Black", "Opening", "ECO", "CleanedMoves"]
-    df_meta = df_knn[metadata_cols].reset_index(drop=True)
-
-    artifacts = {
-        "vectorizer": vectorizer,
-        "knn_model": knn_model,
-        "metadata": df_meta,
-        "K_list": K_list
-    }
-
-    os.makedirs(os.path.dirname(model_save_path), exist_ok=True)
-    joblib.dump(artifacts, model_save_path)
-    print(f"[+] Saved KNN model and search index to '{model_save_path}'.")
-
-    # Evaluate K values on sample queries
-    evaluate_k_values(artifacts, df_meta, K_list=K_list)
-
-    print("=" * 60 + "\n")
-    return artifacts
+    def score(self, X, y):
+        """Đánh giá Accuracy trên tập kiểm thử."""
+        y_pred = self.predict(X)
+        return np.mean(y_pred == y)
 
 
-def predict_opening(moves_input, K=5, model_or_path="models/knn_opening.joblib"):
-    """
-    Predicts the opening of a new game given a sequence of moves using KNN Cosine distance.
-
-    Returns:
-    - Dict with predicted opening, ECO, K, and list of K nearest games.
-    """
-    if isinstance(model_or_path, str):
-        if not os.path.exists(model_or_path):
-            raise FileNotFoundError(f"KNN model artifact not found at {model_or_path}. Please train it first.")
-        artifacts = joblib.load(model_or_path)
-    else:
-        artifacts = model_or_path
-
-    vectorizer = artifacts["vectorizer"]
-    knn_model = artifacts["knn_model"]
-    df_meta = artifacts["metadata"]
-
-    cleaned_input = clean_moves(moves_input)
-    if not cleaned_input:
-        return {
-            "error": "Empty or invalid move sequence provided.",
-            "input_moves": moves_input
-        }
-
-    # Transform input string into TF-IDF feature vector
-    input_vec = vectorizer.transform([cleaned_input])
-
-    # Query KNN
-    distances, indices = knn_model.kneighbors(input_vec, n_neighbors=K)
-
-    distances = distances[0]
-    indices = indices[0]
-
-    nearest_games = []
-    openings = []
-    main_openings = []
-    ecos = []
-
-    for rank, (idx, dist) in enumerate(zip(indices, distances), start=1):
-        row = df_meta.iloc[idx]
-        op = row["Opening"]
-        eco = row["ECO"]
-        main_op = extract_main_opening_name(op)
-        sim_pct = max(0.0, (1.0 - dist) * 100.0)
-
-        nearest_games.append({
-            "rank": rank,
-            "dataset_index": int(idx),
-            "white": row["White"],
-            "black": row["Black"],
-            "distance": float(dist),
-            "similarity_percent": float(sim_pct),
-            "opening": op,
-            "main_opening": main_op,
-            "eco": eco,
-            "moves_excerpt": row["CleanedMoves"][:60] + "..." if len(row["CleanedMoves"]) > 60 else row["CleanedMoves"]
-        })
-
-        if op != "?" and op != "Unknown Opening":
-            openings.append(op)
-        if main_op != "Unknown Opening":
-            main_openings.append(main_op)
-        if eco != "???":
-            ecos.append(eco)
-
-    # Majority vote for predicted opening
-    if main_openings:
-        pred_main_op = Counter(main_openings).most_common(1)[0][0]
-    elif openings:
-        pred_main_op = Counter(openings).most_common(1)[0][0]
-    else:
-        pred_main_op = "Unknown Opening"
-
-    # Exact opening variation majority vote
-    if openings:
-        pred_exact_op = Counter(openings).most_common(1)[0][0]
-    else:
-        pred_exact_op = pred_main_op
-
-    # ECO majority vote
-    if ecos:
-        pred_eco = Counter(ecos).most_common(1)[0][0]
-    else:
-        pred_eco = "N/A"
-
+# ==========================================
+# 3. CÁC HÀM ĐÁNH GIÁ (METRICS)
+# ==========================================
+def compute_multiclass_metrics(y_true, y_pred, classes):
+    """Tính toán ma trận nhầm lẫn (Confusion Matrix) và Accuracy tổng quát."""
+    n_classes = len(classes)
+    cm = np.zeros((n_classes, n_classes), dtype=int)
+    
+    for t, p in zip(y_true, y_pred):
+        i = np.where(classes == t)[0][0]
+        j = np.where(classes == p)[0][0]
+        cm[i, j] += 1
+        
+    accuracy = np.mean(y_true == y_pred)
     return {
-        "input_moves_raw": moves_input,
-        "input_moves_cleaned": cleaned_input,
-        "predicted_opening": pred_exact_op,
-        "predicted_main_opening": pred_main_op,
-        "predicted_eco": pred_eco,
-        "K": K,
-        "nearest_games": nearest_games
+        "Accuracy": accuracy,
+        "Confusion_Matrix": cm
     }
 
 
-def evaluate_k_values(artifacts, df_meta, K_list=[3, 5, 7, 9], num_samples=5):
-    """
-    Evaluates KNN performance across different values of K on sample test sequences.
-    """
-    print("\n--- Evaluation of K values (3, 5, 7, 9) ---")
-
-    test_queries = [
-        "1. e4 c5 2. Nf3 d6 3. d4",                     # Sicilian Defense
-        "1. d4 Nf6 2. c4 e6 3. Nc3 Bb4",               # Nimzo-Indian Defense
-        "1. e4 e5 2. Nf3 Nc6 3. Bb5",                  # Ruy Lopez
-        "1. e4 c6 2. d4 d5",                           # Caro-Kann Defense
-        "1. e4 e6 2. d4 d5"                            # French Defense
-    ]
-
-    for query in test_queries:
-        cleaned = clean_moves(query)
-        print(f"\nTest Query: '{query}' -> Cleaned: '{cleaned}'")
-        for k in K_list:
-            res = predict_opening(query, K=k, model_or_path=artifacts)
-            top_sim = res["nearest_games"][0]["similarity_percent"] if res["nearest_games"] else 0.0
-            print(f"  K={k:<2}: Predicted Opening = '{res['predicted_opening']}' (ECO: {res['predicted_eco']}, Top Similarity: {top_sim:.1f}%)")
-
-
+# ==========================================
+# 4. CHẠY THỬ NGHIỆM VÀ TRỰC QUAN HÓA
+# ==========================================
 if __name__ == "__main__":
-    from data_loader import prepare_and_cache_dataset
-    from preprocessing import preprocess_data
+    np.random.seed(42)
 
-    df = prepare_and_cache_dataset(max_games=10000)
-    _, _, _, df_knn = preprocess_data(df)
+    # 1. Tạo tập dữ liệu phi tuyến tính gồm 3 lớp (Multi-class)
+    print("[1] Đang tạo dữ liệu mẫu 3 lớp...")
+    n_per_class = 120
+    
+    # Lớp 0: Tâm (-2, -1)
+    X0 = np.random.randn(n_per_class, 2) * 0.7 + np.array([-2.0, -1.0])
+    y0 = np.zeros(n_per_class, dtype=int)
+    
+    # Lớp 1: Tâm (2, -1)
+    X1 = np.random.randn(n_per_class, 2) * 0.7 + np.array([2.0, -1.0])
+    y1 = np.ones(n_per_class, dtype=int)
+    
+    # Lớp 2: Tâm (0, 2)
+    X2 = np.random.randn(n_per_class, 2) * 0.7 + np.array([0.0, 2.0])
+    y2 = np.full(n_per_class, 2, dtype=int)
 
-    artifacts = train_knn_opening(df_knn, K_list=[3, 5, 7, 9])
+    X = np.vstack((X0, X1, X2))
+    y = np.concatenate((y0, y1, y2))
 
-    # Interactive test
-    sample_input = "1. e4 c5 2. Nf3 d6 3. d4"
-    result = predict_opening(sample_input, K=5, model_or_path=artifacts)
-    print("\nSample Prediction Result for:", sample_input)
-    print(f"Predicted Opening: {result['predicted_opening']} (ECO: {result['predicted_eco']})")
-    for game in result["nearest_games"]:
-        print(f"  Rank {game['rank']}: dist={game['distance']:.4f} ({game['similarity_percent']:.1f}%), Opening: {game['opening']}, ECO: {game['eco']}")
+    # Xáo trộn dữ liệu
+    indices = np.random.permutation(len(y))
+    X, y = X[indices], y[indices]
+
+    # 2. Chia Train / Test (80% - 20%)
+    train_size = int(0.8 * len(y))
+    X_train_raw, X_test_raw = X[:train_size], X[train_size:]
+    y_train, y_test = y[:train_size], y[train_size:]
+
+    # 3. Chuẩn hóa dữ liệu
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train_raw)
+    X_test = scaler.transform(X_test_raw)
+
+    # 4. Huấn luyện và dự đoán với KNN (k=7, Trọng số theo khoảng cách)
+    print("[2] Đang chạy dự đoán với Robust KNN (k=7, weights='distance')...")
+    knn = RobustKNNClassifier(n_neighbors=7, metric='euclidean', weights='distance')
+    knn.fit(X_train, y_train)
+
+    # 5. Đánh giá kết quả
+    y_test_pred = knn.predict(X_test)
+    res = compute_multiclass_metrics(y_test, y_test_pred, knn.classes_)
+
+    print("\n[3] Kết quả đánh giá trên tập Test:")
+    print(f" • Accuracy: {res['Accuracy'] * 100:.2f}%")
+    print(f" • Confusion Matrix (3x3):\n{res['Confusion_Matrix']}")
+
+    # 6. Trực quan hóa Ranh giới quyết định phi tuyến (Non-linear Decision Boundary)
+    print("\n[4] Đang vẽ ranh giới phân loại phi tuyến của KNN...")
+    plt.figure(figsize=(9, 7))
+
+    # Tạo lưới điểm để quét toàn bộ không gian
+    x_min, x_max = X_train[:, 0].min() - 1, X_train[:, 0].max() + 1
+    y_min, y_max = X_train[:, 1].min() - 1, X_train[:, 1].max() + 1
+    xx, yy = np.meshgrid(np.linspace(x_min, x_max, 200), np.linspace(y_min, y_max, 200))
+
+    # Dự đoán cho từng điểm trên lưới
+    grid_points = np.c_[xx.ravel(), yy.ravel()]
+    Z = knn.predict(grid_points)
+    Z = Z.reshape(xx.shape)
+
+    # Vẽ màu nền ranh giới phân loại
+    plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.coolwarm)
+    
+    # Vẽ các điểm Train thực tế
+    scatter = plt.scatter(X_train[:, 0], X_train[:, 1], c=y_train, cmap=plt.cm.coolwarm, edgecolors='k', s=40)
+    
+    plt.title(f"Ranh giới phân loại phi tuyến của KNN (k={knn.n_neighbors}, weights='{knn.weights}')")
+    plt.xlabel("Feature 1 (Standardized)")
+    plt.ylabel("Feature 2 (Standardized)")
+    plt.grid(True, linestyle="--", alpha=0.5)
+    plt.tight_layout()
+    plt.show()
