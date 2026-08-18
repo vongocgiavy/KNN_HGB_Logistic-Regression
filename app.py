@@ -23,25 +23,23 @@ from comparison import compare_models
 
 # ─── Page Config ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Chess Intelligence AI — Lichess ML Analytics",
-    page_icon="♟️",
+    page_title="Phân tích Ván cờ Lichess — Machine Learning",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# ─── World-Class Futuristic Dark & Glassmorphism Design System ────────────────
+# ─── Pure Typography & Glassmorphism Design System (No Icon, Native Vietnamese) ─
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
 
 /* ── Reset & Aurora Deep Space Background ── */
 html, body, [data-testid="stAppViewContainer"], .main {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-family: 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     background: 
-        radial-gradient(circle at 12% 15%, rgba(56, 189, 248, 0.09) 0%, transparent 40%),
-        radial-gradient(circle at 88% 18%, rgba(168, 85, 247, 0.09) 0%, transparent 45%),
-        radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
-        radial-gradient(circle at 75% 90%, rgba(251, 113, 133, 0.06) 0%, transparent 40%),
+        radial-gradient(circle at 12% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 88% 18%, rgba(168, 85, 247, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
         #070a12 !important;
     color: #f8fafc !important;
     font-size: 16px !important;
@@ -55,15 +53,16 @@ header[data-testid="stHeader"], footer,
     max-width: 1480px !important;
 }
 
-/* ── Typography ── */
+/* ── Typography (Chuẩn hóa toàn bộ tiếng Việt có dấu) ── */
 p, span, label, div {
+    font-family: 'Be Vietnam Pro', 'Inter', sans-serif !important;
     color: #f1f5f9 !important;
 }
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif !important;
+    font-family: 'Be Vietnam Pro', 'Inter', sans-serif !important;
     color: #ffffff !important;
     font-weight: 800 !important;
-    letter-spacing: -0.025em !important;
+    letter-spacing: -0.02em !important;
 }
 
 /* Input Labels */
@@ -76,13 +75,13 @@ h1, h2, h3, h4, h5, h6 {
     text-shadow: 0 2px 4px rgba(0,0,0,0.6);
 }
 
-/* ── Hero Header ── */
+/* ── Hero Header (Không icon, sang trọng) ── */
 .hero-header {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 41, 59, 0.75) 50%, rgba(15, 23, 42, 0.9) 100%);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.88) 0%, rgba(30, 41, 59, 0.78) 50%, rgba(15, 23, 42, 0.92) 100%);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 22px;
+    border-radius: 20px;
     padding: 2.8rem 3.4rem 2.4rem;
     margin-bottom: 2.2rem;
     position: relative;
@@ -98,20 +97,18 @@ h1, h2, h3, h4, h5, h6 {
     top: 0; left: 0; right: 0;
     height: 4px;
     background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc, #f472b6, #fb7185);
-    border-radius: 22px 22px 0 0;
+    border-radius: 20px 20px 0 0;
     box-shadow: 0 0 16px rgba(56, 189, 248, 0.8);
 }
 .hero-title {
-    font-family: 'Outfit', sans-serif !important;
-    font-size: 2.6rem;
+    font-size: 2.5rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 45%, #94a3b8 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 50%, #94a3b8 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin: 0;
-    letter-spacing: -0.035em;
-    line-height: 1.2;
-    filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5));
+    letter-spacing: -0.03em;
+    line-height: 1.25;
 }
 .hero-subtitle {
     font-size: 1.18rem;
@@ -119,7 +116,7 @@ h1, h2, h3, h4, h5, h6 {
     margin-top: 0.8rem;
     font-weight: 400;
     line-height: 1.65;
-    max-width: 1050px;
+    max-width: 1100px;
 }
 .hero-badges {
     display: flex;
@@ -128,10 +125,8 @@ h1, h2, h3, h4, h5, h6 {
     flex-wrap: wrap;
 }
 .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.4rem 1.05rem;
+    display: inline-block;
+    padding: 0.4rem 1.1rem;
     border-radius: 30px;
     font-size: 0.9rem;
     font-weight: 700;
@@ -148,7 +143,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ── Glassmorphic Cards ── */
 .card {
-    background: rgba(15, 23, 42, 0.72) !important;
+    background: rgba(15, 23, 42, 0.75) !important;
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
     border: 1px solid rgba(255, 255, 255, 0.09);
@@ -175,15 +170,11 @@ h1, h2, h3, h4, h5, h6 {
 .card-accent-orange { border-top: 4px solid #fb7185; }
 
 .card-heading {
-    font-family: 'Outfit', sans-serif !important;
     font-size: 1.45rem;
     font-weight: 800;
     color: #ffffff !important;
     margin-bottom: 0.7rem;
     letter-spacing: -0.015em;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 .card-subheading {
     font-size: 1.05rem;
@@ -195,15 +186,11 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ── Section Titles ── */
 .section-title {
-    font-family: 'Outfit', sans-serif !important;
     font-size: 1.8rem;
     font-weight: 900;
     color: #ffffff !important;
     letter-spacing: -0.025em;
     margin: 1.8rem 0 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
     text-shadow: 0 2px 10px rgba(0,0,0,0.6);
 }
 .section-desc {
@@ -230,14 +217,13 @@ h1, h2, h3, h4, h5, h6 {
     transform: translateY(-3px);
 }
 .metric-chip-label {
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     color: #94a3b8 !important;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
 }
 .metric-chip-value {
-    font-family: 'Outfit', sans-serif !important;
     font-size: 2.15rem;
     font-weight: 900;
     margin-top: 0.35rem;
@@ -273,7 +259,6 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 10px 25px rgba(0,0,0,0.4);
 }
 button[data-baseweb="tab"] {
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
     font-size: 1.1rem !important;
     font-weight: 700 !important;
     color: #94a3b8 !important;
@@ -298,7 +283,7 @@ button[data-baseweb="tab"][aria-selected="true"] {
 /* ── Dropdown / Selectbox Glassmorphic Popup ── */
 [data-baseweb="popover"], [data-baseweb="menu"], [data-baseweb="select"] ul, 
 div[data-baseweb="select"] div[role="listbox"], ul[role="listbox"] {
-    background: rgba(15, 23, 42, 0.92) !important;
+    background: rgba(15, 23, 42, 0.94) !important;
     backdrop-filter: blur(28px) saturate(190%) !important;
     -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
     border: 1px solid rgba(56, 189, 248, 0.4) !important;
@@ -414,7 +399,6 @@ input:focus, [data-baseweb="input"] input:focus {
     font-weight: 900;
     margin-bottom: 1.4rem;
     letter-spacing: 0.03em;
-    font-family: 'Outfit', sans-serif !important;
 }
 .result-white  { background: rgba(56,189,248,0.22); color: #7dd3fc !important; border: 1px solid rgba(56,189,248,0.6); box-shadow: 0 0 20px rgba(56,189,248,0.4); text-shadow: 0 0 12px rgba(56,189,248,0.6); }
 .result-black  { background: rgba(251,113,133,0.22); color: #fda4af !important; border: 1px solid rgba(251,113,133,0.6); box-shadow: 0 0 20px rgba(251,113,133,0.4); text-shadow: 0 0 12px rgba(251,113,133,0.6); }
@@ -422,19 +406,19 @@ input:focus, [data-baseweb="input"] input:focus {
 </style>
 """, unsafe_allow_html=True)
 
-# ─── Hero Header ───────────────────────────────────────────────────────────────
+# ─── Hero Header (Sạch sẽ, không emoji, font Việt chuẩn) ─────────────────────
 st.markdown("""
 <div class="hero-header">
-  <div class="hero-title">Chess Intelligence AI — Lichess ML Analytics</div>
+  <div class="hero-title">Hệ thống Phân tích Ván cờ Lichess — Machine Learning</div>
   <div class="hero-subtitle">
-    Hệ thống phân tích dữ liệu ván cờ, dự đoán xác suất kết quả trận đấu, nhận diện khai cuộc và trực quan hóa ranh giới quyết định.
-    Toàn bộ thuật toán được tự xây dựng từ đầu bằng Python và NumPy thuần túy — <b>100% From Scratch (Zero Scikit-Learn)</b>.
+    Dự đoán xác suất kết quả trận đấu, nhận diện khai cuộc và trực quan hóa ranh giới quyết định.
+    Toàn bộ thuật toán được tự xây dựng từ đầu bằng Python và NumPy thuần túy — <b>100% From Scratch (Không sử dụng Scikit-Learn)</b>.
   </div>
   <div class="hero-badges">
-    <span class="badge badge-blue">● 100% Pure From Scratch</span>
-    <span class="badge badge-purple">● Zero Data Leakage</span>
-    <span class="badge badge-green">● 3-Fold Cross-Validation</span>
-    <span class="badge badge-orange">● Real Lichess Database (9,746 Games)</span>
+    <span class="badge badge-blue">100% Pure From Scratch</span>
+    <span class="badge badge-purple">Zero Data Leakage</span>
+    <span class="badge badge-green">3-Fold Cross-Validation</span>
+    <span class="badge badge-orange">Lichess Database (9,746 Games)</span>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -455,7 +439,7 @@ with tab1:
 
     with col_left:
         st.markdown('<div class="card card-accent-blue">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">⚙️ Cấu hình Thông số Đầu vào Ván cờ</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card-heading">Cấu hình Thông số Đầu vào Ván cờ</div>', unsafe_allow_html=True)
         st.markdown('<div class="card-subheading">Điều chỉnh hệ số Elo của hai người chơi và thể thức ván cờ để tính toán xác suất chiến thắng.</div>', unsafe_allow_html=True)
 
         white_elo = st.slider("Hệ số Elo — Bên Trắng (white_rating)", 500, 3000, 1800, step=10)
@@ -485,7 +469,7 @@ with tab1:
 
     with col_right:
         st.markdown('<div class="card card-accent-purple">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">🎯 Kết quả Dự đoán Xác suất</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card-heading">Kết quả Dự đoán Xác suất</div>', unsafe_allow_html=True)
 
         try:
             if "Logistic" in selected_model:
@@ -528,7 +512,7 @@ with tab1:
                 yaxis_range=[0, 100], showlegend=False,
                 margin=dict(l=10, r=10, t=10, b=10),
                 paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                font=dict(family="Plus Jakarta Sans, sans-serif", color="#ffffff", size=14),
+                font=dict(family="Be Vietnam Pro, sans-serif", color="#ffffff", size=14),
                 xaxis=dict(gridcolor="#1e293b", title=""),
                 yaxis=dict(gridcolor="#1e293b", title="Xác suất (%)", title_font=dict(size=14, color="#ffffff")),
             )
@@ -549,7 +533,7 @@ with tab2:
 
     with col_moves:
         st.markdown('<div class="card card-accent-green">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">📝 Nhập Chuỗi Nước đi PGN</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card-heading">Nhập Chuỗi Nước đi PGN</div>', unsafe_allow_html=True)
         st.markdown('<div class="card-subheading">Dán chuỗi nước đi chuẩn PGN để tìm kiếm khai cuộc tương đồng nhất trong kho ván cờ Lichess.</div>', unsafe_allow_html=True)
 
         default_moves = "1. e4 c5 2. Nf3 d6 3. d4"
@@ -559,7 +543,7 @@ with tab2:
 
     with col_board:
         st.markdown('<div class="card card-accent-orange">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">♟️ Bàn cờ 2D Trực quan</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card-heading">Bàn cờ 2D Trực quan</div>', unsafe_allow_html=True)
         try:
             board = chess.Board()
             clean_str = clean_moves(moves_input)
@@ -583,7 +567,7 @@ with tab2:
         res_knn = predict_opening(moves_input, K=k_neighbors, model_or_path=model_path_knn)
         if "error" not in res_knn:
             st.markdown('<div class="card card-accent-blue">', unsafe_allow_html=True)
-            st.markdown('<div class="card-heading">🔍 Kết quả Nhận diện Khai cuộc (KNN Search)</div>', unsafe_allow_html=True)
+            st.markdown('<div class="card-heading">Kết quả Nhận diện Khai cuộc (KNN Search)</div>', unsafe_allow_html=True)
             st.markdown(
                 f'<div style="font-size:1.25rem; margin-bottom:1rem; color:#ffffff; font-weight:700;">'
                 f'Khai cuộc dự đoán: <b style="color:#38bdf8; text-shadow:0 0 12px rgba(56,189,248,0.5);">{res_knn["predicted_opening"]}</b> '
@@ -606,7 +590,7 @@ with tab2:
 with tab3:
 
     # ── Section 5.2 ────────────────────────────────────────────────────────────
-    st.markdown('<div class="section-title">📊 5.2. So sánh hiệu suất mô hình</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">5.2. So sánh hiệu suất mô hình</div>', unsafe_allow_html=True)
     st.markdown("""
     <div class="section-desc">
     Trình bày các chỉ số hiệu suất toàn diện. Độ chính xác được báo cáo cho cả tập kiểm tra giữ lại <b>(Hold-out Test 83,19%)</b> và trung bình của <b>xác thực chéo 3 lần (3-Fold CV)</b>. Các chỉ số chi tiết (Độ chính xác, Ghi nhớ, Điểm F1) được báo cáo trên bộ hold-out để đánh giá khả năng tổng quát hóa.
@@ -636,7 +620,7 @@ with tab3:
     """, unsafe_allow_html=True)
 
     st.markdown('<div class="card card-accent-blue">', unsafe_allow_html=True)
-    st.markdown('<div class="card-heading">🏆 Bảng So sánh Toàn diện Hiệu suất Mô hình</div>', unsafe_allow_html=True)
+    st.markdown('<div class="card-heading">Bảng So sánh Toàn diện Hiệu suất Mô hình</div>', unsafe_allow_html=True)
     st.markdown("""
     <div class="card-subheading">
     Bộ phân loại <b>Tăng cường Gradient Biểu đồ Histogram (HistGradientBoosting)</b> đạt hiệu suất vượt trội trên tất cả các chỉ số, với độ chính xác giữ lại <b>83,19%</b> và kết quả xác thực chéo nhất quán. Đáng chú ý, sự đồng bộ chặt chẽ giữa điểm số giữ lại và điểm xác thực chéo trên tất cả các mô hình cho thấy sự tổng quát hóa vững chắc mà không bị quá khớp.
@@ -659,7 +643,7 @@ with tab3:
 
     # Biểu đồ so sánh chính
     st.markdown('<div class="card card-accent-purple">', unsafe_allow_html=True)
-    st.markdown('<div class="card-heading">📈 Biểu đồ So sánh: 3-Fold CV vs Hold-out vs Macro F1</div>', unsafe_allow_html=True)
+    st.markdown('<div class="card-heading">Biểu đồ So sánh: 3-Fold CV vs Hold-out vs Macro F1</div>', unsafe_allow_html=True)
 
     chart_df = pd.DataFrame([
         {"Mô hình": "HistGradientBoosting (HGB)", "Hold-out Accuracy (%)": 83.19, "3-Fold CV Acc (%)": 83.05, "Macro F1 (x100)": 82.0},
@@ -676,7 +660,7 @@ with tab3:
         yaxis_range=[0, 100],
         margin=dict(l=10, r=10, t=10, b=10),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Plus Jakarta Sans, sans-serif", color="#ffffff", size=14),
+        font=dict(family="Be Vietnam Pro, sans-serif", color="#ffffff", size=14),
         xaxis=dict(gridcolor="#1e293b", title=""),
         yaxis=dict(gridcolor="#1e293b", title="Điểm số (%)", title_font=dict(size=14, color="#ffffff")),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1,
@@ -689,7 +673,7 @@ with tab3:
     # Error Analysis
     st.markdown("""
     <div class="alert-box alert-orange">
-    <b style="font-size:1.18rem; color:#fda4af !important;">🔍 Phân tích lỗi (Error Analysis):</b><br>
+    <b style="font-size:1.18rem; color:#fda4af !important;">Phân tích lỗi (Error Analysis):</b><br>
     Mặc dù mô hình Gradient Boosting đạt độ chính xác tổng thể cao, phân tích hiệu suất theo từng lớp cho thấy phần lớn lỗi phân loại xảy ra trong hạng mục <b>'Draw' (Hòa)</b>. Do sự mất cân bằng lớp cao (chỉ <b>5,11%</b> số lần hòa), các mô hình đơn giản hơn như <i>K-Nearest Neighbors</i> và <i>Logistic Regression</i> gặp khó khăn trong việc phân biệt các trận hòa với các trận đấu quyết định kéo dài, dẫn đến điểm F1 trung bình vĩ mô thấp hơn (<b>0,28</b> và <b>0,31</b> tương ứng) so với <i>Gradient Boosting</i> (<b>0,82</b>), vốn đã thành công trong việc nắm bắt động lực phi tuyến đặc thù liên quan đến các trận hòa.
     </div>
     """, unsafe_allow_html=True)
@@ -697,7 +681,7 @@ with tab3:
     st.markdown('<hr class="divider">', unsafe_allow_html=True)
 
     # ── Section 5.3 Feature Importance ─────────────────────────────────────────
-    st.markdown('<div class="section-title">✨ 5.3. Phân tích tầm quan trọng của tính năng (Feature Importance)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">5.3. Phân tích tầm quan trọng của tính năng (Feature Importance)</div>', unsafe_allow_html=True)
     st.markdown("""
     <div class="section-desc">
     Các giá trị phân tích tầm quan trọng của tính năng được trình bày trong bảng dưới đây, các giá trị này cho thấy các mẫu nhất quán giữa các thuật toán, với một số biến thể đáng chú ý:
@@ -708,7 +692,7 @@ with tab3:
 
     with col_fi_table:
         st.markdown('<div class="card card-accent-green">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">📋 Bảng Tầm quan trọng của Tính năng</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card-heading">Bảng Tầm quan trọng của Tính năng</div>', unsafe_allow_html=True)
         fi_df = pd.DataFrame([
             {"Tính năng (Feature)": "rating_diff (Chênh lệch Elo)", "Ý nghĩa cờ vua": "White Elo - Black Elo (Quyết định cao nhất)", "HGB": "0.5842", "Logistic (|Coef|)": "0.4912"},
             {"Tính năng (Feature)": "white_rating (Elo Bên Trắng)", "Ý nghĩa cờ vua": "Đẳng cấp và kỹ năng người cầm quân Trắng", "HGB": "0.2150", "Logistic (|Coef|)": "0.2310"},
@@ -721,7 +705,7 @@ with tab3:
 
     with col_fi_chart:
         st.markdown('<div class="card card-accent-green">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">📊 Biểu đồ Tầm quan trọng (HGB vs Logistic)</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card-heading">Biểu đồ Tầm quan trọng (HGB vs Logistic)</div>', unsafe_allow_html=True)
         features = ["rated", "opening_ply", "black_rating", "white_rating", "rating_diff"]
         hgb_scores = [0.0203, 0.0385, 0.1420, 0.2150, 0.5842]
         lr_scores  = [0.0408, 0.0520, 0.1850, 0.2310, 0.4912]
@@ -738,7 +722,7 @@ with tab3:
             barmode="group", height=300,
             margin=dict(l=10, r=10, t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Plus Jakarta Sans, sans-serif", color="#ffffff", size=13),
+            font=dict(family="Be Vietnam Pro, sans-serif", color="#ffffff", size=13),
             xaxis=dict(gridcolor="#1e293b", title="Tầm quan trọng (Tỷ trọng tương đối)", title_font=dict(color="#ffffff")),
             yaxis=dict(gridcolor="#1e293b"),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#ffffff"), bgcolor="rgba(0,0,0,0)")
@@ -749,7 +733,7 @@ with tab3:
     st.markdown('<hr class="divider">', unsafe_allow_html=True)
 
     # ── Overfitting Analysis ────────────────────────────────────────────────────
-    st.markdown('<div class="section-title">🛡️ Phân tích Quá khớp (Overfitting Analysis) & Learning Curve</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Phân tích Quá khớp (Overfitting Analysis) & Learning Curve</div>', unsafe_allow_html=True)
     st.markdown("""
     <div class="section-desc">
     So sánh độ chính xác giữa tập huấn luyện (Train) và tập kiểm tra giữ lại (Hold-out Test). Khoảng cách chênh lệch (Gap) nhỏ chứng minh mô hình có khả năng tổng quát hóa cao và không bị học vẹt.
@@ -758,7 +742,7 @@ with tab3:
 
     # Sub-section A: Train vs Hold-out bar chart
     st.markdown('<div class="card card-accent-orange">', unsafe_allow_html=True)
-    st.markdown('<div class="card-heading">📊 So sánh Train Accuracy vs Hold-out Test Accuracy</div>', unsafe_allow_html=True)
+    st.markdown('<div class="card-heading">So sánh Train Accuracy vs Hold-out Test Accuracy</div>', unsafe_allow_html=True)
     st.markdown('<div class="card-subheading">Khoảng cách chênh lệch (Train - Hold-out) càng nhỏ chứng minh mô hình tổng quát hóa tốt. L2 Regularization và Early Stopping giúp kiểm soát chặt chẽ hiện tượng quá khớp.</div>', unsafe_allow_html=True)
 
     model_names = ["Logistic Regression", "KNN (k=20)", "HGB (lr=0.1, depth=5)"]
@@ -784,14 +768,14 @@ with tab3:
         fig_ov.add_annotation(
             x=model_names[i], y=max(t, h) + 6.5,
             text=f"Gap: {gap:+.1f}%", showarrow=False,
-            font=dict(size=14, color=col, family="Plus Jakarta Sans", weight="bold"), bgcolor="rgba(0,0,0,0)"
+            font=dict(size=14, color=col, family="Be Vietnam Pro", weight="bold"), bgcolor="rgba(0,0,0,0)"
         )
 
     fig_ov.update_layout(
         barmode="group", height=380,
         margin=dict(l=10, r=10, t=40, b=10),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Plus Jakarta Sans, sans-serif", color="#ffffff", size=14),
+        font=dict(family="Be Vietnam Pro, sans-serif", color="#ffffff", size=14),
         xaxis=dict(gridcolor="#1e293b", title=""),
         yaxis=dict(gridcolor="#1e293b", title="Accuracy (%)", range=[0, 115], title_font=dict(color="#ffffff")),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#ffffff"), bgcolor="rgba(0,0,0,0)")
@@ -800,7 +784,7 @@ with tab3:
 
     st.markdown("""
     <div class="alert-box alert-blue">
-    <b>💡 Nhận xét kết quả:</b><br>
+    <b>Nhận xét kết quả:</b><br>
     • <b>Logistic Regression:</b> Gap <b>-0.8%</b> — mô hình cực kỳ ổn định, tuyệt đối không bị Overfitting.<br>
     • <b>KNN (k=20):</b> Gap <b>+36.6%</b> — Overfitting mạnh trên tập Train do thuật toán KNN ghi nhớ trực tiếp các điểm dữ liệu lân cận (đặc tính tự nhiên của Lazy Learner).<br>
     • <b>HistGradientBoosting:</b> Gap <b>+2.1%</b> — kiểm soát Overfitting xuất sắc nhờ cơ chế L2 Regularization (1.5) và dừng sớm (Early Stopping).
@@ -810,7 +794,7 @@ with tab3:
 
     # Sub-section B: HGB Learning Curve
     st.markdown('<div class="card card-accent-blue">', unsafe_allow_html=True)
-    st.markdown('<div class="card-heading">📉 HGB Learning Curve — Phân tích Quá trình Hội tụ Mô hình</div>', unsafe_allow_html=True)
+    st.markdown('<div class="card-heading">HGB Learning Curve — Phân tích Quá trình Hội tụ Mô hình</div>', unsafe_allow_html=True)
     st.markdown('<div class="card-subheading">Đường cong hàm mất mát (Cross-Entropy Loss) trên tập Train và tập Validation nội bộ qua 200 Boosting Stages.</div>', unsafe_allow_html=True)
 
     n_stages = 200
@@ -840,7 +824,7 @@ with tab3:
         height=350,
         margin=dict(l=10, r=10, t=10, b=10),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Plus Jakarta Sans, sans-serif", color="#ffffff", size=14),
+        font=dict(family="Be Vietnam Pro, sans-serif", color="#ffffff", size=14),
         xaxis=dict(gridcolor="#1e293b", title="Boosting Stage", title_font=dict(color="#ffffff")),
         yaxis=dict(gridcolor="#1e293b", title="Cross-Entropy Loss", title_font=dict(color="#ffffff")),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#ffffff"), bgcolor="rgba(0,0,0,0)")
@@ -850,7 +834,7 @@ with tab3:
 
     # Sub-section C: 3-Fold CV Variance
     st.markdown('<div class="card card-accent-purple">', unsafe_allow_html=True)
-    st.markdown('<div class="card-heading">🎯 3-Fold Cross-Validation — Độ ổn định qua từng Fold</div>', unsafe_allow_html=True)
+    st.markdown('<div class="card-heading">3-Fold Cross-Validation — Độ ổn định qua từng Fold</div>', unsafe_allow_html=True)
     st.markdown('<div class="card-subheading">Độ chính xác Validation của từng mô hình qua 3 Fold chia dữ liệu độc lập. Đường thẳng nằm ngang chứng tỏ thuật toán ổn định và không phụ thuộc vào may rủi dữ liệu.</div>', unsafe_allow_html=True)
 
     fold_labels = ["Fold 1", "Fold 2", "Fold 3"]
@@ -882,7 +866,7 @@ with tab3:
         height=340,
         margin=dict(l=10, r=10, t=10, b=10),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Plus Jakarta Sans, sans-serif", color="#ffffff", size=14),
+        font=dict(family="Be Vietnam Pro, sans-serif", color="#ffffff", size=14),
         xaxis=dict(gridcolor="#1e293b", title=""),
         yaxis=dict(gridcolor="#1e293b", title="Accuracy (%)", range=[55, 105], title_font=dict(color="#ffffff")),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#ffffff"), bgcolor="rgba(0,0,0,0)")
@@ -891,7 +875,7 @@ with tab3:
 
     st.markdown("""
     <div class="alert-box alert-green">
-    <b style="color:#6ee7b7 !important; font-size:1.18rem;">🏆 Kết luận chung về Khả năng Tổng quát hóa:</b><br>
+    <b style="color:#6ee7b7 !important; font-size:1.18rem;">Kết luận chung về Khả năng Tổng quát hóa:</b><br>
     • <b>Logistic Regression:</b> Hoàn toàn không bị Overfitting, phân phối đều qua 3 Fold.<br>
     • <b>KNN:</b> Ghi nhớ mạnh trên Train nhưng Validation Accuracy ổn định quanh 61.5% — đây là bản chất chuẩn của phân loại dựa trên khoảng cách thể hiện.<br>
     • <b>HistGradientBoosting:</b> Độ chính xác cao vượt trội (83.19%), đường hội tụ Learning Curve mượt mà, kiểm soát rủi ro quá khớp hoàn hảo.
@@ -903,7 +887,7 @@ with tab3:
 # TAB 4 — 2D DECISION BOUNDARIES & DATASET EDA INSIGHTS
 # ══════════════════════════════════════════════════════════════════════════════
 with tab4:
-    st.markdown('<div class="section-title">🎨 Trực quan hóa Ranh giới Quyết định (Decision Boundaries) & Dữ liệu Tổng hợp</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Trực quan hóa Ranh giới Quyết định & Dữ liệu Tổng hợp</div>', unsafe_allow_html=True)
     st.markdown("""
     <div class="section-desc">
     Khám phá không gian phân lớp hình học của các mô hình học máy (Tuyến tính vs Phi tuyến) và các biểu đồ thống kê chuyên sâu trên toàn bộ kho ván cờ Lichess.
@@ -915,7 +899,7 @@ with tab4:
 
     with col_b1:
         st.markdown('<div class="card card-accent-blue">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">📐 Multinomial Logistic Regression (OvR Decision Boundary)</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card-heading">Multinomial Logistic Regression (OvR Decision Boundary)</div>', unsafe_allow_html=True)
         st.markdown('<div class="card-subheading">Ranh giới phân chia tuyến tính One-vs-Rest giữa 3 lớp: Trắng thắng (Xanh dương), Đen thắng (Đỏ mận) và Hòa (Trắng xám).</div>', unsafe_allow_html=True)
 
         np.random.seed(42)
@@ -949,7 +933,7 @@ with tab4:
         fig_b1.update_layout(
             height=380, margin=dict(l=10, r=10, t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Plus Jakarta Sans, sans-serif", color="#ffffff", size=13),
+            font=dict(family="Be Vietnam Pro, sans-serif", color="#ffffff", size=13),
             xaxis=dict(gridcolor="#1e293b", title="Feature 1 (Standardized Rating Diff)"),
             yaxis=dict(gridcolor="#1e293b", title="Feature 2 (Standardized White Rating)"),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#ffffff"), bgcolor="rgba(0,0,0,0)")
@@ -959,7 +943,7 @@ with tab4:
 
     with col_b2:
         st.markdown('<div class="card card-accent-purple">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">🌳 HGB Non-linear Boundary (Cây quyết định bậc thang)</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card-heading">HGB Non-linear Boundary (Cây quyết định bậc thang)</div>', unsafe_allow_html=True)
         st.markdown('<div class="card-subheading">Khả năng phân tách phi tuyến phân mảnh dạng bậc thang của HistGradientBoosting giúp bắt trọn ranh giới phức tạp.</div>', unsafe_allow_html=True)
 
         n_moon = 70
@@ -989,7 +973,7 @@ with tab4:
         fig_b2.update_layout(
             height=380, margin=dict(l=10, r=10, t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Plus Jakarta Sans, sans-serif", color="#ffffff", size=13),
+            font=dict(family="Be Vietnam Pro, sans-serif", color="#ffffff", size=13),
             xaxis=dict(gridcolor="#1e293b", title="Feature 1 (Rating Difference)"),
             yaxis=dict(gridcolor="#1e293b", title="Feature 2 (Opening Moves Count)"),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#ffffff"), bgcolor="rgba(0,0,0,0)")
@@ -1000,7 +984,7 @@ with tab4:
     st.markdown('<hr class="divider">', unsafe_allow_html=True)
 
     # ── 2. DATASET EXPLORATORY & AGGREGATE CHARTS (EDA) ────────────────────────
-    st.markdown('<div class="section-title">📊 Tổng hợp & Khai phá Dữ liệu Cờ vua (Lichess Insights)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Tổng hợp & Khai phá Dữ liệu Cờ vua (Lichess Insights)</div>', unsafe_allow_html=True)
     st.markdown("""
     <div class="section-desc">
     Các biểu đồ phân phối tần suất, tỷ lệ khai cuộc phổ biến nhất và tương quan Elo trên toàn bộ tập dữ liệu cờ vua Lichess thực tế.
@@ -1011,7 +995,7 @@ with tab4:
 
     with col_eda1:
         st.markdown('<div class="card card-accent-green">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">🍩 Phân phối Tỷ lệ Kết quả Trận đấu</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card-heading">Phân phối Tỷ lệ Kết quả Trận đấu</div>', unsafe_allow_html=True)
         st.markdown('<div class="card-subheading">Tỷ lệ thắng của Bên Trắng, Bên Đen và Hòa trong 9,746 ván cờ thực tế.</div>', unsafe_allow_html=True)
 
         res_labels = ["Trắng thắng (1-0)", "Đen thắng (0-1)", "Hòa (1/2-1/2)"]
@@ -1021,20 +1005,20 @@ with tab4:
         fig_donut = go.Figure(data=[go.Pie(
             labels=res_labels, values=res_counts, hole=0.58,
             marker=dict(colors=res_colors, line=dict(color='#070a12', width=2.5)),
-            textinfo='label+percent', textfont=dict(size=13, color='#ffffff', family="Plus Jakarta Sans"),
+            textinfo='label+percent', textfont=dict(size=13, color='#ffffff', family="Be Vietnam Pro"),
             hoverinfo='label+value+percent'
         )])
         fig_donut.update_layout(
             height=340, margin=dict(l=10, r=10, t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            showlegend=False, font=dict(family="Plus Jakarta Sans", color="#ffffff")
+            showlegend=False, font=dict(family="Be Vietnam Pro", color="#ffffff")
         )
         st.plotly_chart(fig_donut, use_container_width=True, config={"displayModeBar": False})
         st.markdown('</div>', unsafe_allow_html=True)
 
     with col_eda2:
         st.markdown('<div class="card card-accent-orange">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">🏆 Top 10 Thế trận Khai cuộc Phổ biến Nhất</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card-heading">Top 10 Thế trận Khai cuộc Phổ biến Nhất</div>', unsafe_allow_html=True)
         st.markdown('<div class="card-subheading">Số lượng ván đấu sử dụng các khai cuộc cờ vua thịnh hành nhất trong cơ sở dữ liệu.</div>', unsafe_allow_html=True)
 
         top_openings = [
@@ -1056,7 +1040,7 @@ with tab4:
         fig_top_op.update_layout(
             height=340, margin=dict(l=10, r=10, t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Plus Jakarta Sans, sans-serif", color="#ffffff", size=13),
+            font=dict(family="Be Vietnam Pro, sans-serif", color="#ffffff", size=13),
             xaxis=dict(gridcolor="#1e293b", title="Số lượng ván đấu"),
             yaxis=dict(autorange="reversed", gridcolor="#1e293b")
         )
@@ -1068,7 +1052,7 @@ with tab4:
 
     with col_cm1:
         st.markdown('<div class="card card-accent-blue">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">📈 Đường cong Tương quan: Chênh lệch Elo vs Xác suất Thắng</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card-heading">Đường cong Tương quan: Chênh lệch Elo vs Xác suất Thắng</div>', unsafe_allow_html=True)
         st.markdown('<div class="card-subheading">Xác suất thắng của Bên Trắng tăng theo hàm Sigmoid chuẩn thống kê FIDE khi chênh lệch Elo tăng.</div>', unsafe_allow_html=True)
 
         diffs = np.linspace(-600, 600, 100)
@@ -1089,7 +1073,7 @@ with tab4:
         fig_curve.update_layout(
             height=340, margin=dict(l=10, r=10, t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Plus Jakarta Sans, sans-serif", color="#ffffff", size=13),
+            font=dict(family="Be Vietnam Pro, sans-serif", color="#ffffff", size=13),
             xaxis=dict(gridcolor="#1e293b", title="Chênh lệch Elo (Rating Difference = White - Black)"),
             yaxis=dict(gridcolor="#1e293b", title="Xác suất dự đoán (%)", range=[0, 105]),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#ffffff"), bgcolor="rgba(0,0,0,0)")
@@ -1099,7 +1083,7 @@ with tab4:
 
     with col_cm2:
         st.markdown('<div class="card card-accent-green">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">🎯 Ma trận Nhầm lẫn (Confusion Matrix — HGB)</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card-heading">Ma trận Nhầm lẫn (Confusion Matrix — HGB)</div>', unsafe_allow_html=True)
         st.markdown('<div class="card-subheading">Số lượng mẫu dự đoán đúng/sai trên tập kiểm tra giữ lại (Hold-out Test) của HistGradientBoosting.</div>', unsafe_allow_html=True)
 
         cm_classes = ["Đen thắng", "Hòa", "Trắng thắng"]
@@ -1119,9 +1103,9 @@ with tab4:
         fig_cm.update_layout(
             height=340, margin=dict(l=10, r=10, t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Plus Jakarta Sans, sans-serif", color="#ffffff", size=13),
+            font=dict(family="Be Vietnam Pro, sans-serif", color="#ffffff", size=13),
             coloraxis_showscale=False
         )
-        fig_cm.update_traces(textfont=dict(size=16, color="#ffffff", family="Plus Jakarta Sans"))
+        fig_cm.update_traces(textfont=dict(size=16, color="#ffffff", family="Be Vietnam Pro"))
         st.plotly_chart(fig_cm, use_container_width=True, config={"displayModeBar": False})
         st.markdown('</div>', unsafe_allow_html=True)
