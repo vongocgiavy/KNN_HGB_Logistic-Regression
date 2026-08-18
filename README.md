@@ -13,6 +13,7 @@
 4. [Giải thích Chi tiết Tác dụng của Từng File trong Dự án](#4-giải-thích-chi-tiết-tác-dụng-của-từng-file-trong-dự-án)
 5. [Hướng dẫn Cài đặt & Chạy chương trình](#5-hướng-dẫn-cài-đặt--chạy-chương-trình)
 6. [Báo cáo Kết quả Thực nghiệm (Mục 5.2 & 5.3)](#6-báo-cáo-kết-quả-thực-nghiệm-mục-52--53)
+7. [Tài liệu Giải thích Chi tiết Tất cả Biểu đồ (GIAI_THICH_BIEU_DO.md)](GIAI_THICH_BIEU_DO.md)
 
 ---
 
