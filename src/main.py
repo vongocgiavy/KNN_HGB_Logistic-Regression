@@ -248,29 +248,98 @@ class RobustLogisticRegression:
         return np.mean(self.predict(X) == np.array(y))
 
 
-def evaluate_logistic_metrics(y_true, y_pred):
-    """Tính toán chi tiết Accuracy, Precision, Recall, F1 và Confusion Matrix viết tay."""
+def evaluate_classification_report(y_true, y_pred, class_names=None):
+    """
+    Tính toán chi tiết và in Báo cáo Đánh giá Hiệu suất Toàn diện (Viết tay 100% bằng NumPy):
+    - Độ chính xác tổng thể (Overall Accuracy)
+    - Độ chính xác theo từng lớp (Precision per Class)
+    - Khả năng nhớ lại theo từng lớp (Recall per Class)
+    - Điểm F1 hài hòa (F1-Score per Class)
+    - Trung bình có trọng số (Weighted Average) & Ma trận nhầm lẫn (Confusion Matrix)
+    """
     y_t = np.array(y_true)
     y_p = np.array(y_pred)
+    classes = np.unique(np.concatenate([y_t, y_p]))
+    n_classes = len(classes)
     
-    tp = np.sum((y_t == 1) & (y_p == 1))
-    tn = np.sum((y_t == 0) & (y_p == 0))
-    fp = np.sum((y_t == 0) & (y_p == 1))
-    fn = np.sum((y_t == 1) & (y_p == 0))
-
-    total = tp + tn + fp + fn
-    accuracy = (tp + tn) / total if total > 0 else 0.0
-    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
-    recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-    f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+    # 1. Xây dựng ma trận nhầm lẫn (Confusion Matrix)
+    cm = np.zeros((n_classes, n_classes), dtype=int)
+    for t, p in zip(y_t, y_p):
+        i = np.where(classes == t)[0][0]
+        j = np.where(classes == p)[0][0]
+        cm[i, j] += 1
+        
+    total_samples = len(y_t)
+    overall_accuracy = float(np.sum(np.diag(cm)) / total_samples) if total_samples > 0 else 0.0
+    
+    # 2. Tính Precision, Recall, F1 cho từng lớp
+    per_class_metrics = []
+    supports = []
+    precisions = []
+    recalls = []
+    f1s = []
+    
+    for i, c in enumerate(classes):
+        tp = cm[i, i]
+        fp = np.sum(cm[:, i]) - tp
+        fn = np.sum(cm[i, :]) - tp
+        support = int(np.sum(cm[i, :]))
+        
+        prec = float(tp / (tp + fp)) if (tp + fp) > 0 else 0.0
+        rec = float(tp / (tp + fn)) if (tp + fn) > 0 else 0.0
+        f1 = float(2 * prec * rec / (prec + rec)) if (prec + rec) > 0 else 0.0
+        
+        name = class_names[i] if (class_names and i < len(class_names)) else f"Lớp {c}"
+        per_class_metrics.append({
+            "class": name,
+            "precision": prec,
+            "recall": rec,
+            "f1": f1,
+            "support": support
+        })
+        precisions.append(prec)
+        recalls.append(rec)
+        f1s.append(f1)
+        supports.append(support)
+        
+    # 3. Tính Weighted Average & Macro Average
+    total_support = sum(supports) if sum(supports) > 0 else 1
+    weighted_precision = float(np.sum(np.array(precisions) * np.array(supports)) / total_support)
+    weighted_recall = float(np.sum(np.array(recalls) * np.array(supports)) / total_support)
+    weighted_f1 = float(np.sum(np.array(f1s) * np.array(supports)) / total_support)
+    
+    # 4. In bảng báo cáo chi tiết
+    print("\n" + "=" * 70)
+    print("           BÁO CÁO ĐÁNH GIÁ CHỈ SỐ HIỆU SUẤT MÔ HÌNH")
+    print("=" * 70)
+    print(f" • Độ chính xác tổng thể (Overall Accuracy): {overall_accuracy * 100:.2f}%\n")
+    print(f"{'Lớp đối tượng':<25} | {'Precision (Độ CX)':<18} | {'Recall (Độ nhớ)':<16} | {'F1-Score':<10} | {'Mẫu (Support)':<12}")
+    print("-" * 70)
+    for row in per_class_metrics:
+        print(f"{row['class']:<25} | {row['precision']*100:>16.2f}% | {row['recall']*100:>14.2f}% | {row['f1']*100:>8.2f}% | {row['support']:>12d}")
+    print("-" * 70)
+    print(f"{'Trung bình trọng số':<25} | {weighted_precision*100:>16.2f}% | {weighted_recall*100:>14.2f}% | {weighted_f1*100:>8.2f}% | {total_support:>12d}")
+    print("=" * 70)
+    print("Ma trận nhầm lẫn (Confusion Matrix):")
+    print(cm)
+    print("=" * 70 + "\n")
 
     return {
-        "Accuracy": accuracy,
-        "Precision": precision,
-        "Recall": recall,
-        "F1-Score": f1,
-        "Confusion_Matrix": np.array([[tn, fp], [fn, tp]])
+        "Accuracy": overall_accuracy,
+        "Precision": weighted_precision,
+        "Recall": weighted_recall,
+        "F1-Score": weighted_f1,
+        "Confusion_Matrix": cm,
+        "Per_Class": per_class_metrics
     }
+
+
+def evaluate_logistic_metrics(y_true, y_pred):
+    return evaluate_classification_report(y_true, y_pred, class_names=["Lớp 0 (Âm tính)", "Lớp 1 (Dương tính)"])
+
+
+def evaluate_multiclass_metrics(y_true, y_pred, classes=None):
+    return evaluate_classification_report(y_true, y_pred, class_names=[f"Lớp {c}" for c in (classes if classes is not None else [0, 1, 2])])
 
 
 # =====================================================================
@@ -794,12 +863,8 @@ def run_hgb(show_plot=True, n_estimators=200, learning_rate=0.1, max_depth=5, us
         )
         hgb.fit(X_train, y_train)
 
-    test_acc = hgb.score(X_test, y_test)
-    print("\n" + "-" * 50)
-    print(" KẾT QUẢ ĐÁNH GIÁ TRÊN TẬP TEST:")
-    print(f" • Test Accuracy   : {test_acc * 100:.2f}%")
-    print(f" • Tổng số cây     : {len(hgb.trees)}")
-    print("-" * 50)
+    y_test_pred = hgb.predict(X_test)
+    metrics = evaluate_classification_report(y_test, y_test_pred, class_names=["Lớp 0 (Moons 1)", "Lớp 1 (Moons 2)"])
 
     if show_plot:
         print("[*] Đang hiển thị đồ thị...")
