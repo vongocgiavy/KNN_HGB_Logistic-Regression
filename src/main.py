@@ -760,7 +760,7 @@ def run_all_and_compare(show_plot=False):
     print("                      5.2. SO SÁNH HIỆU SUẤT MÔ HÌNH")
     print("=" * 95)
     print("(*) Trình bày các chỉ số hiệu suất toàn diện trên dữ liệu thực tế (Không Data Leak):")
-    print("    • Độ chính xác được báo cáo cho cả tập kiểm tra giữ lại (Hold-out Test 83.19%) và 5-Fold CV.")
+    print("    • Độ chính xác được báo cáo cho cả tập kiểm tra giữ lại (Hold-out Test 83.19%) và 3-Fold CV.")
     print("    • Các chỉ số chi tiết (Độ chính xác, Ghi nhớ, Điểm F1) được báo cáo trên bộ hold-out để đánh giá khả năng tổng quát hóa.\n")
 
     # 1. Multinomial Logistic Regression
@@ -776,7 +776,7 @@ def run_all_and_compare(show_plot=False):
     print("\n" + "=" * 105)
     print("                                5.2. BẢNG SO SÁNH HIỆU SUẤT MÔ HÌNH")
     print("=" * 105)
-    print(f"{'Thuật toán / Mô hình':<32} | {'5-Fold CV Acc':<16} | {'Hold-out Acc':<14} | {'Precision':<11} | {'Recall':<10} | {'Macro F1':<10}")
+    print(f"{'Thuật toán / Mô hình':<32} | {'3-Fold CV Acc':<16} | {'Hold-out Acc':<14} | {'Precision':<11} | {'Recall':<10} | {'Macro F1':<10}")
     print("-" * 105)
     
     print(f"{'1. HistGradientBoosting (HGB)':<32} | {'83.05% (±0.42%)':<16} | {'83.19%':>12} | {'83.45%':>9} | {'83.19%':>8} | {'0.82':>8}")

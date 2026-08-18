@@ -307,7 +307,7 @@ with tab3:
     comparison_df = pd.DataFrame([
         {
             "Thuật toán / Mô hình": "HistGradientBoosting (HGB, lr=0.1, depth=5, iter=200)",
-            "5-Fold CV Accuracy": "83.05% (±0.42%)",
+            "3-Fold CV Accuracy": "83.05% (±0.42%)",
             "Hold-out Test Accuracy": "83.19%",
             "Precision (Độ chính xác)": "83.45%",
             "Recall (Ghi nhớ)": "83.19%",
@@ -315,7 +315,7 @@ with tab3:
         },
         {
             "Thuật toán / Mô hình": "Hồi quy Logistic Đa thức (Multinomial Logistic - OvR)",
-            "5-Fold CV Accuracy": "63.95% (±0.61%)",
+            "3-Fold CV Accuracy": "63.95% (±0.61%)",
             "Hold-out Test Accuracy": "64.20%",
             "Precision (Độ chính xác)": "62.80%",
             "Recall (Ghi nhớ)": "64.20%",
@@ -323,7 +323,7 @@ with tab3:
         },
         {
             "Thuật toán / Mô hình": "K-Nearest Neighbors (KNN, k=20, Manhattan)",
-            "5-Fold CV Accuracy": "60.80% (±0.78%)",
+            "3-Fold CV Accuracy": "60.80% (±0.78%)",
             "Hold-out Test Accuracy": "61.50%",
             "Precision (Độ chính xác)": "59.90%",
             "Recall (Ghi nhớ)": "61.50%",
@@ -345,15 +345,15 @@ with tab3:
 
     # Biểu đồ so sánh
     chart_df = pd.DataFrame([
-        {"Mô hình": "HistGradientBoosting (HGB)", "Hold-out Accuracy (%)": 83.19, "5-Fold CV Acc (%)": 83.05, "Macro F1 (x100)": 82.0},
-        {"Mô hình": "Logistic Regression (OvR)", "Hold-out Accuracy (%)": 64.20, "5-Fold CV Acc (%)": 63.95, "Macro F1 (x100)": 31.0},
-        {"Mô hình": "K-Nearest Neighbors (KNN)", "Hold-out Accuracy (%)": 61.50, "5-Fold CV Acc (%)": 60.80, "Macro F1 (x100)": 28.0}
+        {"Mô hình": "HistGradientBoosting (HGB)", "Hold-out Accuracy (%)": 83.19, "3-Fold CV Acc (%)": 83.05, "Macro F1 (x100)": 82.0},
+        {"Mô hình": "Logistic Regression (OvR)", "Hold-out Accuracy (%)": 64.20, "3-Fold CV Acc (%)": 63.95, "Macro F1 (x100)": 31.0},
+        {"Mô hình": "K-Nearest Neighbors (KNN)", "Hold-out Accuracy (%)": 61.50, "3-Fold CV Acc (%)": 60.80, "Macro F1 (x100)": 28.0}
     ])
 
     fig_comp = px.bar(
         chart_df,
         x="Mô hình",
-        y=["5-Fold CV Acc (%)", "Hold-out Accuracy (%)", "Macro F1 (x100)"],
+        y=["3-Fold CV Acc (%)", "Hold-out Accuracy (%)", "Macro F1 (x100)"],
         barmode="group",
         height=360,
         color_discrete_sequence=["#94a3b8", "#2563eb", "#059669"]
