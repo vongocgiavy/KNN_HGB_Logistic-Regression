@@ -35,24 +35,24 @@ chess_analytics_b64 = get_base64_image(os.path.join(assets_dir, "chess_analytics
 
 # ─── Page Config ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Lichess AI Grandmaster Analytics — Pure ML Engine",
+    page_title="Kính Xanh | Lichess AI Chess Analytics Portal",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# ─── Senior Creative UI/UX CSS Design System ──────────────────────────────────
+# ─── Premium E-Commerce / SaaS Portal CSS System ──────────────────────────────
 st.markdown(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
 
-/* ── Global Canvas & Ambient Dynamic Background ── */
+/* ── Global Background Canvas ── */
 html, body, [data-testid="stAppViewContainer"], .main {{
-    font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', sans-serif !important;
     background-color: #f8fafc !important;
     background-image: 
-        radial-gradient(circle at 10% 10%, rgba(2, 132, 199, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 90% 20%, rgba(124, 58, 237, 0.06) 0%, transparent 45%),
-        linear-gradient(rgba(248, 250, 252, 0.88), rgba(248, 250, 252, 0.93)),
+        radial-gradient(circle at 5% 5%, rgba(2, 132, 199, 0.06) 0%, transparent 35%),
+        radial-gradient(circle at 95% 15%, rgba(124, 58, 237, 0.05) 0%, transparent 40%),
+        linear-gradient(rgba(248, 250, 252, 0.90), rgba(248, 250, 252, 0.94)),
         url("data:image/jpeg;base64,{chess_bg_b64}") !important;
     background-size: cover !important;
     background-position: center !important;
@@ -65,125 +65,171 @@ header[data-testid="stHeader"], footer,
 [data-testid="stToolbar"], .stDeployButton {{ display: none !important; }}
 
 .block-container {{
-    padding: 2.0rem 3.0rem 4.5rem !important;
-    max-width: 1480px !important;
+    padding: 0rem 3.0rem 4.5rem !important;
+    max-width: 1520px !important;
 }}
 
-/* ── High-Contrast Typography ── */
-p, span, label, div {{
-    font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', 'Inter', sans-serif !important;
-    color: #0f172a !important;
-}}
-h1, h2, h3, h4, h5, h6 {{
-    font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', sans-serif !important;
-    color: #0f172a !important;
-    font-weight: 800 !important;
-    letter-spacing: -0.025em !important;
-}}
-
-/* Input Labels */
-[data-testid="stWidgetLabel"] p, label p, .stSlider label p {{
-    font-size: 0.95rem !important;
-    font-weight: 700 !important;
-    color: #0f172a !important;
-    margin-bottom: 6px !important;
-    letter-spacing: -0.01em !important;
+/* ── TOP E-COMMERCE STICKY NAVBAR ── */
+.top-navbar {{
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0.95rem 2.0rem;
+    margin: 0 -3.0rem 2.0rem -3.0rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
 }}
 
-/* ── Hero Glassmorphic Header with Shimmer Sweep ── */
-.hero-header {{
+.nav-brand {{
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: #0f172a !important;
+    letter-spacing: -0.02em;
+}}
+.nav-brand-tag {{
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff !important;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}}
+
+.nav-status {{
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 30px;
+    padding: 0.4rem 1.1rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #334155 !important;
+}}
+.status-dot {{
+    width: 9px;
+    height: 9px;
+    background-color: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #10b981;
+}}
+
+/* ── HERO BANNER (E-Commerce Style Promo Card) ── */
+.hero-banner {{
     background: 
-        linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 245, 249, 0.90) 100%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(241, 245, 249, 0.88) 100%),
         url("data:image/jpeg;base64,{chess_bg_b64}") center/cover no-repeat !important;
-    border: 1px solid rgba(203, 213, 225, 0.8);
+    border: 1px solid #cbd5e1;
     border-radius: 24px;
-    padding: 2.6rem 3.2rem 2.2rem;
+    padding: 2.8rem 3.5rem;
     margin-bottom: 2.2rem;
     position: relative;
     overflow: hidden;
-    box-shadow: 
-        0 20px 40px -15px rgba(15, 23, 42, 0.08),
-        0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-    backdrop-filter: blur(16px);
+    box-shadow: 0 15px 35px -10px rgba(15, 23, 42, 0.06);
 }}
-.hero-header::before {{
+.hero-banner::before {{
     content: "";
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 5px;
     background: linear-gradient(90deg, #0284c7, #6366f1, #8b5cf6, #ec4899);
-    border-radius: 24px 24px 0 0;
 }}
 
-.hero-title {{
-    font-size: 2.5rem;
+.hero-tagline {{
+    display: inline-block;
+    background: #e0f2fe;
+    color: #0369a1 !important;
+    border: 1px solid #7dd3fc;
+    padding: 0.35rem 1.0rem;
+    border-radius: 30px;
+    font-size: 0.85rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 45%, #0284c7 100%);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.9rem;
+}}
+.hero-main-title {{
+    font-size: 2.6rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0284c7 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin: 0;
     letter-spacing: -0.03em;
-    line-height: 1.25;
+    line-height: 1.2;
 }}
-.hero-subtitle {{
+.hero-desc {{
     font-size: 1.15rem;
     color: #334155 !important;
     margin-top: 0.8rem;
     font-weight: 500;
-    line-height: 1.65;
-    max-width: 1150px;
+    line-height: 1.7;
+    max-width: 1100px;
 }}
 
-/* Quick Stats Bar */
-.quick-stats-bar {{
-    display: flex;
-    gap: 1.5rem;
-    margin-top: 1.6rem;
-    padding-top: 1.4rem;
-    border-top: 1px solid #e2e8f0;
-    flex-wrap: wrap;
+/* ── FEATURED CATEGORIES SHOWCASE GRID ── */
+.category-grid {{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.4rem;
+    margin-bottom: 2.2rem;
 }}
-.quick-stat-item {{
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #334155 !important;
+.cat-card {{
+    background: #ffffff !important;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 1.4rem 1.6rem;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.03);
+    transition: all 0.25s ease;
+    cursor: pointer;
 }}
-.quick-stat-icon {{
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
+.cat-card:hover {{
+    border-color: #0284c7;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(2, 132, 199, 0.12);
 }}
-.icon-blue   {{ background: #e0f2fe; color: #0284c7; }}
-.icon-purple {{ background: #f3e8ff; color: #7c3aed; }}
-.icon-green  {{ background: #d1fae5; color: #059669; }}
-.icon-orange {{ background: #ffe4e6; color: #e11d48; }}
+.cat-icon {{
+    font-size: 1.8rem;
+    margin-bottom: 0.6rem;
+}}
+.cat-title {{
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0f172a !important;
+    margin-bottom: 0.3rem;
+}}
+.cat-sub {{
+    font-size: 0.88rem;
+    color: #64748b !important;
+    font-weight: 500;
+    line-height: 1.5;
+}}
 
-/* ── Interactive Glassmorphic Cards (3D Lift Animation) ── */
+/* ── E-COMMERCE CARD BOXES ── */
 .card-box {{
     background: #ffffff !important;
-    border: 1px solid #e2e8f0;
-    border-radius: 22px;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
     padding: 1.9rem 2.3rem;
     margin-bottom: 1.8rem;
-    box-shadow: 
-        0 10px 30px -10px rgba(15, 23, 42, 0.05),
-        0 2px 6px rgba(15, 23, 42, 0.02);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    transition: all 0.25s ease;
 }}
 .card-box:hover {{
     border-color: #38bdf8;
-    box-shadow: 
-        0 20px 45px -10px rgba(2, 132, 199, 0.15),
-        0 0 0 2px rgba(2, 132, 199, 0.2);
-    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(2, 132, 199, 0.12);
+    transform: translateY(-2px);
 }}
 
 .accent-blue   {{ border-top: 4px solid #0284c7; }}
@@ -197,9 +243,6 @@ h1, h2, h3, h4, h5, h6 {{
     color: #0f172a !important;
     margin-bottom: 0.5rem;
     letter-spacing: -0.015em;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
 }}
 .card-subheading {{
     font-size: 1.0rem;
@@ -209,21 +252,19 @@ h1, h2, h3, h4, h5, h6 {{
     line-height: 1.65;
 }}
 
-/* Feature Artwork Header inside Card */
 .art-card-header {{
     width: 100%;
     height: 140px;
-    border-radius: 16px;
+    border-radius: 14px;
     object-fit: cover;
     margin-bottom: 1.2rem;
     border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
 }}
 
-/* ── Section Titles ── */
+/* ── SECTION TITLES ── */
 .section-title {{
     font-size: 1.75rem;
-    font-weight: 800;
+    font-weight: 900;
     color: #0f172a !important;
     letter-spacing: -0.025em;
     margin: 1.8rem 0 0.4rem;
@@ -235,22 +276,17 @@ h1, h2, h3, h4, h5, h6 {{
     margin-bottom: 1.4rem;
 }}
 
-/* ── Stitch Tonal Metric Stat Chips ── */
+/* ── METRIC STAT CHIPS ── */
 .metric-row {{ display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 1.5rem; }}
 .metric-chip {{
     flex: 1;
     min-width: 160px;
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border: 1px solid #e2e8f0;
-    border-radius: 18px;
+    border: 1px solid #cbd5e1;
+    border-radius: 16px;
     padding: 1.2rem 1.4rem;
     text-align: center;
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-}}
-.metric-chip:hover {{
-    transform: translateY(-3px);
-    box-shadow: 0 10px 24px rgba(2, 132, 199, 0.14);
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
 }}
 .metric-chip-label {{
     font-size: 0.85rem;
@@ -261,29 +297,28 @@ h1, h2, h3, h4, h5, h6 {{
 }}
 .metric-chip-value {{
     font-size: 2.15rem;
-    font-weight: 800;
+    font-weight: 900;
     margin-top: 0.3rem;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.02em;
 }}
 .chip-blue   .metric-chip-value {{ color: #0284c7 !important; }}
 .chip-purple .metric-chip-value {{ color: #7c3aed !important; }}
 .chip-green  .metric-chip-value {{ color: #059669 !important; }}
 .chip-orange .metric-chip-value {{ color: #e11d48 !important; }}
 
-/* ── Alert Highlight Boxes ── */
+/* ── ALERT BOXES ── */
 .alert-box {{
-    border-radius: 16px;
+    border-radius: 14px;
     padding: 1.3rem 1.6rem;
     margin: 1.3rem 0;
     font-size: 1.02rem;
     line-height: 1.75;
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
 }}
 .alert-blue   {{ background: #f0f9ff; border-left: 5px solid #0284c7; color: #0c4a6e !important; }}
 .alert-orange {{ background: #fff1f2; border-left: 5px solid #e11d48; color: #881337 !important; }}
 .alert-green  {{ background: #ecfdf5; border-left: 5px solid #059669; color: #064e3b !important; }}
 
-/* ── Stitch Floating Tab Bar ── */
+/* ── TAB NAVIGATION ── */
 [data-baseweb="tab-list"] {{
     background: #f1f5f9 !important;
     border: 1px solid #cbd5e1 !important;
@@ -291,7 +326,6 @@ h1, h2, h3, h4, h5, h6 {{
     padding: 6px !important;
     gap: 6px !important;
     margin-bottom: 1.8rem !important;
-    box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.06);
 }}
 button[data-baseweb="tab"] {{
     font-size: 1.05rem !important;
@@ -301,32 +335,22 @@ button[data-baseweb="tab"] {{
     border-radius: 14px !important;
     border: none !important;
     background: transparent !important;
-    transition: all 0.25s ease !important;
-}}
-button[data-baseweb="tab"]:hover {{
-    color: #0f172a !important;
-    background: rgba(255, 255, 255, 0.7) !important;
+    transition: all 0.2s ease !important;
 }}
 button[data-baseweb="tab"][aria-selected="true"] {{
     color: #0f172a !important;
     background: #ffffff !important;
     border: 1.5px solid #0284c7 !important;
     font-weight: 800 !important;
-    box-shadow: 0 6px 18px rgba(2, 132, 199, 0.18) !important;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.15) !important;
 }}
 
-/* ── Form Control Styling ── */
+/* FORM CONTROLS */
 div[data-testid="stSelectbox"] > div > div {{
     background-color: #ffffff !important;
-    background: #ffffff !important;
     border: 1.5px solid #cbd5e1 !important;
-    border-radius: 12px !important;
+    border-radius: 10px !important;
     height: 42px !important;
-    min-height: 42px !important;
-    max-height: 42px !important;
-    display: flex !important;
-    align-items: center !important;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
 }}
 div[data-testid="stSelectbox"] [data-baseweb="select"] span,
 div[data-testid="stSelectbox"] [data-baseweb="select"] div,
@@ -337,26 +361,13 @@ div[data-testid="stSelectbox"] [data-baseweb="select"] p {{
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
 }}
-div[data-testid="stSelectbox"] svg {{
-    fill: #0f172a !important;
-    color: #0f172a !important;
-}}
 
-/* NUMBER INPUTS */
 div[data-testid="stNumberInput"] > div > div {{
     background-color: #ffffff !important;
-    background: #ffffff !important;
     border: 1.5px solid #cbd5e1 !important;
-    border-radius: 12px !important;
+    border-radius: 10px !important;
     height: 42px !important;
-    min-height: 42px !important;
-    max-height: 42px !important;
-    overflow: hidden !important;
-    display: flex !important;
-    align-items: center !important;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
 }}
-
 div[data-testid="stNumberInput"] input {{
     background-color: #ffffff !important;
     color: #0f172a !important;
@@ -364,119 +375,17 @@ div[data-testid="stNumberInput"] input {{
     font-family: 'JetBrains Mono', monospace !important;
     font-size: 0.94rem !important;
     font-weight: 800 !important;
-    border: none !important;
-    height: 42px !important;
-    padding-left: 12px !important;
 }}
 
-div[data-testid="stNumberInput"] button {{
-    background-color: #f1f5f9 !important;
-    color: #0f172a !important;
-    -webkit-text-fill-color: #0f172a !important;
-    border: none !important;
-    border-left: 1px solid #cbd5e1 !important;
-    font-size: 0.95rem !important;
-    font-weight: 800 !important;
-    height: 42px !important;
-    min-width: 34px !important;
-    transition: background 0.15s ease !important;
-}}
-div[data-testid="stNumberInput"] button:hover {{
-    background-color: #0284c7 !important;
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-}}
-
-/* POPOVER DROPDOWN MENU LIST */
-div[data-baseweb="popover"],
-div[data-baseweb="popover"] div,
-div[data-baseweb="menu"],
-div[data-baseweb="menu"] div,
-ul[role="listbox"] {{
+div[data-baseweb="popover"], ul[role="listbox"] {{
     background-color: #ffffff !important;
-    background: #ffffff !important;
     border: 2px solid #0284c7 !important;
-    border-radius: 14px !important;
-    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16) !important;
-}}
-
-div[data-baseweb="popover"] [role="option"],
-div[data-baseweb="popover"] [role="option"] *,
-div[data-baseweb="popover"] li,
-div[data-baseweb="popover"] li *,
-div[data-baseweb="popover"] span,
-div[data-baseweb="popover"] div,
-div[data-baseweb="menu"] li,
-div[data-baseweb="menu"] li *,
-ul[role="listbox"] li,
-ul[role="listbox"] li * {{
-    color: #0f172a !important;
-    -webkit-text-fill-color: #0f172a !important;
-    font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', sans-serif !important;
-    font-size: 0.95rem !important;
-    font-weight: 700 !important;
-    opacity: 1 !important;
-}}
-
-div[data-baseweb="popover"] li,
-ul[role="listbox"] li,
-li[role="option"] {{
-    background-color: #ffffff !important;
-    padding: 10px 15px !important;
-    border-bottom: 1px solid #f1f5f9 !important;
-}}
-
-div[data-baseweb="popover"] [role="option"]:hover,
-div[data-baseweb="popover"] [role="option"]:hover *,
-div[data-baseweb="popover"] li:hover,
-div[data-baseweb="popover"] li:hover *,
-div[data-baseweb="popover"] [aria-selected="true"],
-div[data-baseweb="popover"] [aria-selected="true"] *,
-ul[role="listbox"] li:hover,
-ul[role="listbox"] li:hover *,
-ul[role="listbox"] [aria-selected="true"],
-ul[role="listbox"] [aria-selected="true"] * {{
-    background-color: #0284c7 !important;
-    background: #0284c7 !important;
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-    font-weight: 800 !important;
-}}
-
-/* SLIDER VALUES */
-[data-testid="stSlider"] div[data-testid="stMarkdownContainer"] p {{
-    color: #0284c7 !important;
-    -webkit-text-fill-color: #0284c7 !important;
-    font-weight: 800 !important;
-    font-size: 1.35rem !important;
-}}
-
-/* TEXTAREA */
-.stTextArea, [data-baseweb="textarea"], [data-baseweb="input"] {{
-    background-color: #ffffff !important;
-    border-radius: 14px !important;
-}}
-textarea, [data-baseweb="textarea"] textarea, input, [data-baseweb="input"] input {{
-    background-color: #ffffff !important;
-    color: #0f172a !important;
-    -webkit-text-fill-color: #0f172a !important;
-    font-size: 1.05rem !important;
-    font-family: 'JetBrains Mono', monospace, sans-serif !important;
-    font-weight: 600 !important;
-    line-height: 1.65 !important;
-    border: 1.5px solid #cbd5e1 !important;
     border-radius: 12px !important;
-    padding: 12px 15px !important;
-    caret-color: #0284c7 !important;
-    box-shadow: inset 0 1px 3px rgba(15,23,42,0.05) !important;
-    transition: all 0.2s ease !important;
 }}
-textarea:focus, [data-baseweb="textarea"] textarea:focus,
-input:focus, [data-baseweb="input"] input:focus {{
-    border-color: #0284c7 !important;
-    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2), inset 0 1px 3px rgba(15,23,42,0.05) !important;
+div[data-baseweb="popover"] [role="option"], ul[role="listbox"] li {{
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
+    font-weight: 700 !important;
 }}
 
 /* BUTTONS */
@@ -484,28 +393,11 @@ div.stButton > button {{
     background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
-    font-size: 1.05rem !important;
     font-weight: 800 !important;
     padding: 0.75rem 1.8rem !important;
     border-radius: 12px !important;
     border: none !important;
     box-shadow: 0 6px 18px rgba(2, 132, 199, 0.25) !important;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}}
-div.stButton > button:hover {{
-    transform: translateY(-2px) !important;
-    box-shadow: 0 10px 25px rgba(2, 132, 199, 0.38) !important;
-    background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%) !important;
-}}
-
-/* DATAFRAMES */
-[data-testid="stDataFrame"] {{
-    background: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 16px !important;
-    overflow: hidden !important;
-    box-shadow: 0 4px 16px rgba(15,23,42,0.04);
 }}
 
 /* CHESSBOARD FRAME */
@@ -515,59 +407,93 @@ div.stButton > button:hover {{
     align-items: center;
     background: radial-gradient(circle, #ffffff 0%, #f1f5f9 100%);
     border: 1px solid #cbd5e1;
-    border-radius: 20px;
-    padding: 1.4rem;
-    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.07);
-}}
-
-.divider {{
-    height: 1px;
-    background: #e2e8f0;
-    margin: 2.4rem 0;
-    border: none;
+    border-radius: 18px;
+    padding: 1.3rem;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
 }}
 
 /* RESULT BADGES */
 .result-badge {{
     padding: 1.15rem 1.7rem;
-    border-radius: 16px;
+    border-radius: 14px;
     font-size: 1.3rem;
-    font-weight: 800;
+    font-weight: 900;
     text-align: center;
     margin-bottom: 1.5rem;
-    letter-spacing: 0.03em;
 }}
-.result-white  {{ background: #e0f2fe; color: #0369a1 !important; border: 2px solid #38bdf8; box-shadow: 0 4px 14px rgba(56,189,248,0.22); }}
-.result-black  {{ background: #ffe4e6; color: #9f1239 !important; border: 2px solid #fb7185; box-shadow: 0 4px 14px rgba(251,113,133,0.22); }}
-.result-draw   {{ background: #f3e8ff; color: #6b21a8 !important; border: 2px solid #c084fc; box-shadow: 0 4px 14px rgba(168,85,247,0.22); }}
+.result-white  {{ background: #e0f2fe; color: #0369a1 !important; border: 2px solid #38bdf8; }}
+.result-black  {{ background: #ffe4e6; color: #9f1239 !important; border: 2px solid #fb7185; }}
+.result-draw   {{ background: #f3e8ff; color: #6b21a8 !important; border: 2px solid #c084fc; }}
+
+/* ── FOOTER ── */
+.portal-footer {{
+    background: #ffffff !important;
+    border-top: 1px solid #e2e8f0;
+    padding: 2.2rem 3.0rem;
+    margin: 3.5rem -3.0rem -4.5rem -3.0rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+}}
+.footer-text {{
+    font-size: 0.92rem;
+    color: #64748b !important;
+}}
 </style>
 """, unsafe_allow_html=True)
 
-# ─── Hero Header ───────────────────────────────────────────────────────────────
+# ─── TOP E-COMMERCE STICKY NAVBAR ─────────────────────────────────────────────
 st.markdown("""
-<div class="hero-header">
-  <div class="hero-title">Lichess AI Grandmaster Analytics — Pure ML Engine</div>
-  <div class="hero-subtitle">
-    Nền tảng phân tích ván cờ Lichess thông minh: Dự đoán xác suất thắng/thua, nhận diện khai cuộc tương đồng và trực quan ranh giới quyết định.
-    Toàn bộ thuật toán xây dựng thuần túy <b>100% From Scratch bằng Python & NumPy (Không sử dụng Scikit-Learn)</b>.
+<div class="top-navbar">
+  <div class="nav-brand">
+    <span>KÍNH XANH</span>
+    <span style="font-weight:300; color:#64748b;">|</span>
+    <span style="color:#0284c7;">CHESS AI ENGINE</span>
+    <span class="nav-brand-tag">Pure ML 100%</span>
   </div>
-  <div class="quick-stats-bar">
-    <div class="quick-stat-item">
-      <div class="quick-stat-icon icon-blue">📊</div>
-      <span>Kho ván cờ: <b>9,746 Matches</b></span>
-    </div>
-    <div class="quick-stat-item">
-      <div class="quick-stat-icon icon-purple">⚡</div>
-      <span>Mô hình đỉnh cao: <b>HistGradientBoosting (83.19%)</b></span>
-    </div>
-    <div class="quick-stat-item">
-      <div class="quick-stat-icon icon-green">🎯</div>
-      <span>Xác thực: <b>3-Fold Cross-Validation</b></span>
-    </div>
-    <div class="quick-stat-item">
-      <div class="quick-stat-icon icon-orange">🔍</div>
-      <span>Truy vấn: <b>KNN Opening Similarity</b></span>
-    </div>
+  <div class="nav-status">
+    <div class="status-dot"></div>
+    <span>System Online: <b>9,746 Lichess Matches</b></span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+# ─── HERO PROMO BANNER ────────────────────────────────────────────────────────
+st.markdown("""
+<div class="hero-banner">
+  <div class="hero-tagline">Nền tảng Phân tích Ván cờ Thông minh 2026</div>
+  <div class="hero-main-title">Kính Xanh Chess Analytics — Nhìn Sâu Vào Thế Cờ.</div>
+  <div class="hero-desc">
+    Dự đoán xác suất chiến thắng theo Elo, truy vấn khai cuộc tương đồng qua thuật toán KNN Manhattan và trực quan hóa ranh giới quyết định.
+    Toàn bộ mã nguồn và thuật toán được lập trình <b>100% From Scratch bằng Python & NumPy thuần</b> — Tuyệt đối không kéo Scikit-Learn.
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+# ─── FEATURED CATEGORIES SHOWCASE GRID ────────────────────────────────────────
+st.markdown("""
+<div class="category-grid">
+  <div class="cat-card">
+    <div class="cat-icon">🏆</div>
+    <div class="cat-title">Dự đoán Thắng / Thua</div>
+    <div class="cat-sub">HistGradientBoosting • Peak Acc 83.19%</div>
+  </div>
+  <div class="cat-card">
+    <div class="cat-icon">🐴</div>
+    <div class="cat-title">Nhận diện Khai cuộc</div>
+    <div class="cat-sub">KNN Manhattan Search • PGN Format</div>
+  </div>
+  <div class="cat-card">
+    <div class="cat-icon">📊</div>
+    <div class="cat-title">Báo cáo Benchmark</div>
+    <div class="cat-sub">3-Fold CV • Zero Data Leakage</div>
+  </div>
+  <div class="cat-card">
+    <div class="cat-icon">♟️</div>
+    <div class="cat-title">Ranh giới & EDA</div>
+    <div class="cat-sub">2D Decision Boundaries & Lichess Insights</div>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -691,7 +617,7 @@ with tab1:
             st.error(f"Chưa có file mô hình huấn luyện. Vui lòng chạy `py src/main.py --mode 3` trước. ({e})")
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB 2 — KNN OPENING & SVG BOARD (FEATURING 3D NEON KNIGHT ARTWORK)
+# TAB 2 — KNN OPENING & SVG BOARD
 # ══════════════════════════════════════════════════════════════════════════════
 with tab2:
     col_moves, col_board = st.columns([1.2, 1], gap="large")
@@ -779,7 +705,7 @@ with tab2:
         st.dataframe(pd.DataFrame(k_data), use_container_width=True, hide_index=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB 3 — MODEL COMPARISON, BENCHMARKS & OVERFITTING ANALYSIS (FEATURING 3D HOLOGRAPHIC ANALYTICS ARTWORK)
+# TAB 3 — MODEL COMPARISON, BENCHMARKS & OVERFITTING ANALYSIS
 # ══════════════════════════════════════════════════════════════════════════════
 with tab3:
 
@@ -1328,3 +1254,18 @@ with tab4:
         )
         fig_cm.update_traces(textfont=dict(size=16, color="#0f172a", family="Plus Jakarta Sans, Be Vietnam Pro"))
         st.plotly_chart(fig_cm, use_container_width=True, config={"displayModeBar": False})
+
+# ─── FOOTER SECTION ───────────────────────────────────────────────────────────
+st.markdown("""
+<div class="portal-footer">
+  <div>
+    <div style="font-size:1.1rem; font-weight:900; color:#0f172a;">KÍNH XANH | LICHESS AI CHESS ENGINE</div>
+    <div class="footer-text" style="margin-top:0.3rem;">
+      Hệ thống phân tích ván cờ Lichess thông minh bằng 100% Thuật toán Python & NumPy thuần túy.
+    </div>
+  </div>
+  <div class="footer-text">
+    © 2026 Kính Xanh Chess Analytics. All Rights Reserved. • <b style="color:#0284c7;">3-Fold CV Verified</b>
+  </div>
+</div>
+""", unsafe_allow_html=True)
