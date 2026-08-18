@@ -8,22 +8,53 @@ import matplotlib.pyplot as plt
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-# Import 3 from-scratch models
-from logistic_baseline import (
-    StandardScaler as LRStandardScaler,
-    RobustLogisticRegression,
-    evaluate_metrics as evaluate_lr_metrics
-)
-from knn_opening import (
-    StandardScaler as KNNStandardScaler,
-    RobustKNNClassifier,
-    compute_multiclass_metrics as evaluate_knn_metrics
-)
-from hgb_elo import (
-    HistBinner,
-    HistDecisionTree,
-    RobustHGBClassifier
-)
+# Add current directory and parent directory to sys.path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
+# Import 3 from-scratch models with fallback support
+try:
+    from logistic_baseline import (
+        StandardScaler as LRStandardScaler,
+        RobustLogisticRegression,
+        evaluate_metrics as evaluate_lr_metrics
+    )
+except ImportError:
+    from src.logistic_baseline import (
+        StandardScaler as LRStandardScaler,
+        RobustLogisticRegression,
+        evaluate_metrics as evaluate_lr_metrics
+    )
+
+try:
+    from knn_opening import (
+        StandardScaler as KNNStandardScaler,
+        RobustKNNClassifier,
+        compute_multiclass_metrics as evaluate_knn_metrics
+    )
+except ImportError:
+    from src.knn_opening import (
+        StandardScaler as KNNStandardScaler,
+        RobustKNNClassifier,
+        compute_multiclass_metrics as evaluate_knn_metrics
+    )
+
+try:
+    from hgb_elo import (
+        HistBinner,
+        HistDecisionTree,
+        RobustHGBClassifier
+    )
+except ImportError:
+    from src.hgb_elo import (
+        HistBinner,
+        HistDecisionTree,
+        RobustHGBClassifier
+    )
 
 
 def train_test_split_custom(X, y, test_size=0.2, random_state=42):
