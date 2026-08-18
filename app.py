@@ -21,33 +21,37 @@ from knn_opening import predict_opening, train_knn_opening
 from hgb_elo import predict_game_result, train_hgb_classifier
 from comparison import compare_models
 
-# ─── Load Generated Luxury Chess Background Image ──────────────────────────────
+# ─── Load Generated Custom Artwork Images ─────────────────────────────────────
 def get_base64_image(image_path):
     if os.path.exists(image_path):
         with open(image_path, "rb") as f:
             return base64.b64encode(f.read()).decode("utf-8")
     return ""
 
-chess_bg_path = os.path.join(os.path.dirname(__file__), "assets", "chess_bg.jpg")
-chess_bg_b64 = get_base64_image(chess_bg_path)
+assets_dir = os.path.join(os.path.dirname(__file__), "assets")
+chess_bg_b64 = get_base64_image(os.path.join(assets_dir, "chess_bg.jpg"))
+chess_knight_b64 = get_base64_image(os.path.join(assets_dir, "chess_knight.jpg"))
+chess_analytics_b64 = get_base64_image(os.path.join(assets_dir, "chess_analytics.jpg"))
 
 # ─── Page Config ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Phân tích Ván cờ Lichess — Stitch AI Design System",
+    page_title="Lichess AI Grandmaster Analytics — Pure ML Engine",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# ─── Stitch - Design with AI (Google Material 3 AI UI Standard System) ──────
+# ─── Senior Creative UI/UX CSS Design System ──────────────────────────────────
 st.markdown(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
 
-/* ── Stitch Canvas & Tonal Surface Background Overlay ── */
+/* ── Global Canvas & Ambient Dynamic Background ── */
 html, body, [data-testid="stAppViewContainer"], .main {{
     font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     background-color: #f8fafc !important;
     background-image: 
+        radial-gradient(circle at 10% 10%, rgba(2, 132, 199, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 20%, rgba(124, 58, 237, 0.06) 0%, transparent 45%),
         linear-gradient(rgba(248, 250, 252, 0.88), rgba(248, 250, 252, 0.93)),
         url("data:image/jpeg;base64,{chess_bg_b64}") !important;
     background-size: cover !important;
@@ -65,7 +69,7 @@ header[data-testid="stHeader"], footer,
     max-width: 1480px !important;
 }}
 
-/* ── Typography System (Stitch M3 Specs) ── */
+/* ── High-Contrast Typography ── */
 p, span, label, div {{
     font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', 'Inter', sans-serif !important;
     color: #0f172a !important;
@@ -79,40 +83,42 @@ h1, h2, h3, h4, h5, h6 {{
 
 /* Input Labels */
 [data-testid="stWidgetLabel"] p, label p, .stSlider label p {{
-    font-size: 0.94rem !important;
+    font-size: 0.95rem !important;
     font-weight: 700 !important;
     color: #0f172a !important;
-    margin-bottom: 5px !important;
+    margin-bottom: 6px !important;
     letter-spacing: -0.01em !important;
 }}
 
-/* ── Stitch Hero Header ── */
+/* ── Hero Glassmorphic Header with Shimmer Sweep ── */
 .hero-header {{
     background: 
-        linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 245, 249, 0.92) 100%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 245, 249, 0.90) 100%),
         url("data:image/jpeg;base64,{chess_bg_b64}") center/cover no-repeat !important;
-    border: 1px solid #e2e8f0;
+    border: 1px solid rgba(203, 213, 225, 0.8);
     border-radius: 24px;
-    padding: 2.5rem 3.0rem 2.2rem;
-    margin-bottom: 2.0rem;
+    padding: 2.6rem 3.2rem 2.2rem;
+    margin-bottom: 2.2rem;
     position: relative;
     overflow: hidden;
     box-shadow: 
-        0 12px 32px rgba(15, 23, 42, 0.05),
-        0 2px 8px rgba(2, 132, 199, 0.08);
+        0 20px 40px -15px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+    backdrop-filter: blur(16px);
 }}
 .hero-header::before {{
     content: "";
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 4px;
+    height: 5px;
     background: linear-gradient(90deg, #0284c7, #6366f1, #8b5cf6, #ec4899);
     border-radius: 24px 24px 0 0;
 }}
+
 .hero-title {{
-    font-size: 2.45rem;
+    font-size: 2.5rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0284c7 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 45%, #0284c7 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin: 0;
@@ -122,52 +128,62 @@ h1, h2, h3, h4, h5, h6 {{
 .hero-subtitle {{
     font-size: 1.15rem;
     color: #334155 !important;
-    margin-top: 0.7rem;
+    margin-top: 0.8rem;
     font-weight: 500;
     line-height: 1.65;
-    max-width: 1100px;
+    max-width: 1150px;
 }}
-.hero-badges {{
+
+/* Quick Stats Bar */
+.quick-stats-bar {{
     display: flex;
-    gap: 0.8rem;
-    margin-top: 1.4rem;
+    gap: 1.5rem;
+    margin-top: 1.6rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid #e2e8f0;
     flex-wrap: wrap;
 }}
-.badge {{
-    display: inline-block;
-    padding: 0.45rem 1.2rem;
-    border-radius: 30px;
-    font-size: 0.88rem;
+.quick-stat-item {{
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    letter-spacing: 0.02em;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    color: #334155 !important;
 }}
-.badge:hover {{
-    transform: translateY(-2px);
+.quick-stat-icon {{
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
 }}
-.badge-blue   {{ background: #e0f2fe; color: #0369a1 !important; border: 1px solid #7dd3fc; }}
-.badge-purple {{ background: #f3e8ff; color: #6b21a8 !important; border: 1px solid #c084fc; }}
-.badge-green  {{ background: #d1fae5; color: #065f46 !important; border: 1px solid #6ee7b7; }}
-.badge-orange {{ background: #ffe4e6; color: #9f1239 !important; border: 1px solid #fda4af; }}
+.icon-blue   {{ background: #e0f2fe; color: #0284c7; }}
+.icon-purple {{ background: #f3e8ff; color: #7c3aed; }}
+.icon-green  {{ background: #d1fae5; color: #059669; }}
+.icon-orange {{ background: #ffe4e6; color: #e11d48; }}
 
-/* ── Stitch Surface Containers (Material 3 Cards) ── */
+/* ── Interactive Glassmorphic Cards (3D Lift Animation) ── */
 .card-box {{
     background: #ffffff !important;
     border: 1px solid #e2e8f0;
-    border-radius: 20px;
-    padding: 1.8rem 2.2rem;
-    margin-bottom: 1.6rem;
+    border-radius: 22px;
+    padding: 1.9rem 2.3rem;
+    margin-bottom: 1.8rem;
     box-shadow: 
-        0 8px 24px rgba(15, 23, 42, 0.04),
+        0 10px 30px -10px rgba(15, 23, 42, 0.05),
         0 2px 6px rgba(15, 23, 42, 0.02);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
 }}
 .card-box:hover {{
     border-color: #38bdf8;
     box-shadow: 
-        0 16px 36px rgba(2, 132, 199, 0.12),
+        0 20px 45px -10px rgba(2, 132, 199, 0.15),
         0 0 0 2px rgba(2, 132, 199, 0.2);
-    transform: translateY(-2px);
+    transform: translateY(-4px);
 }}
 
 .accent-blue   {{ border-top: 4px solid #0284c7; }}
@@ -181,6 +197,9 @@ h1, h2, h3, h4, h5, h6 {{
     color: #0f172a !important;
     margin-bottom: 0.5rem;
     letter-spacing: -0.015em;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
 }}
 .card-subheading {{
     font-size: 1.0rem;
@@ -190,37 +209,48 @@ h1, h2, h3, h4, h5, h6 {{
     line-height: 1.65;
 }}
 
+/* Feature Artwork Header inside Card */
+.art-card-header {{
+    width: 100%;
+    height: 140px;
+    border-radius: 16px;
+    object-fit: cover;
+    margin-bottom: 1.2rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}}
+
 /* ── Section Titles ── */
 .section-title {{
     font-size: 1.75rem;
     font-weight: 800;
     color: #0f172a !important;
     letter-spacing: -0.025em;
-    margin: 1.6rem 0 0.4rem;
+    margin: 1.8rem 0 0.4rem;
 }}
 .section-desc {{
     font-size: 1.08rem;
     color: #334155 !important;
     line-height: 1.75;
-    margin-bottom: 1.3rem;
+    margin-bottom: 1.4rem;
 }}
 
 /* ── Stitch Tonal Metric Stat Chips ── */
-.metric-row {{ display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 1.4rem; }}
+.metric-row {{ display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 1.5rem; }}
 .metric-chip {{
     flex: 1;
-    min-width: 150px;
+    min-width: 160px;
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 1.1rem 1.3rem;
+    border-radius: 18px;
+    padding: 1.2rem 1.4rem;
     text-align: center;
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }}
 .metric-chip:hover {{
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(2, 132, 199, 0.12);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(2, 132, 199, 0.14);
 }}
 .metric-chip-label {{
     font-size: 0.85rem;
@@ -230,24 +260,24 @@ h1, h2, h3, h4, h5, h6 {{
     letter-spacing: 0.06em;
 }}
 .metric-chip-value {{
-    font-size: 2.1rem;
+    font-size: 2.15rem;
     font-weight: 800;
     margin-top: 0.3rem;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
 }}
 .chip-blue   .metric-chip-value {{ color: #0284c7 !important; }}
 .chip-purple .metric-chip-value {{ color: #7c3aed !important; }}
 .chip-green  .metric-chip-value {{ color: #059669 !important; }}
 .chip-orange .metric-chip-value {{ color: #e11d48 !important; }}
 
-/* ── Stitch Alert Highlight Boxes ── */
+/* ── Alert Highlight Boxes ── */
 .alert-box {{
-    border-radius: 14px;
-    padding: 1.2rem 1.5rem;
-    margin: 1.2rem 0;
+    border-radius: 16px;
+    padding: 1.3rem 1.6rem;
+    margin: 1.3rem 0;
     font-size: 1.02rem;
     line-height: 1.75;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
 }}
 .alert-blue   {{ background: #f0f9ff; border-left: 5px solid #0284c7; color: #0c4a6e !important; }}
 .alert-orange {{ background: #fff1f2; border-left: 5px solid #e11d48; color: #881337 !important; }}
@@ -256,44 +286,44 @@ h1, h2, h3, h4, h5, h6 {{
 /* ── Stitch Floating Tab Bar ── */
 [data-baseweb="tab-list"] {{
     background: #f1f5f9 !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 16px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 18px !important;
     padding: 6px !important;
     gap: 6px !important;
-    margin-bottom: 1.6rem !important;
-    box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.05);
+    margin-bottom: 1.8rem !important;
+    box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.06);
 }}
 button[data-baseweb="tab"] {{
     font-size: 1.05rem !important;
     font-weight: 700 !important;
     color: #475569 !important;
-    padding: 0.75rem 1.6rem !important;
-    border-radius: 12px !important;
+    padding: 0.8rem 1.8rem !important;
+    border-radius: 14px !important;
     border: none !important;
     background: transparent !important;
-    transition: all 0.2s ease !important;
+    transition: all 0.25s ease !important;
 }}
 button[data-baseweb="tab"]:hover {{
     color: #0f172a !important;
-    background: rgba(255, 255, 255, 0.6) !important;
+    background: rgba(255, 255, 255, 0.7) !important;
 }}
 button[data-baseweb="tab"][aria-selected="true"] {{
     color: #0f172a !important;
     background: #ffffff !important;
-    border: 1px solid #0284c7 !important;
+    border: 1.5px solid #0284c7 !important;
     font-weight: 800 !important;
-    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.15) !important;
+    box-shadow: 0 6px 18px rgba(2, 132, 199, 0.18) !important;
 }}
 
-/* ── SELECTBOX INPUTS ── */
+/* ── Form Control Styling ── */
 div[data-testid="stSelectbox"] > div > div {{
     background-color: #ffffff !important;
     background: #ffffff !important;
     border: 1.5px solid #cbd5e1 !important;
-    border-radius: 10px !important;
-    height: 40px !important;
-    min-height: 40px !important;
-    max-height: 40px !important;
+    border-radius: 12px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
     display: flex !important;
     align-items: center !important;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
@@ -302,7 +332,7 @@ div[data-testid="stSelectbox"] [data-baseweb="select"] span,
 div[data-testid="stSelectbox"] [data-baseweb="select"] div,
 div[data-testid="stSelectbox"] [data-baseweb="select"] p {{
     font-family: 'JetBrains Mono', 'Plus Jakarta Sans', monospace !important;
-    font-size: 0.92rem !important;
+    font-size: 0.94rem !important;
     font-weight: 700 !important;
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
@@ -312,15 +342,15 @@ div[data-testid="stSelectbox"] svg {{
     color: #0f172a !important;
 }}
 
-/* ── NUMBER INPUTS ── */
+/* NUMBER INPUTS */
 div[data-testid="stNumberInput"] > div > div {{
     background-color: #ffffff !important;
     background: #ffffff !important;
     border: 1.5px solid #cbd5e1 !important;
-    border-radius: 10px !important;
-    height: 40px !important;
-    min-height: 40px !important;
-    max-height: 40px !important;
+    border-radius: 12px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
     overflow: hidden !important;
     display: flex !important;
     align-items: center !important;
@@ -332,10 +362,10 @@ div[data-testid="stNumberInput"] input {{
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
     font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.92rem !important;
+    font-size: 0.94rem !important;
     font-weight: 800 !important;
     border: none !important;
-    height: 40px !important;
+    height: 42px !important;
     padding-left: 12px !important;
 }}
 
@@ -347,8 +377,8 @@ div[data-testid="stNumberInput"] button {{
     border-left: 1px solid #cbd5e1 !important;
     font-size: 0.95rem !important;
     font-weight: 800 !important;
-    height: 40px !important;
-    min-width: 32px !important;
+    height: 42px !important;
+    min-width: 34px !important;
     transition: background 0.15s ease !important;
 }}
 div[data-testid="stNumberInput"] button:hover {{
@@ -357,7 +387,7 @@ div[data-testid="stNumberInput"] button:hover {{
     -webkit-text-fill-color: #ffffff !important;
 }}
 
-/* ── POPOVER DROPDOWN MENU LIST ── */
+/* POPOVER DROPDOWN MENU LIST */
 div[data-baseweb="popover"],
 div[data-baseweb="popover"] div,
 div[data-baseweb="menu"],
@@ -366,8 +396,8 @@ ul[role="listbox"] {{
     background-color: #ffffff !important;
     background: #ffffff !important;
     border: 2px solid #0284c7 !important;
-    border-radius: 12px !important;
-    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.15) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16) !important;
 }}
 
 div[data-baseweb="popover"] [role="option"],
@@ -392,7 +422,7 @@ div[data-baseweb="popover"] li,
 ul[role="listbox"] li,
 li[role="option"] {{
     background-color: #ffffff !important;
-    padding: 9px 14px !important;
+    padding: 10px 15px !important;
     border-bottom: 1px solid #f1f5f9 !important;
 }}
 
@@ -413,18 +443,18 @@ ul[role="listbox"] [aria-selected="true"] * {{
     font-weight: 800 !important;
 }}
 
-/* ── SLIDER VALUES ── */
+/* SLIDER VALUES */
 [data-testid="stSlider"] div[data-testid="stMarkdownContainer"] p {{
     color: #0284c7 !important;
     -webkit-text-fill-color: #0284c7 !important;
     font-weight: 800 !important;
-    font-size: 1.3rem !important;
+    font-size: 1.35rem !important;
 }}
 
-/* ── TEXTAREA ── */
+/* TEXTAREA */
 .stTextArea, [data-baseweb="textarea"], [data-baseweb="input"] {{
     background-color: #ffffff !important;
-    border-radius: 12px !important;
+    border-radius: 14px !important;
 }}
 textarea, [data-baseweb="textarea"] textarea, input, [data-baseweb="input"] input {{
     background-color: #ffffff !important;
@@ -436,7 +466,7 @@ textarea, [data-baseweb="textarea"] textarea, input, [data-baseweb="input"] inpu
     line-height: 1.65 !important;
     border: 1.5px solid #cbd5e1 !important;
     border-radius: 12px !important;
-    padding: 12px 14px !important;
+    padding: 12px 15px !important;
     caret-color: #0284c7 !important;
     box-shadow: inset 0 1px 3px rgba(15,23,42,0.05) !important;
     transition: all 0.2s ease !important;
@@ -449,63 +479,95 @@ input:focus, [data-baseweb="input"] input:focus {{
     -webkit-text-fill-color: #0f172a !important;
 }}
 
-/* ── DATAFRAMES ── */
+/* BUTTONS */
+div.stButton > button {{
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    padding: 0.75rem 1.8rem !important;
+    border-radius: 12px !important;
+    border: none !important;
+    box-shadow: 0 6px 18px rgba(2, 132, 199, 0.25) !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}}
+div.stButton > button:hover {{
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 25px rgba(2, 132, 199, 0.38) !important;
+    background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%) !important;
+}}
+
+/* DATAFRAMES */
 [data-testid="stDataFrame"] {{
     background: #ffffff !important;
     border: 1px solid #cbd5e1 !important;
-    border-radius: 14px !important;
+    border-radius: 16px !important;
     overflow: hidden !important;
-    box-shadow: 0 4px 14px rgba(15,23,42,0.04);
+    box-shadow: 0 4px 16px rgba(15,23,42,0.04);
 }}
 
-/* ── CHESSBOARD FRAME ── */
+/* CHESSBOARD FRAME */
 .board-wrap {{
     display: flex;
     justify-content: center;
     align-items: center;
     background: radial-gradient(circle, #ffffff 0%, #f1f5f9 100%);
     border: 1px solid #cbd5e1;
-    border-radius: 18px;
-    padding: 1.3rem;
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+    border-radius: 20px;
+    padding: 1.4rem;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.07);
 }}
 
 .divider {{
     height: 1px;
     background: #e2e8f0;
-    margin: 2.2rem 0;
+    margin: 2.4rem 0;
     border: none;
 }}
 
-/* ── RESULT BADGES ── */
+/* RESULT BADGES */
 .result-badge {{
-    padding: 1.1rem 1.6rem;
-    border-radius: 14px;
-    font-size: 1.28rem;
+    padding: 1.15rem 1.7rem;
+    border-radius: 16px;
+    font-size: 1.3rem;
     font-weight: 800;
     text-align: center;
-    margin-bottom: 1.4rem;
+    margin-bottom: 1.5rem;
     letter-spacing: 0.03em;
 }}
-.result-white  {{ background: #e0f2fe; color: #0369a1 !important; border: 2px solid #38bdf8; box-shadow: 0 4px 12px rgba(56,189,248,0.2); }}
-.result-black  {{ background: #ffe4e6; color: #9f1239 !important; border: 2px solid #fb7185; box-shadow: 0 4px 12px rgba(251,113,133,0.2); }}
-.result-draw   {{ background: #f3e8ff; color: #6b21a8 !important; border: 2px solid #c084fc; box-shadow: 0 4px 12px rgba(168,85,247,0.2); }}
+.result-white  {{ background: #e0f2fe; color: #0369a1 !important; border: 2px solid #38bdf8; box-shadow: 0 4px 14px rgba(56,189,248,0.22); }}
+.result-black  {{ background: #ffe4e6; color: #9f1239 !important; border: 2px solid #fb7185; box-shadow: 0 4px 14px rgba(251,113,133,0.22); }}
+.result-draw   {{ background: #f3e8ff; color: #6b21a8 !important; border: 2px solid #c084fc; box-shadow: 0 4px 14px rgba(168,85,247,0.22); }}
 </style>
 """, unsafe_allow_html=True)
 
 # ─── Hero Header ───────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="hero-header">
-  <div class="hero-title">Hệ thống Phân tích Ván cờ Lichess — Stitch AI System</div>
+  <div class="hero-title">Lichess AI Grandmaster Analytics — Pure ML Engine</div>
   <div class="hero-subtitle">
-    Dự đoán xác suất kết quả trận đấu, nhận diện khai cuộc và trực quan hóa ranh giới quyết định.
-    Toàn bộ thuật toán được tự xây dựng từ đầu bằng Python và NumPy thuần túy — <b>100% From Scratch (Không sử dụng Scikit-Learn)</b>.
+    Nền tảng phân tích ván cờ Lichess thông minh: Dự đoán xác suất thắng/thua, nhận diện khai cuộc tương đồng và trực quan ranh giới quyết định.
+    Toàn bộ thuật toán xây dựng thuần túy <b>100% From Scratch bằng Python & NumPy (Không sử dụng Scikit-Learn)</b>.
   </div>
-  <div class="hero-badges">
-    <span class="badge badge-blue">100% Pure From Scratch</span>
-    <span class="badge badge-purple">Zero Data Leakage</span>
-    <span class="badge badge-green">3-Fold Cross-Validation</span>
-    <span class="badge badge-orange">Lichess Database (9,746 Games)</span>
+  <div class="quick-stats-bar">
+    <div class="quick-stat-item">
+      <div class="quick-stat-icon icon-blue">📊</div>
+      <span>Kho ván cờ: <b>9,746 Matches</b></span>
+    </div>
+    <div class="quick-stat-item">
+      <div class="quick-stat-icon icon-purple">⚡</div>
+      <span>Mô hình đỉnh cao: <b>HistGradientBoosting (83.19%)</b></span>
+    </div>
+    <div class="quick-stat-item">
+      <div class="quick-stat-icon icon-green">🎯</div>
+      <span>Xác thực: <b>3-Fold Cross-Validation</b></span>
+    </div>
+    <div class="quick-stat-item">
+      <div class="quick-stat-icon icon-orange">🔍</div>
+      <span>Truy vấn: <b>KNN Opening Similarity</b></span>
+    </div>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -629,16 +691,17 @@ with tab1:
             st.error(f"Chưa có file mô hình huấn luyện. Vui lòng chạy `py src/main.py --mode 3` trước. ({e})")
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB 2 — KNN OPENING & SVG BOARD
+# TAB 2 — KNN OPENING & SVG BOARD (FEATURING 3D NEON KNIGHT ARTWORK)
 # ══════════════════════════════════════════════════════════════════════════════
 with tab2:
     col_moves, col_board = st.columns([1.2, 1], gap="large")
 
     with col_moves:
-        st.markdown("""
+        st.markdown(f"""
         <div class="card-box accent-green">
-          <div class="card-heading">Nhập Chuỗi Nước đi PGN</div>
-          <div class="card-subheading">Dán chuỗi nước đi chuẩn PGN để tìm kiếm khai cuộc tương đồng nhất trong kho ván cờ Lichess.</div>
+          <img src="data:image/jpeg;base64,{chess_knight_b64}" class="art-card-header" />
+          <div class="card-heading">🐴 Truy vấn & Nhận diện Khai cuộc KNN</div>
+          <div class="card-subheading">Dán chuỗi nước đi chuẩn PGN để thuật toán K-Nearest Neighbors tìm kiếm các ván cờ tương đồng nhất trong kho dữ liệu Lichess.</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -660,7 +723,7 @@ with tab2:
     with col_board:
         st.markdown("""
         <div class="card-box accent-blue">
-          <div class="card-heading">Trực quan Bàn cờ 2D</div>
+          <div class="card-heading">♟️ Trực quan Bàn cờ 2D Interactive</div>
           <div class="card-subheading">Bàn cờ tự động cập nhật thế cờ theo nước đi cuối cùng trong chuỗi PGN.</div>
         </div>
         """, unsafe_allow_html=True)
@@ -694,9 +757,9 @@ with tab2:
 
         st.markdown(f"""
         <div class="card-box accent-purple">
-          <div class="card-heading">Kết quả Nhận diện Khai cuộc Tương đồng Nhất</div>
+          <div class="card-heading">🏆 Kết quả Nhận diện Khai cuộc Tương đồng Nhất</div>
           <div class="alert-box alert-blue" style="margin-bottom: 1.2rem;">
-            <b>Khai cuộc Dự đoán Top #1:</b> <span style="font-size:1.25rem; font-weight:800; color:#0284c7;">{top_opening}</span> (Mã ECO: <b>{top_eco}</b>)
+            <b>Khai cuộc Dự đoán Top #1:</b> <span style="font-size:1.3rem; font-weight:800; color:#0284c7;">{top_opening}</span> (Mã ECO: <b>{top_eco}</b>)
           </div>
         </div>
         """, unsafe_allow_html=True)
@@ -716,7 +779,7 @@ with tab2:
         st.dataframe(pd.DataFrame(k_data), use_container_width=True, hide_index=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB 3 — MODEL COMPARISON, BENCHMARKS & OVERFITTING ANALYSIS
+# TAB 3 — MODEL COMPARISON, BENCHMARKS & OVERFITTING ANALYSIS (FEATURING 3D HOLOGRAPHIC ANALYTICS ARTWORK)
 # ══════════════════════════════════════════════════════════════════════════════
 with tab3:
 
@@ -750,9 +813,10 @@ with tab3:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("""
+    st.markdown(f"""
     <div class="card-box accent-blue">
-      <div class="card-heading">Bảng So sánh Toàn diện Hiệu suất Mô hình</div>
+      <img src="data:image/jpeg;base64,{chess_analytics_b64}" class="art-card-header" />
+      <div class="card-heading">📈 Bảng So sánh Toàn diện Hiệu suất Mô hình Machine Learning</div>
       <div class="card-subheading">
         Bộ phân loại <b>Tăng cường Gradient Biểu đồ Histogram (HistGradientBoosting)</b> đạt hiệu suất vượt trội trên tất cả các chỉ số, với độ chính xác giữ lại <b>83,19%</b> và kết quả xác thực chéo nhất quán.
       </div>
