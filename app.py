@@ -280,138 +280,117 @@ button[data-baseweb="tab"][aria-selected="true"] {
     box-shadow: 0 6px 18px rgba(0,0,0,0.5), 0 0 15px rgba(56, 189, 248, 0.25) !important;
 }
 
-/* ── KHUNG SELECTBOX CHÍNH TRÊN GIAO DIỆN (TRIGGER BUTTON ON PAGE) ── */
-div[data-baseweb="select"] > div {
-    background-color: #090d16 !important;
-    border: 1.5px solid #334155 !important;
-    border-radius: 12px !important;
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-    font-size: 1.15rem !important;
+/* ── TIÊU ĐỀ TRÊN CÁC NÚT ĐIỀU KHIỂN (LABELS KHỚP ẢNH MẪU) ── */
+[data-testid="stWidgetLabel"] p, label p {
+    font-family: 'Be Vietnam Pro', sans-serif !important;
+    font-size: 1.08rem !important;
     font-weight: 700 !important;
-    height: 46px !important;
-    min-height: 46px !important;
-    max-height: 46px !important;
+    color: #ffffff !important;
+    margin-bottom: 8px !important;
+}
+
+/* ── THẾ THỨC SELECTBOX (CỜ TÍNH ELO) - CHUẨN KHỚP ẢNH MẪU ── */
+div[data-testid="stSelectbox"] > div > div {
+    background-color: #161b26 !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 10px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
     display: flex !important;
     align-items: center !important;
-    box-sizing: border-box !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4) !important;
 }
-div[data-baseweb="select"] > div * {
+div[data-testid="stSelectbox"] [data-baseweb="select"] span {
+    font-family: 'JetBrains Mono', 'Be Vietnam Pro', monospace !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
 }
-div[data-baseweb="select"] > div:hover,
-div[data-baseweb="select"] > div:focus-within {
-    border-color: #38bdf8 !important;
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.35) !important;
-}
-div[data-baseweb="select"] svg {
-    fill: #38bdf8 !important;
-    color: #38bdf8 !important;
-}
-
-/* ── SỐ NƯỚC KHAI CUỘC (NUMBER INPUT & NÚT + / -) - CÂN BẰNG CHIỀU CAO 46PX ── */
-div[data-testid="stNumberInput"] {
-    background-color: #090d16 !important;
-    border-radius: 12px !important;
-}
-div[data-testid="stNumberInput"] > div {
-    height: 46px !important;
-    min-height: 46px !important;
-    max-height: 46px !important;
-    box-sizing: border-box !important;
-}
-div[data-testid="stNumberInput"] input {
-    background-color: #090d16 !important;
+div[data-testid="stSelectbox"] svg {
+    fill: #ffffff !important;
     color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-    font-size: 1.25rem !important;
-    font-weight: 800 !important;
-    border: 1.5px solid #334155 !important;
-    height: 46px !important;
-    min-height: 46px !important;
-    box-sizing: border-box !important;
-}
-div[data-testid="stNumberInput"] button {
-    background-color: #1e293b !important;
-    color: #38bdf8 !important;
-    -webkit-text-fill-color: #38bdf8 !important;
-    border: 1.5px solid #334155 !important;
-    font-weight: 800 !important;
-    font-size: 1.2rem !important;
-    height: 46px !important;
-    min-height: 46px !important;
-    box-sizing: border-box !important;
-    transition: all 0.2s ease !important;
-}
-div[data-testid="stNumberInput"] button:hover {
-    background-color: #0284c7 !important;
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-    border-color: #38bdf8 !important;
 }
 
-/* ── DANH SÁCH XỔ XUỐNG (POPOVER DROPDOWN MENU LIST) - CHỮ MÀU ĐEN 100% TRÊN NỀN TRẮNG (ƯU TIÊN CAO NHẤT) ── */
-div[data-baseweb="popover"],
-div[data-baseweb="popover"] *,
-div[data-baseweb="menu"],
-div[data-baseweb="menu"] *,
-ul[role="listbox"],
-ul[role="listbox"] *,
-li[role="option"],
-li[role="option"] *,
-div[role="option"],
-div[role="option"] * {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
-}
-
-div[data-baseweb="popover"],
-div[data-baseweb="menu"],
-ul[role="listbox"] {
-    background-color: #ffffff !important;
-    background: #ffffff !important;
-    border: 2px solid #0284c7 !important;
-    border-radius: 12px !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(2, 132, 199, 0.3) !important;
+/* ── SỐ NƯỚC KHAI CUỘC (NUMBER INPUT & NÚT + / -) - CHUẨN KHỚP ẢNH MẪU ── */
+div[data-testid="stNumberInput"] > div > div {
+    background-color: #161b26 !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 10px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
     overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* Các mục lựa chọn trong danh sách */
-div[data-baseweb="popover"] li,
-div[data-baseweb="popover"] div[role="option"],
-li[role="option"],
-[data-baseweb="menu"] li {
-    background-color: #ffffff !important;
-    background: #ffffff !important;
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
+div[data-testid="stNumberInput"] input {
+    background-color: transparent !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    font-family: 'JetBrains Mono', monospace !important;
     font-size: 1.15rem !important;
     font-weight: 700 !important;
-    padding: 12px 18px !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-    cursor: pointer !important;
-    transition: all 0.15s ease !important;
+    border: none !important;
+    height: 44px !important;
+    padding-left: 14px !important;
 }
 
-/* Rê chuột hoặc mục đang chọn -> Nền Xanh Dương Đậm + Chữ Trắng Nổ */
+/* Nút - và + bên phải nút */
+div[data-testid="stNumberInput"] button {
+    background-color: #1c2433 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    border: none !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.15) !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    height: 44px !important;
+    min-width: 36px !important;
+    transition: background 0.15s ease !important;
+}
+div[data-testid="stNumberInput"] button:hover {
+    background-color: #2a364a !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+
+/* ── POPOVER DROPDOWN MENU LIST - CHỮ MÀU ĐEN TUYỆT ĐỐI TRÊN NỀN TRẮNG SÁNG ── */
+div[data-baseweb="popover"] {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    border: 2px solid #38bdf8 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8) !important;
+}
+div[data-baseweb="popover"] *,
+div[data-baseweb="menu"] *,
+ul[role="listbox"] *,
+li[role="option"] * {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    font-family: 'Be Vietnam Pro', sans-serif !important;
+}
+div[data-baseweb="popover"] li,
+li[role="option"] {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    padding: 10px 16px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
 div[data-baseweb="popover"] li:hover,
 div[data-baseweb="popover"] li:hover *,
-div[data-baseweb="popover"] li[aria-selected="true"],
-div[data-baseweb="popover"] li[aria-selected="true"] *,
 li[role="option"]:hover,
-li[role="option"]:hover *,
-li[role="option"][aria-selected="true"],
-li[role="option"][aria-selected="true"] *,
-div[role="option"]:hover,
-div[role="option"]:hover *,
-[data-baseweb="menu"] li:hover,
-[data-baseweb="menu"] li:hover * {
+li[role="option"]:hover * {
     background-color: #0284c7 !important;
     background: #0284c7 !important;
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
-    font-weight: 800 !important;
 }
 
 /* ── CHỈ SỐ SLIDER (1800, 1500) ── */
