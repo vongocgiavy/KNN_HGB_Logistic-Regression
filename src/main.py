@@ -662,10 +662,11 @@ def run_knn(show_plot=True, k=7, weights='distance'):
     return knn, metrics
 
 
-def run_hgb(show_plot=True, n_estimators=40, learning_rate=0.2, max_depth=4):
+def run_hgb(show_plot=True, n_estimators=200, learning_rate=0.1, max_depth=5):
     print("\n" + "=" * 65)
     print(" [3] HISTOGRAM GRADIENT BOOSTING (HGB) VIẾT TAY")
     print("=" * 65)
+    print("(*) Thiết lập siêu tham số tối ưu: learning_rate = 0.1 | max_depth = 5 | max_iter = 200")
 
     np.random.seed(42)
     n_samples = 600
