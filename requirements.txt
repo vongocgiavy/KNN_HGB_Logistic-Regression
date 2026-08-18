@@ -1,0 +1,6 @@
+zstandard>=0.21.0
+python-chess>=1.999
+scikit-learn>=1.2.0
+pandas>=2.0.0
+numpy>=1.24.0
+joblib>=1.2.0

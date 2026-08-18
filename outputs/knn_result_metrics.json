@@ -1,0 +1,47 @@
+{
+    "model_name": "K-Nearest Neighbors Classifier",
+    "best_params": {
+        "classifier__n_neighbors": 15,
+        "classifier__p": 1,
+        "classifier__weights": "uniform"
+    },
+    "cv_f1_mean": 0.6239625030720559,
+    "cv_f1_std": 0.007203058317238657,
+    "accuracy": 0.623,
+    "precision": 0.6031957857901868,
+    "recall": 0.623,
+    "f1_score": 0.6124826759015672,
+    "confusion_matrix": [
+        [
+            633,
+            0,
+            319
+        ],
+        [
+            37,
+            0,
+            29
+        ],
+        [
+            369,
+            0,
+            613
+        ]
+    ],
+    "feature_importance": {
+        "white_rating": -0.0016000000000000014,
+        "black_rating": 0.003599999999999981,
+        "rating_diff": 0.12730000000000002,
+        "rated": 0.0,
+        "opening_ply": 0.0005999999999999784
+    },
+    "features_used": [
+        "white_rating",
+        "black_rating",
+        "rating_diff",
+        "rated",
+        "opening_ply"
+    ],
+    "train_samples": 8000,
+    "test_samples": 2000
+}

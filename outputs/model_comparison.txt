@@ -1,0 +1,23 @@
+================================================================================
+       SO SÁNH MÔ HÌNH DỰ ĐOÁN KẾT QUẢ VÁN CỜ: LOGISTIC BASELINE VÀ HGB
+================================================================================
+
+                         Model    5-Fold CV F1 Accuracy Precision Recall F1-Score
+Logistic Regression (BASELINE) 0.5886 ± 0.0109   0.5444    0.6697 0.5444   0.5953
+    HistGradientBoosting (HGB) 0.5974 ± 0.0111   0.5649    0.6219 0.5649   0.5910
+
+--- ĐÁNH GIÁ VÀ NHẬN XÉT CHI TIẾT ---
+1. Baseline Logistic Regression: Accuracy = 0.5444, F1-Score = 0.5953
+2. HistGradientBoosting (HGB): Accuracy = 0.5649, F1-Score = 0.5910
+3. HistGradientBoosting vượt trội hơn Baseline Logistic Regression 2.05% về Accuracy.
+
+--- ĐỘ QUAN TRỌNG CỦA ĐẶC TRƯNG (FEATURE IMPORTANCE) ---
+
+     Feature Logistic (Coef Mag) HGB (Permutation)
+white_rating              0.1521           -0.0170
+black_rating              0.1417           -0.0267
+ rating_diff              0.2838            0.0971
+       rated              0.0000            0.0000
+ opening_ply              0.0257            0.0039
+
+================================================================================

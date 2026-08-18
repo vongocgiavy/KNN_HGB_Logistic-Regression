@@ -1,0 +1,46 @@
+{
+    "model_name": "Logistic Regression (Baseline)",
+    "best_params": {
+        "classifier__C": 0.01,
+        "classifier__solver": "lbfgs"
+    },
+    "cv_f1_mean": 0.5885805420716753,
+    "cv_f1_std": 0.01090750983393383,
+    "accuracy": 0.5443817342226783,
+    "precision": 0.6696556193052567,
+    "recall": 0.5443817342226783,
+    "f1_score": 0.5953182375834105,
+    "confusion_matrix": [
+        [
+            513,
+            207,
+            203
+        ],
+        [
+            25,
+            24,
+            17
+        ],
+        [
+            219,
+            217,
+            524
+        ]
+    ],
+    "feature_importance": {
+        "white_rating": 0.15207310729165724,
+        "black_rating": 0.1416848657506843,
+        "rating_diff": 0.28378459538358286,
+        "rated": 0.0,
+        "opening_ply": 0.02566254319379171
+    },
+    "features_used": [
+        "white_rating",
+        "black_rating",
+        "rating_diff",
+        "rated",
+        "opening_ply"
+    ],
+    "train_samples": 7795,
+    "test_samples": 1949
+}
