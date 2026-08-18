@@ -280,30 +280,31 @@ button[data-baseweb="tab"][aria-selected="true"] {
     box-shadow: 0 6px 18px rgba(0,0,0,0.5), 0 0 15px rgba(56, 189, 248, 0.25) !important;
 }
 
-/* ── TIÊU ĐỀ TRÊN CÁC NÚT ĐIỀU KHIỂN (LABELS - CỠ CHỮ NHỎ GỌN TINH TẾ) ── */
+/* ── TIÊU ĐỀ TRÊN CÁC NÚT ĐIỀU KHIỂN (LABELS - VỪA MẮT) ── */
 [data-testid="stWidgetLabel"] p, label p {
     font-family: 'Be Vietnam Pro', sans-serif !important;
-    font-size: 0.95rem !important;
+    font-size: 0.92rem !important;
     font-weight: 700 !important;
     color: #ffffff !important;
-    margin-bottom: 6px !important;
+    margin-bottom: 5px !important;
 }
 
-/* ── THẾ THỨC SELECTBOX (CỜ TÍNH ELO) - CHỮ NHỎ GỌN 0.95REM CÂN BẰNG ── */
+/* ── THẾ THỨC SELECTBOX (CỜ TÍNH ELO) - CỠ CHỮ 0.92REM VỪA MẮT ── */
 div[data-testid="stSelectbox"] > div > div {
     background-color: #161b26 !important;
     border: 1px solid rgba(255, 255, 255, 0.18) !important;
-    border-radius: 9px !important;
-    height: 42px !important;
-    min-height: 42px !important;
-    max-height: 42px !important;
+    border-radius: 8px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
     display: flex !important;
     align-items: center !important;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4) !important;
 }
-div[data-testid="stSelectbox"] [data-baseweb="select"] span {
+div[data-testid="stSelectbox"] [data-baseweb="select"] span,
+div[data-testid="stSelectbox"] [data-baseweb="select"] div {
     font-family: 'JetBrains Mono', 'Be Vietnam Pro', monospace !important;
-    font-size: 0.95rem !important;
+    font-size: 0.92rem !important;
     font-weight: 600 !important;
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
@@ -313,14 +314,14 @@ div[data-testid="stSelectbox"] svg {
     color: #ffffff !important;
 }
 
-/* ── SỐ NƯỚC KHAI CUỘC (NUMBER INPUT & NÚT + / -) - CHỮ NHỎ GỌN 0.98REM CÂN BẰNG ── */
+/* ── SỐ NƯỚC KHAI CUỘC (NUMBER INPUT & NÚT + / -) - CỠ CHỮ 0.92REM VỪA MẮT ── */
 div[data-testid="stNumberInput"] > div > div {
     background-color: #161b26 !important;
     border: 1px solid rgba(255, 255, 255, 0.18) !important;
-    border-radius: 9px !important;
-    height: 42px !important;
-    min-height: 42px !important;
-    max-height: 42px !important;
+    border-radius: 8px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
     overflow: hidden !important;
     display: flex !important;
     align-items: center !important;
@@ -332,10 +333,10 @@ div[data-testid="stNumberInput"] input {
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
     font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.98rem !important;
+    font-size: 0.92rem !important;
     font-weight: 700 !important;
     border: none !important;
-    height: 42px !important;
+    height: 40px !important;
     padding-left: 12px !important;
 }
 
@@ -346,10 +347,10 @@ div[data-testid="stNumberInput"] button {
     -webkit-text-fill-color: #ffffff !important;
     border: none !important;
     border-left: 1px solid rgba(255, 255, 255, 0.15) !important;
-    font-size: 1.0rem !important;
+    font-size: 0.95rem !important;
     font-weight: 700 !important;
-    height: 42px !important;
-    min-width: 34px !important;
+    height: 40px !important;
+    min-width: 32px !important;
     transition: background 0.15s ease !important;
 }
 div[data-testid="stNumberInput"] button:hover {
@@ -358,54 +359,57 @@ div[data-testid="stNumberInput"] button:hover {
     -webkit-text-fill-color: #ffffff !important;
 }
 
-/* ── POPOVER DROPDOWN MENU LIST - ÉP BẮT BUỘC CHỮ MÀU ĐEN 100% TRÊN NỀN TRẮNG ── */
-ul[role="listbox"],
-ul[role="listbox"] li,
-ul[role="listbox"] li *,
+/* ── POPOVER DROPDOWN MENU LIST - CHỮ MÀU ĐEN KHÔNG THỂ LẪN TRÊN NỀN TRẮNG ── */
 div[data-baseweb="popover"],
-div[data-baseweb="popover"] *,
+div[data-baseweb="popover"] div,
 div[data-baseweb="menu"],
-div[data-baseweb="menu"] *,
-li[role="option"],
-li[role="option"] * {
+div[data-baseweb="menu"] div,
+ul[role="listbox"] {
     background-color: #ffffff !important;
     background: #ffffff !important;
+    border: 2px solid #0284c7 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85) !important;
+}
+
+/* Bắt buộc 100% tất cả các thẻ chữ bên trong Popover list phải mang MÀU ĐEN THẬT */
+div[data-baseweb="popover"] [role="option"],
+div[data-baseweb="popover"] [role="option"] *,
+div[data-baseweb="popover"] li,
+div[data-baseweb="popover"] li *,
+div[data-baseweb="popover"] span,
+div[data-baseweb="popover"] div,
+div[data-baseweb="menu"] li,
+div[data-baseweb="menu"] li *,
+ul[role="listbox"] li,
+ul[role="listbox"] li * {
     color: #000000 !important;
     -webkit-text-fill-color: #000000 !important;
     font-family: 'Be Vietnam Pro', sans-serif !important;
-}
-
-div[data-baseweb="popover"],
-div[data-baseweb="menu"],
-ul[role="listbox"] {
-    border: 2px solid #0284c7 !important;
-    border-radius: 10px !important;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85) !important;
-    overflow: hidden !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    opacity: 1 !important;
 }
 
 div[data-baseweb="popover"] li,
 ul[role="listbox"] li,
 li[role="option"] {
-    font-size: 1.05rem !important;
-    font-weight: 700 !important;
-    padding: 10px 16px !important;
+    background-color: #ffffff !important;
+    padding: 9px 14px !important;
     border-bottom: 1px solid #e2e8f0 !important;
 }
 
-/* Rê chuột hoặc mục đang chọn -> Nền Xanh Dương Sáng + Chữ Trắng In Đậm */
-ul[role="listbox"] li:hover,
-ul[role="listbox"] li:hover *,
-ul[role="listbox"] li[aria-selected="true"],
-ul[role="listbox"] li[aria-selected="true"] *,
+/* Khi di chuột hoặc mục đang chọn -> Nền Xanh Dương Sáng + Chữ Trắng Nổi */
+div[data-baseweb="popover"] [role="option"]:hover,
+div[data-baseweb="popover"] [role="option"]:hover *,
 div[data-baseweb="popover"] li:hover,
 div[data-baseweb="popover"] li:hover *,
-div[data-baseweb="popover"] li[aria-selected="true"],
-div[data-baseweb="popover"] li[aria-selected="true"] *,
-li[role="option"]:hover,
-li[role="option"]:hover *,
-li[role="option"][aria-selected="true"],
-li[role="option"][aria-selected="true"] * {
+div[data-baseweb="popover"] [aria-selected="true"],
+div[data-baseweb="popover"] [aria-selected="true"] *,
+ul[role="listbox"] li:hover,
+ul[role="listbox"] li:hover *,
+ul[role="listbox"] [aria-selected="true"],
+ul[role="listbox"] [aria-selected="true"] * {
     background-color: #0284c7 !important;
     background: #0284c7 !important;
     color: #ffffff !important;
