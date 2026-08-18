@@ -35,7 +35,7 @@ chess_analytics_b64 = get_base64_image(os.path.join(assets_dir, "chess_analytics
 
 # ─── Page Config ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Kính Xanh | Lichess AI Chess Analytics Portal",
+    page_title="Lichess AI Grandmaster Analytics Portal",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -69,7 +69,7 @@ header[data-testid="stHeader"], footer,
     max-width: 1520px !important;
 }}
 
-/* ── TOP E-COMMERCE STICKY NAVBAR ── */
+/* ── TOP STICKY NAVBAR ── */
 .top-navbar {{
     position: sticky;
     top: 0;
@@ -125,7 +125,7 @@ header[data-testid="stHeader"], footer,
     box-shadow: 0 0 10px #10b981;
 }}
 
-/* ── HERO BANNER (E-Commerce Style Promo Card) ── */
+/* ── HERO BANNER ── */
 .hero-banner {{
     background: 
         linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(241, 245, 249, 0.88) 100%),
@@ -444,13 +444,13 @@ div.stButton > button {{
 </style>
 """, unsafe_allow_html=True)
 
-# ─── TOP E-COMMERCE STICKY NAVBAR ─────────────────────────────────────────────
+# ─── TOP STICKY NAVBAR ─────────────────────────────────────────────
 st.markdown("""
 <div class="top-navbar">
   <div class="nav-brand">
-    <span>KÍNH XANH</span>
+    <span>LICHESS AI LABS</span>
     <span style="font-weight:300; color:#64748b;">|</span>
-    <span style="color:#0284c7;">CHESS AI ENGINE</span>
+    <span style="color:#0284c7;">GRANDMASTER ENGINE</span>
     <span class="nav-brand-tag">Pure ML 100%</span>
   </div>
   <div class="nav-status">
@@ -464,7 +464,7 @@ st.markdown("""
 st.markdown("""
 <div class="hero-banner">
   <div class="hero-tagline">Nền tảng Phân tích Ván cờ Thông minh 2026</div>
-  <div class="hero-main-title">Kính Xanh Chess Analytics — Nhìn Sâu Vào Thế Cờ.</div>
+  <div class="hero-main-title">Lichess AI Grandmaster Analytics — Nhìn Sâu Vào Thế Cờ.</div>
   <div class="hero-desc">
     Dự đoán xác suất chiến thắng theo Elo, truy vấn khai cuộc tương đồng qua thuật toán KNN Manhattan và trực quan hóa ranh giới quyết định.
     Toàn bộ mã nguồn và thuật toán được lập trình <b>100% From Scratch bằng Python & NumPy thuần</b> — Tuyệt đối không kéo Scikit-Learn.
@@ -1259,13 +1259,13 @@ with tab4:
 st.markdown("""
 <div class="portal-footer">
   <div>
-    <div style="font-size:1.1rem; font-weight:900; color:#0f172a;">KÍNH XANH | LICHESS AI CHESS ENGINE</div>
+    <div style="font-size:1.1rem; font-weight:900; color:#0f172a;">LICHESS AI GRANDMASTER ENGINE</div>
     <div class="footer-text" style="margin-top:0.3rem;">
       Hệ thống phân tích ván cờ Lichess thông minh bằng 100% Thuật toán Python & NumPy thuần túy.
     </div>
   </div>
   <div class="footer-text">
-    © 2026 Kính Xanh Chess Analytics. All Rights Reserved. • <b style="color:#0284c7;">3-Fold CV Verified</b>
+    © 2026 Lichess AI Chess Analytics Platform. All Rights Reserved. • <b style="color:#0284c7;">3-Fold CV Verified</b>
   </div>
 </div>
 """, unsafe_allow_html=True)
