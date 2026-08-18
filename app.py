@@ -30,11 +30,11 @@ st.set_page_config(
 # ─── High-Contrast Dark & Glassmorphism Design System ─────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
 
 /* ── Reset & Base (Nền đen sâu, Chữ trắng tinh nổi bật) ── */
 html, body, [data-testid="stAppViewContainer"], .main {
-    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
     background: #090d13 !important;
     color: #ffffff !important;
     font-size: 16px !important;
@@ -59,11 +59,11 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Streamlit Input Labels Font Size */
 [data-testid="stWidgetLabel"] p, label p, .stSlider label p {
-    font-size: 1.12rem !important;
+    font-size: 1.15rem !important;
     font-weight: 700 !important;
     color: #ffffff !important;
-    margin-bottom: 0.4rem !important;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    margin-bottom: 0.5rem !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
 }
 
 /* ── Hero Header ── */
@@ -142,7 +142,7 @@ h1, h2, h3, h4, h5, h6 {
     letter-spacing: -0.01em;
 }
 .card-subheading {
-    font-size: 1.02rem;
+    font-size: 1.05rem;
     color: #d0d7de !important;
     font-weight: 400;
     margin-bottom: 1.2rem;
@@ -252,7 +252,7 @@ div[data-baseweb="select"] div[role="listbox"], ul[role="listbox"] {
 /* Các mục bên trong Dropdown menu */
 [data-baseweb="menu"] li, [data-baseweb="select"] li, div[role="option"] {
     color: #ffffff !important;
-    font-size: 1.05rem !important;
+    font-size: 1.08rem !important;
     font-weight: 600 !important;
     padding: 0.65rem 1rem !important;
     border-radius: 8px !important;
@@ -264,9 +264,54 @@ div[data-baseweb="select"] div[role="listbox"], ul[role="listbox"] {
     color: #ffffff !important;
 }
 
-/* ── Selectbox, Text Area & Inputs ── */
-[data-baseweb="select"] > div, [data-baseweb="input"], [data-baseweb="textarea"] {
-    background: #090d13 !important;
+/* ── Ô NHẬP NƯỚC CỜ (TEXTAREA & INPUTS) - ĐẢM BẢO TƯƠNG PHẢN TUYỆT ĐỐI ── */
+.stTextArea, [data-baseweb="textarea"], [data-baseweb="input"] {
+    background-color: #0b111c !important;
+    border-radius: 12px !important;
+}
+
+/* Khi ô nhập là nền đen thì chữ phải trắng tinh, to, sắc nét */
+textarea, [data-baseweb="textarea"] textarea, input, [data-baseweb="input"] input {
+    background-color: #0b111c !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    font-size: 1.15rem !important;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace, sans-serif !important;
+    font-weight: 600 !important;
+    line-height: 1.6 !important;
+    border: 1px solid #303d52 !important;
+    border-radius: 10px !important;
+    padding: 12px 14px !important;
+    caret-color: #58a6ff !important;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.5) !important;
+    transition: all 0.2s ease !important;
+}
+
+textarea:focus, [data-baseweb="textarea"] textarea:focus,
+input:focus, [data-baseweb="input"] input:focus {
+    border-color: #58a6ff !important;
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.35), inset 0 2px 6px rgba(0,0,0,0.5) !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+
+/* NẾU NỀN TRẮNG/SÁNG THÌ CHỮ BẮT BUỘC PHẢI MÀU ĐEN ĐẬM TƯƠNG PHẢN */
+.bg-light-box, [style*="background: white"], [style*="background-color: white"], 
+[style*="background:#fff"], [style*="background-color:#fff"],
+[style*="background: rgb(255, 255, 255)"], [style*="background-color: rgb(255, 255, 255)"] {
+    background-color: #ffffff !important;
+    color: #090d13 !important;
+}
+.bg-light-box *, [style*="background: white"] *, [style*="background-color: white"] *, 
+[style*="background:#fff"] *, [style*="background-color:#fff"] *,
+[style*="background: rgb(255, 255, 255)"] *, [style*="background-color: rgb(255, 255, 255)"] * {
+    color: #090d13 !important;
+    -webkit-text-fill-color: #090d13 !important;
+}
+
+/* ── Selectbox Container ── */
+[data-baseweb="select"] > div {
+    background: #0b111c !important;
     border: 1px solid #303d52 !important;
     border-radius: 10px !important;
     color: #ffffff !important;
@@ -274,23 +319,19 @@ div[data-baseweb="select"] div[role="listbox"], ul[role="listbox"] {
     font-weight: 600 !important;
     transition: all 0.2s ease !important;
 }
-[data-baseweb="select"] > div:hover, [data-baseweb="input"]:hover, [data-baseweb="textarea"]:hover {
+[data-baseweb="select"] > div:hover {
     border-color: #58a6ff !important;
 }
-[data-baseweb="select"] > div:focus-within, [data-baseweb="input"]:focus-within, [data-baseweb="textarea"]:focus-within {
+[data-baseweb="select"] > div:focus-within {
     border-color: #58a6ff !important;
     box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3) !important;
-}
-textarea {
-    color: #ffffff !important;
-    font-size: 1.1rem !important;
 }
 
 /* ── Dataframe Table Styling ── */
 [data-testid="stDataFrame"] {
     background: #090d13 !important;
     border: 1px solid #283347 !important;
-    border-radius: 10px !important;
+    border-radius: 12px !important;
     overflow: hidden !important;
 }
 
@@ -301,9 +342,9 @@ textarea {
     align-items: center;
     background: #090d13;
     border: 1px solid #283347;
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 1.3rem;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+    box-shadow: inset 0 0 25px rgba(0,0,0,0.6);
 }
 
 /* ── Separator ── */
@@ -317,7 +358,7 @@ textarea {
 /* ── Predicted Result Badge ── */
 .result-badge {
     display: inline-block;
-    padding: 0.5rem 1.4rem;
+    padding: 0.55rem 1.5rem;
     border-radius: 10px;
     font-size: 1.25rem;
     font-weight: 800;
