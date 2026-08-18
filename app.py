@@ -639,7 +639,7 @@ with tab2:
 
         if st.button("Truy vấn Khai cuộc KNN", type="primary", use_container_width=True):
             try:
-                openings_res = predict_opening(user_moves, top_k=top_k)
+                openings_res = predict_opening(user_moves, K=top_k)
                 st.session_state["knn_openings"] = openings_res
             except Exception as e:
                 st.error(f"Lỗi khi thực hiện KNN search: {e}")
@@ -675,17 +675,31 @@ with tab2:
 
     # Bảng kết quả KNN Search
     if "knn_openings" in st.session_state and st.session_state["knn_openings"]:
+        res_data = st.session_state["knn_openings"]
+        nearest_list = res_data.get("nearest_games", [])
+        top_opening = res_data.get("predicted_opening", "N/A")
+        top_eco = res_data.get("predicted_eco", "?")
+
         st.markdown('<div class="card card-accent-purple">', unsafe_allow_html=True)
-        st.markdown('<div class="card-heading">Khai cuộc Tương đồng Nhất (KNN Manhattan Distance)</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card-heading">Kết quả Nhận diện Khai cuộc Tương đồng Nhất</div>', unsafe_allow_html=True)
+        
+        st.markdown(
+            f'<div class="alert-box alert-blue" style="margin-bottom: 1.2rem;">'
+            f'<b>Khai cuộc Dự đoán Top #1:</b> <span style="font-size:1.25rem; font-weight:800; color:#0284c7;">{top_opening}</span> (Mã ECO: <b>{top_eco}</b>)'
+            f'</div>',
+            unsafe_allow_html=True
+        )
 
         k_data = []
-        for i, item in enumerate(st.session_state["knn_openings"], 1):
+        for item in nearest_list:
             k_data.append({
-                "Thứ tự (Rank)": f"Top #{i}",
-                "Tên Khai cuộc (Opening Name)": item.get("opening_name", "N/A"),
-                "Mã ECO": item.get("opening_eco", "N/A"),
-                "Khoảng cách Manhattan (Distance)": f"{item.get('distance', 0):.4f}",
-                "Tỷ lệ thắng trong quá khứ": item.get("win_rate_str", "50.0% White")
+                "Thứ tự (Rank)": f"Top #{item.get('rank', 1)}",
+                "Tên Khai cuộc (Opening Name)": item.get("opening", "N/A"),
+                "Mã ECO": item.get("eco", "N/A"),
+                "Độ tương đồng (%)": f"{item.get('similarity_percent', 0):.1f}%",
+                "Khoảng cách hình học (Distance)": f"{item.get('distance', 0):.4f}",
+                "Người chơi (Trắng vs Đen)": f"{item.get('white', 'N/A')} vs {item.get('black', 'N/A')}",
+                "Trích đoạn nước đi": item.get("moves_excerpt", "")
             })
 
         st.dataframe(pd.DataFrame(k_data), use_container_width=True, hide_index=True)
