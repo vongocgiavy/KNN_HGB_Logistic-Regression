@@ -20,6 +20,20 @@ from knn_opening import predict_opening, train_knn_opening
 from hgb_elo import predict_game_result, train_hgb_classifier
 from comparison import compare_models
 
+# ─── Cached EDA Data Loader (dữ liệu thực từ processed_games.csv) ─────────────
+@st.cache_data
+def load_eda_data():
+    """Load và cache dữ liệu EDA thực tế từ processed_games.csv."""
+    _path = os.path.join(os.path.dirname(__file__), "data", "processed_games.csv")
+    _df = pd.read_csv(_path, usecols=["WhiteElo", "BlackElo", "Result", "Opening", "Event"])
+    _df["WhiteElo"] = pd.to_numeric(_df["WhiteElo"], errors="coerce")
+    _df["BlackElo"]  = pd.to_numeric(_df["BlackElo"],  errors="coerce")
+    _df = _df.dropna(subset=["WhiteElo", "BlackElo", "Result", "Opening"]).copy()
+    _df["rating_diff"] = _df["WhiteElo"] - _df["BlackElo"]
+    _df["rated"] = _df["Event"].str.contains("Rated", case=False, na=True).astype(int)
+    return _df
+
+
 # ─── Load Generated Custom Artwork Images ─────────────────────────────────────
 def get_base64_image(image_path):
     if os.path.exists(image_path):
@@ -806,9 +820,23 @@ with tab3:
 
     # ── SECTION: PHÂN TÍCH DỮ LIỆU THĂM DÒ (EDA) ──────────────────────────────
     st.markdown('<div class="section-title">2. Phân tích Dữ liệu Thăm dò (EDA — Exploratory Data Analysis)</div>', unsafe_allow_html=True)
-    st.markdown("""
+
+    # Load dữ liệu thực tế
+    _eda_df = load_eda_data()
+    _n_total = len(_eda_df)
+    _result_counts = _eda_df["Result"].value_counts()
+    _n_white = int(_result_counts.get("1-0", 0))
+    _n_black = int(_result_counts.get("0-1", 0))
+    _n_draw  = int(_result_counts.get("1/2-1/2", 0))
+    _white_elos = _eda_df["WhiteElo"].values
+    _black_elos = _eda_df["BlackElo"].values
+    _rating_diff = _eda_df["rating_diff"].values
+    _diff_mean = float(_eda_df["rating_diff"].mean())
+
+    st.markdown(f"""
     <div class="section-desc">
-    Trực quan hóa các phân phối thống kê và mối tương quan trong tập dữ liệu <b>9,746 ván cờ Lichess</b> trước khi huấn luyện mô hình. EDA là bước then chốt để hiểu bản chất dữ liệu và lựa chọn thuật toán phù hợp.
+    Trực quan hóa các phân phối thống kê và mối tương quan trong tập dữ liệu <b>{_n_total:,} ván cờ Lichess</b> thực tế.
+    Toàn bộ biểu đồ dưới đây được vẽ trực tiếp từ file <code>data/processed_games.csv</code> — không dùng dữ liệu giả lập.
     </div>
     """, unsafe_allow_html=True)
 
@@ -824,19 +852,21 @@ with tab3:
         """, unsafe_allow_html=True)
         fig_res = go.Figure(go.Pie(
             labels=["White thắng (1-0)", "Black thắng (0-1)", "Hòa (1/2-1/2)"],
-            values=[4860, 4390, 496],
+            values=[_n_white, _n_black, _n_draw],
             hole=0.55,
             marker=dict(colors=["#0284c7", "#e11d48", "#7c3aed"],
                         line=dict(color="#ffffff", width=3)),
             textinfo="label+percent",
             textfont=dict(size=13, family="Plus Jakarta Sans, Be Vietnam Pro"),
+            customdata=[[_n_white], [_n_black], [_n_draw]],
+            hovertemplate="%{label}<br>Số ván: %{customdata[0]:,}<br>Tỷ lệ: %{percent}<extra></extra>",
         ))
         fig_res.update_layout(
             height=300, margin=dict(l=10, r=10, t=10, b=10),
             paper_bgcolor="rgba(0,0,0,0)",
             font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a"),
             showlegend=False,
-            annotations=[dict(text="9,746<br>ván cờ", x=0.5, y=0.5, font=dict(size=14, color="#0f172a", family="Plus Jakarta Sans"), showarrow=False)]
+            annotations=[dict(text=f"{_n_total:,}<br>ván cờ", x=0.5, y=0.5, font=dict(size=14, color="#0f172a", family="Plus Jakarta Sans"), showarrow=False)]
         )
         st.plotly_chart(fig_res, use_container_width=True, config={"displayModeBar": False})
         st.markdown("""
@@ -853,28 +883,19 @@ with tab3:
           <div class="card-subheading">Histogram điểm Elo của người chơi Trắng và Đen trên toàn bộ 9,746 ván cờ.</div>
         </div>
         """, unsafe_allow_html=True)
-        np.random.seed(42)
-        white_elos_sim = np.concatenate([
-            np.random.normal(1350, 220, 4500),
-            np.random.normal(1650, 180, 4200),
-            np.random.normal(1950, 120, 1046),
-        ])
-        black_elos_sim = np.concatenate([
-            np.random.normal(1340, 225, 4500),
-            np.random.normal(1640, 185, 4200),
-            np.random.normal(1940, 125, 1046),
-        ])
-        white_elos_sim = np.clip(white_elos_sim, 800, 2700)
-        black_elos_sim = np.clip(black_elos_sim, 800, 2700)
+        _elo_median_w = int(_eda_df["WhiteElo"].median())
+        _elo_median_b = int(_eda_df["BlackElo"].median())
         fig_elo = go.Figure()
         fig_elo.add_trace(go.Histogram(
-            x=white_elos_sim, name="White Elo", nbinsx=40,
+            x=_white_elos, name="White Elo", nbinsx=50,
             marker=dict(color="rgba(2,132,199,0.65)", line=dict(color="rgba(2,132,199,0.9)", width=1))
         ))
         fig_elo.add_trace(go.Histogram(
-            x=black_elos_sim, name="Black Elo", nbinsx=40, opacity=0.7,
+            x=_black_elos, name="Black Elo", nbinsx=50, opacity=0.7,
             marker=dict(color="rgba(225,29,72,0.55)", line=dict(color="rgba(225,29,72,0.85)", width=1))
         ))
+        fig_elo.add_vline(x=_elo_median_w, line=dict(color="#0284c7", width=1.5, dash="dot"))
+        fig_elo.add_vline(x=_elo_median_b, line=dict(color="#e11d48", width=1.5, dash="dot"))
         fig_elo.update_layout(
             barmode="overlay", height=300,
             margin=dict(l=10, r=10, t=10, b=10),
@@ -887,7 +908,7 @@ with tab3:
         st.plotly_chart(fig_elo, use_container_width=True, config={"displayModeBar": False})
         st.markdown("""
         <div class="alert-box alert-blue" style="font-size:0.88rem; padding: 8px 14px;">
-        Phân phối Elo tập trung ở khoảng <b>1,200–1,800</b> (nhóm nghiệp dư đến bán chuyên). Cả hai bên Trắng–Đen có phân phối gần như đồng nhất, đảm bảo tập dữ liệu không bị lệch hệ thống.
+        Phân phối Elo tập trung ở khoảng median <b>White={_elo_median_w:,} / Black={_elo_median_b:,}</b> (nhóm nghiệp dư đến bán chuyên). Cả hai bên Trắng–Đen có phân phối gần như đồng nhất, đảm bảo tập dữ liệu không bị lệch hệ thống.
         </div>
         """, unsafe_allow_html=True)
 
@@ -901,12 +922,9 @@ with tab3:
           <div class="card-subheading">Phân phối <code>rating_diff</code> — đặc trưng quan trọng nhất trong mô hình dự đoán kết quả.</div>
         </div>
         """, unsafe_allow_html=True)
-        np.random.seed(7)
-        rating_diff_sim = np.random.normal(8, 165, 9746)
-        rating_diff_sim = np.clip(rating_diff_sim, -700, 700)
-        colors_diff = ["#0284c7" if v > 0 else "#e11d48" if v < 0 else "#7c3aed" for v in rating_diff_sim[:100]]
+        _diff_median = float(_eda_df["rating_diff"].median())
         fig_diff = go.Figure(go.Histogram(
-            x=rating_diff_sim, nbinsx=60,
+            x=_rating_diff, nbinsx=60,
             marker=dict(color="rgba(5,150,105,0.65)", line=dict(color="rgba(5,150,105,0.9)", width=1)),
             name="Rating Diff"
         ))
@@ -924,7 +942,7 @@ with tab3:
         st.plotly_chart(fig_diff, use_container_width=True, config={"displayModeBar": False})
         st.markdown("""
         <div class="alert-box alert-blue" style="font-size:0.88rem; padding: 8px 14px;">
-        Phân phối chuẩn, tâm tại <b>≈ +8 điểm</b> (Trắng nhỉnh hơn Đen rất nhẹ). Đây là đặc trưng chiếm tầm quan trọng cao nhất trong HGB (<b>58.42%</b>).
+        Phân phối chuẩn, tâm tại <b>mean={_diff_mean:+.1f} / median={_diff_median:+.1f} điểm</b> (Trắng nhỉnh hơn Đen rất nhẹ). Đây là đặc trưng chiếm tầm quan trọng cao nhất trong HGB (<b>58.42%</b>).
         </div>
         """, unsafe_allow_html=True)
 
@@ -936,12 +954,17 @@ with tab3:
           <div class="card-subheading">Tỷ lệ thắng-thua-hòa trong ván đấu xếp hạng (Rated=1) so với ván giao hữu (Rated=0).</div>
         </div>
         """, unsafe_allow_html=True)
-        rated_data = pd.DataFrame({
-            "Loại ván": ["Rated (Xếp hạng)", "Rated (Xếp hạng)", "Rated (Xếp hạng)",
-                         "Casual (Giao hữu)", "Casual (Giao hữu)", "Casual (Giao hữu)"],
-            "Kết quả": ["White thắng", "Black thắng", "Hòa"] * 2,
-            "Tỷ lệ (%)": [50.2, 44.5, 5.3, 48.8, 46.1, 5.1]
-        })
+        _rows_rated = []
+        for _rated_val, _rated_lbl in [(1, "Rated (Xếp hạng)"), (0, "Casual (Giao hữu)")]:
+            _sub = _eda_df[_eda_df["rated"] == _rated_val]
+            _n = len(_sub)
+            if _n == 0:
+                continue
+            _vc = _sub["Result"].value_counts()
+            _rows_rated.append({"Loại ván": _rated_lbl, "Kết quả": "White thắng", "Tỷ lệ (%)": round(_vc.get("1-0", 0) / _n * 100, 1)})
+            _rows_rated.append({"Loại ván": _rated_lbl, "Kết quả": "Black thắng", "Tỷ lệ (%)": round(_vc.get("0-1", 0) / _n * 100, 1)})
+            _rows_rated.append({"Loại ván": _rated_lbl, "Kết quả": "Hòa",         "Tỷ lệ (%)": round(_vc.get("1/2-1/2", 0) / _n * 100, 1)})
+        rated_data = pd.DataFrame(_rows_rated)
         fig_rated = px.bar(
             rated_data, x="Loại ván", y="Tỷ lệ (%)", color="Kết quả",
             barmode="group", height=280,
@@ -970,15 +993,19 @@ with tab3:
     </div>
     """, unsafe_allow_html=True)
 
-    opening_names = [
-        "Sicilian Defense", "French Defense", "Queen's Gambit", "Italian Game",
-        "King's Indian Defense", "Ruy Lopez", "Scandinavian Defense",
-        "Caro-Kann Defense", "English Opening", "Modern Defense"
-    ]
-    opening_counts = [1480, 920, 840, 780, 680, 620, 520, 480, 420, 380]
-    white_win_pct  = [47.2, 52.1, 54.3, 51.8, 49.0, 53.5, 48.6, 51.2, 50.9, 49.7]
-    black_win_pct  = [47.6, 42.3, 40.1, 43.0, 45.8, 40.8, 46.2, 43.5, 43.8, 45.2]
-    draw_pct       = [5.2,  5.6,  5.6,  5.2,  5.2,  5.7,  5.2,  5.3,  5.3,  5.1]
+    # Tính Top 10 Opening từ dữ liệu thực
+    _eda_df["OpeningBase"] = _eda_df["Opening"].str.split(":").str[0].str.strip()
+    _top10_groups = (
+        _eda_df.groupby("OpeningBase")["Result"]
+        .agg(list).reset_index()
+        .assign(count=lambda x: x["Result"].apply(len))
+        .nlargest(10, "count")
+    )
+    opening_names  = _top10_groups["OpeningBase"].tolist()
+    opening_counts = _top10_groups["count"].tolist()
+    white_win_pct  = [round(_top10_groups[_top10_groups["OpeningBase"]==n]["Result"].values[0].count("1-0") / max(opening_counts[i],1)*100, 1) for i, n in enumerate(opening_names)]
+    black_win_pct  = [round(_top10_groups[_top10_groups["OpeningBase"]==n]["Result"].values[0].count("0-1") / max(opening_counts[i],1)*100, 1) for i, n in enumerate(opening_names)]
+    draw_pct       = [round(_top10_groups[_top10_groups["OpeningBase"]==n]["Result"].values[0].count("1/2-1/2") / max(opening_counts[i],1)*100, 1) for i, n in enumerate(opening_names)]
 
     fig_open = make_subplots(rows=1, cols=2,
                               subplot_titles=["Số ván cờ theo Khai cuộc", "Tỷ lệ Thắng/Thua/Hòa theo Khai cuộc"],
@@ -1011,9 +1038,11 @@ with tab3:
     fig_open.update_yaxes(gridcolor="rgba(0,0,0,0)")
     st.plotly_chart(fig_open, use_container_width=True, config={"displayModeBar": False})
 
-    st.markdown("""
+    _top1_name = opening_names[0] if opening_names else "N/A"
+    _top1_count = opening_counts[0] if opening_counts else 0
+    st.markdown(f"""
     <div class="alert-box alert-green" style="font-size:0.88rem; padding: 8px 14px;">
-    <b>Sicilian Defense</b> là khai cuộc phổ biến nhất (1,480 ván). Ở các khai cuộc như <b>Queen's Gambit</b> và <b>Ruy Lopez</b>, tỷ lệ thắng của Trắng cao hơn trung bình (~53–54%) do cấu trúc thế cờ có lợi cho bên đi trước.
+    <b>{_top1_name}</b> là khai cuộc phổ biến nhất ({_top1_count:,} ván). Dữ liệu trực tiếp từ <code>processed_games.csv</code> — mỗi ván được nhóm theo tên khai cuộc chính (trước dấu ":").
     </div>
     """, unsafe_allow_html=True)
 
