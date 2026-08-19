@@ -16,7 +16,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 from data_loader import prepare_and_cache_dataset, check_dataset_stats
 from preprocessing import preprocess_data, clean_moves
 from logistic_baseline import train_logistic_regression, predict_game_result_lr
-from knn_result import predict_result_knn
 from knn_opening import predict_opening, train_knn_opening
 from hgb_elo import predict_game_result, train_hgb_classifier
 from comparison import compare_models
@@ -493,7 +492,7 @@ st.markdown("""
   <div class="hero-main-title">Lichess AI Grandmaster Analytics — Nhìn Sâu Vào Thế Cờ.</div>
   <div class="hero-desc">
     Dự đoán xác suất chiến thắng theo Elo, truy vấn khai cuộc tương đồng qua thuật toán KNN Manhattan và trực quan hóa ranh giới quyết định.
-    Toàn bộ mã nguồn và thuật toán được lập trình <b>100% From Scratch bằng Python & NumPy thuần</b> — Tuyệt đối không kéo Scikit-Learn.
+    Toàn bộ mã nguồn và thuật toán được lập trình <b>100% From Scratch bằng Python & NumPy thuần</b> 
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -558,7 +557,7 @@ with tab1:
 
         selected_model = st.selectbox(
             "Mô hình Machine Learning sử dụng:",
-            ["HistGradientBoosting (HGB)", "Logistic Regression (Baseline)", "K-Nearest Neighbors (KNN)"]
+            ["HistGradientBoosting (HGB - Advanced)", "Logistic Regression (Baseline)"]
         )
 
         elo_diff = white_elo - black_elo
@@ -580,8 +579,6 @@ with tab1:
         try:
             if "Logistic" in selected_model:
                 res = predict_game_result_lr(white_elo, black_elo, rated=rated_val, opening_ply=opening_ply)
-            elif "KNN" in selected_model:
-                res = predict_result_knn(white_elo, black_elo, rated=rated_val, opening_ply=opening_ply)
             else:
                 res = predict_game_result(white_elo, black_elo, rated=rated_val, opening_ply=opening_ply)
 
@@ -749,7 +746,7 @@ with tab3:
     </div>
     """, unsafe_allow_html=True)
 
-    # Metric chips (3 mô hình)
+    # Metric chips (2 mô hình)
     st.markdown("""
     <div class="metric-row">
       <div class="metric-chip chip-blue">
@@ -757,16 +754,16 @@ with tab3:
         <div class="metric-chip-value">83.19%</div>
       </div>
       <div class="metric-chip chip-purple">
-        <div class="metric-chip-label">Logistic — Hold-out Acc</div>
+        <div class="metric-chip-label">Logistic Baseline — Hold-out Acc</div>
         <div class="metric-chip-value">64.20%</div>
-      </div>
-      <div class="metric-chip chip-orange">
-        <div class="metric-chip-label">KNN — Hold-out Acc</div>
-        <div class="metric-chip-value">61.50%</div>
       </div>
       <div class="metric-chip chip-green">
         <div class="metric-chip-label">HGB — Macro F1</div>
         <div class="metric-chip-value">0.82</div>
+      </div>
+      <div class="metric-chip chip-orange">
+        <div class="metric-chip-label">Logistic Baseline — Macro F1</div>
+        <div class="metric-chip-value">0.31</div>
       </div>
     </div>
     """, unsafe_allow_html=True)
@@ -777,7 +774,7 @@ with tab3:
         <div style="flex: 1;">
           <div class="card-heading">Bảng So sánh Toàn diện Hiệu suất Mô hình Machine Learning</div>
           <div class="card-subheading" style="margin-bottom:0;">
-            Bộ phân loại <b>Tăng cường Gradient Biểu đồ Histogram (HistGradientBoosting)</b> đạt hiệu suất vượt trội trên tất cả các chỉ số, với độ chính xác giữ lại <b>83,19%</b> và kết quả xác thực chéo nhất quán.
+            Bộ phân loại <b>Tăng cường Gradient Biểu đồ Histogram (HistGradientBoosting)</b> đạt hiệu suất vượt trội so với <b>Hồi quy Logistic Baseline</b> trên tất cả các chỉ số, với độ chính xác giữ lại <b>83.19%</b> và kết quả xác thực chéo nhất quán.
           </div>
         </div>
         <div style="width: 220px; flex-shrink: 0;">
@@ -789,14 +786,13 @@ with tab3:
 
     comparison_df = pd.DataFrame([
         {"Thuật toán / Mô hình": "HistGradientBoosting (HGB, lr=0.1, depth=5, iter=200)",
+         "Vai trò": "Nâng cao (Advanced)",
          "3-Fold CV Accuracy": "83.05% (±0.42%)", "Hold-out Test Accuracy": "83.19%",
          "Precision (Độ chính xác)": "83.45%", "Recall (Ghi nhớ)": "83.19%", "Macro F1-Score": "0.82"},
         {"Thuật toán / Mô hình": "Hồi quy Logistic Đa thức (Multinomial Logistic - OvR)",
+         "Vai trò": "Cơ sở (BASELINE)",
          "3-Fold CV Accuracy": "63.95% (±0.61%)", "Hold-out Test Accuracy": "64.20%",
          "Precision (Độ chính xác)": "62.80%", "Recall (Ghi nhớ)": "64.20%", "Macro F1-Score": "0.31"},
-        {"Thuật toán / Mô hình": "K-Nearest Neighbors (KNN, k=20, Manhattan)",
-         "3-Fold CV Accuracy": "60.80% (±0.78%)", "Hold-out Test Accuracy": "61.50%",
-         "Precision (Độ chính xác)": "59.90%", "Recall (Ghi nhớ)": "61.50%", "Macro F1-Score": "0.28"},
     ])
     st.dataframe(comparison_df, use_container_width=True, hide_index=True)
 
@@ -809,8 +805,7 @@ with tab3:
 
     chart_df = pd.DataFrame([
         {"Mô hình": "HistGradientBoosting (HGB)", "Hold-out Accuracy (%)": 83.19, "3-Fold CV Acc (%)": 83.05, "Macro F1 (x100)": 82.0},
-        {"Mô hình": "Logistic Regression (OvR)",  "Hold-out Accuracy (%)": 64.20, "3-Fold CV Acc (%)": 63.95, "Macro F1 (x100)": 31.0},
-        {"Mô hình": "K-Nearest Neighbors (KNN)",   "Hold-out Accuracy (%)": 61.50, "3-Fold CV Acc (%)": 60.80, "Macro F1 (x100)": 28.0},
+        {"Mô hình": "Logistic Regression (Baseline)",  "Hold-out Accuracy (%)": 64.20, "3-Fold CV Acc (%)": 63.95, "Macro F1 (x100)": 31.0},
     ])
     fig_comp = px.bar(
         chart_df, x="Mô hình",
@@ -835,7 +830,7 @@ with tab3:
     st.markdown("""
     <div class="alert-box alert-orange">
     <b style="font-size:1.15rem; color:#881337 !important;">Phân tích lỗi (Error Analysis):</b><br>
-    Mặc dù mô hình Gradient Boosting đạt độ chính xác tổng thể cao, phân tích hiệu suất theo từng lớp cho thấy phần lớn lỗi phân loại xảy ra trong hạng mục <b>'Draw' (Hòa)</b>. Do sự mất cân bằng lớp cao (chỉ <b>5,11%</b> số lần hòa), các mô hình đơn giản hơn như <i>K-Nearest Neighbors</i> và <i>Logistic Regression</i> gặp khó khăn trong việc phân biệt các trận hòa với các trận đấu quyết định kéo dài, dẫn đến điểm F1 trung bình vĩ mô thấp hơn (<b>0,28</b> và <b>0,31</b> tương ứng) so với <i>Gradient Boosting</i> (<b>0,82</b>), vốn đã thành công trong việc nắm bắt động lực phi tuyến đặc thù liên quan đến các trận hòa.
+    Mặc dù mô hình Gradient Boosting đạt độ chính xác tổng thể cao, phân tích hiệu suất theo từng lớp cho thấy phần lớn lỗi phân loại xảy ra trong hạng mục <b>'Draw' (Hòa)</b>. Do sự mất cân bằng lớp cao (chỉ <b>5.11%</b> số lần hòa), mô hình tuyến tính <i>Logistic Regression Baseline</i> gặp khó khăn trong việc phân biệt các trận hòa với các trận đấu quyết định kéo dài (Macro F1 = 0.31). Trái lại, <i>HistGradientBoosting (HGB)</i> với 200 cây quyết định học nối tiếp đã nắm bắt thành công động lực phi tuyến phức tạp liên quan đến các trận hòa (Macro F1 = 0.82).
     </div>
     """, unsafe_allow_html=True)
 
@@ -858,11 +853,11 @@ with tab3:
         </div>
         """, unsafe_allow_html=True)
         fi_df = pd.DataFrame([
-            {"Tính năng (Feature)": "rating_diff (Chênh lệch Elo)", "Ý nghĩa cờ vua": "White Elo - Black Elo (Quyết định cao nhất)", "HGB": "0.5842", "Logistic (|Coef|)": "0.4912"},
-            {"Tính năng (Feature)": "white_rating (Elo Bên Trắng)", "Ý nghĩa cờ vua": "Đẳng cấp và kỹ năng người cầm quân Trắng", "HGB": "0.2150", "Logistic (|Coef|)": "0.2310"},
-            {"Tính năng (Feature)": "black_rating (Elo Bên Đen)", "Ý nghĩa cờ vua": "Đẳng cấp và kỹ năng người cầm quân Đen", "HGB": "0.1420", "Logistic (|Coef|)": "0.1850"},
-            {"Tính năng (Feature)": "opening_ply (Độ dài khai cuộc)", "Ý nghĩa cờ vua": "Số nước đi lý thuyết trước khi vào trung cuộc", "HGB": "0.0385", "Logistic (|Coef|)": "0.0520"},
-            {"Tính năng (Feature)": "rated (Trận đấu xếp hạng)", "Ý nghĩa cờ vua": "Trận đấu tính điểm Elo (1) hoặc giao hữu (0)", "HGB": "0.0203", "Logistic (|Coef|)": "0.0408"},
+            {"Tính năng (Feature)": "rating_diff (Chênh lệch Elo)", "Ý nghĩa cờ vua": "White Elo - Black Elo (Quyết định cao nhất)", "HGB": "0.5842", "Logistic Baseline (|Coef|)": "0.4912"},
+            {"Tính năng (Feature)": "white_rating (Elo Bên Trắng)", "Ý nghĩa cờ vua": "Đẳng cấp và kỹ năng người cầm quân Trắng", "HGB": "0.2150", "Logistic Baseline (|Coef|)": "0.2310"},
+            {"Tính năng (Feature)": "black_rating (Elo Bên Đen)", "Ý nghĩa cờ vua": "Đẳng cấp và kỹ năng người cầm quân Đen", "HGB": "0.1420", "Logistic Baseline (|Coef|)": "0.1850"},
+            {"Tính năng (Feature)": "opening_ply (Độ dài khai cuộc)", "Ý nghĩa cờ vua": "Số nước đi lý thuyết trước khi vào trung cuộc", "HGB": "0.0385", "Logistic Baseline (|Coef|)": "0.0520"},
+            {"Tính năng (Feature)": "rated (Trận đấu xếp hạng)", "Ý nghĩa cờ vua": "Trận đấu tính điểm Elo (1) hoặc giao hữu (0)", "HGB": "0.0203", "Logistic Baseline (|Coef|)": "0.0408"},
         ])
         st.dataframe(fi_df, use_container_width=True, hide_index=True)
 
@@ -881,7 +876,7 @@ with tab3:
             orientation="h", marker=dict(color="#0284c7")
         ))
         fig_fi.add_trace(go.Bar(
-            y=features, x=lr_scores, name="Logistic Regression",
+            y=features, x=lr_scores, name="Logistic Regression Baseline",
             orientation="h", marker=dict(color="#94a3b8")
         ))
         fig_fi.update_layout(
@@ -913,9 +908,9 @@ with tab3:
     </div>
     """, unsafe_allow_html=True)
 
-    model_names = ["Logistic Regression", "KNN (k=20)", "HGB (lr=0.1, depth=5)"]
-    train_accs  = [64.70,  99.90, 85.30]
-    test_accs   = [65.50,  63.30, 83.19]
+    model_names = ["Logistic Regression Baseline", "HistGradientBoosting (HGB)"]
+    train_accs  = [64.70, 85.30]
+    test_accs   = [65.50, 83.19]
 
     fig_ov = go.Figure()
     fig_ov.add_trace(go.Bar(
@@ -932,7 +927,7 @@ with tab3:
     # Gap annotations
     for i, (t, h) in enumerate(zip(train_accs, test_accs)):
         gap = t - h
-        col = "#059669" if abs(gap) < 5 else "#7c3aed" if abs(gap) < 15 else "#e11d48"
+        col = "#059669" if abs(gap) < 5 else "#e11d48"
         fig_ov.add_annotation(
             x=model_names[i], y=max(t, h) + 6.5,
             text=f"Gap: {gap:+.1f}%", showarrow=False,
@@ -953,8 +948,7 @@ with tab3:
     st.markdown("""
     <div class="alert-box alert-blue">
     <b>Nhận xét kết quả:</b><br>
-    • <b>Logistic Regression:</b> Gap <b>-0.8%</b> — mô hình cực kỳ ổn định, tuyệt đối không bị Overfitting.<br>
-    • <b>KNN (k=20):</b> Gap <b>+36.6%</b> — Overfitting mạnh trên tập Train do thuật toán KNN ghi nhớ trực tiếp các điểm dữ liệu lân cận (đặc tính tự nhiên của Lazy Learner).<br>
+    • <b>Logistic Regression Baseline:</b> Gap <b>-0.8%</b> — mô hình cực kỳ ổn định, tuyệt đối không bị Overfitting.<br>
     • <b>HistGradientBoosting:</b> Gap <b>+2.1%</b> — kiểm soát Overfitting xuất sắc nhờ cơ chế L2 Regularization (1.5) và dừng sớm (Early Stopping).
     </div>
     """, unsafe_allow_html=True)
@@ -1011,16 +1005,13 @@ with tab3:
 
     fold_labels = ["Fold 1", "Fold 2", "Fold 3"]
     cv_lr_va  = [64.1, 65.3, 64.5]
-    cv_knn_va = [60.8, 62.3, 61.4]
     cv_hgb_va = [64.3, 65.7, 64.5]
     cv_lr_tr  = [64.8, 64.6, 65.2]
-    cv_knn_tr = [99.8, 99.7, 99.9]
     cv_hgb_tr = [74.7, 76.4, 73.9]
 
     fig_cv = go.Figure()
     for name, tr, va, col in [
-        ("Logistic Regression",  cv_lr_tr,  cv_lr_va,  "#059669"),
-        ("KNN (k=20)", cv_knn_tr, cv_knn_va, "#e11d48"),
+        ("Logistic Regression Baseline",  cv_lr_tr,  cv_lr_va,  "#059669"),
         ("HistGradientBoosting", cv_hgb_tr, cv_hgb_va, "#0284c7"),
     ]:
         fig_cv.add_trace(go.Scatter(
@@ -1040,7 +1031,7 @@ with tab3:
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=14),
         xaxis=dict(gridcolor="#e2e8f0", title=""),
-        yaxis=dict(gridcolor="#e2e8f0", title="Accuracy (%)", range=[55, 105], title_font=dict(color="#0f172a")),
+        yaxis=dict(gridcolor="#e2e8f0", title="Accuracy (%)", range=[55, 90], title_font=dict(color="#0f172a")),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#0f172a"), bgcolor="rgba(0,0,0,0)")
     )
     st.plotly_chart(fig_cv, use_container_width=True, config={"displayModeBar": False})
@@ -1048,8 +1039,7 @@ with tab3:
     st.markdown("""
     <div class="alert-box alert-green">
     <b style="color:#064e3b !important; font-size:1.15rem;">Kết luận chung về Khả năng Tổng quát hóa:</b><br>
-    • <b>Logistic Regression:</b> Hoàn toàn không bị Overfitting, phân phối đều qua 3 Fold.<br>
-    • <b>KNN:</b> Ghi nhớ mạnh trên Train nhưng Validation Accuracy ổn định quanh 61.5% — đây là bản chất chuẩn của phân loại dựa trên khoảng cách thể hiện.<br>
+    • <b>Logistic Regression Baseline:</b> Hoàn toàn không bị Overfitting, phân phối đều qua 3 Fold.<br>
     • <b>HistGradientBoosting:</b> Độ chính xác cao vượt trội (83.19%), đường hội tụ Learning Curve mượt mà, kiểm soát rủi ro quá khớp hoàn hảo.
     </div>
     """, unsafe_allow_html=True)

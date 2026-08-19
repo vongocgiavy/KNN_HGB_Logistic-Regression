@@ -186,6 +186,15 @@ def train_knn_opening(df=None, K_list=[3, 5, 7], model_save_path="models/knn_ope
 
 def predict_opening(moves_input, K=5, model_or_path="models/knn_opening.joblib"):
     """Dự đoán khai cuộc dựa trên nước đi nhập vào."""
+    # Khắc phục triệt để lỗi unpickle khi gọi từ các file entry point khác nhau (main.py, app.py)
+    import sys
+    main_mod = sys.modules.get("__main__")
+    if main_mod:
+        if not hasattr(main_mod, "SimpleTextVectorizer"):
+            setattr(main_mod, "SimpleTextVectorizer", SimpleTextVectorizer)
+        if not hasattr(main_mod, "RobustKNNClassifier"):
+            setattr(main_mod, "RobustKNNClassifier", RobustKNNClassifier)
+
     if isinstance(model_or_path, str):
         if not os.path.exists(model_or_path):
             train_knn_opening(model_save_path=model_or_path)
@@ -230,4 +239,5 @@ def predict_opening(moves_input, K=5, model_or_path="models/knn_opening.joblib")
 
 
 if __name__ == "__main__":
+    sys.modules['knn_opening'] = sys.modules['__main__']
     train_knn_opening()

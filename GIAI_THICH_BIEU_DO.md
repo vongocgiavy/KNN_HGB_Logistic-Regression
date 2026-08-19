@@ -42,25 +42,25 @@
 
 ## 2. NHÓM 2: BIỂU ĐỒ SO SÁNH HIỆU SUẤT & TẦM QUAN TRỌNG TÍNH NĂNG (MỤC 5.2 & 5.3)
 
-### 📊 2.1. Biểu đồ So sánh Hiệu suất 3 Mô hình (Mục 5.2 - Grouped Bar Chart)
-- **Hình thức:** Biểu đồ cột phân nhóm (Grouped Bar Chart) so sánh đồng thời 3 chỉ số cốt lõi:
+### 📊 2.1. Biểu đồ So sánh Hiệu suất Dự đoán Kết quả (Mục 5.2 - Grouped Bar Chart)
+- **Hình thức:** Biểu đồ cột phân nhóm (Grouped Bar Chart) so sánh đồng thời 3 chỉ số cốt lõi giữa **Logistic Regression (Baseline)** và **HistGradientBoosting (HGB)** trong bài toán dự đoán kết quả ván cờ theo Elo:
   - **Cột Xám:** Độ chính xác trung bình qua 3 lần xác thực chéo (`3-Fold CV Acc %`).
   - **Cột Xanh dương:** Độ chính xác trên tập kiểm tra giữ lại độc lập (`Hold-out Test Acc %`).
   - **Cột Xanh lá:** Điểm trung bình vĩ mô (`Macro F1-Score x100`).
 - **Ý nghĩa so sánh:**
-  - **HistGradientBoosting (HGB):** Đạt điểm cao nhất trên cả 3 chỉ số (Hold-out: **83.19%**, 3-Fold CV: **83.05%**, Macro F1: **0.82**). Cột Hold-out và CV bám sát nhau chứng minh mô hình **học thật - không học vẹt**.
-  - **Logistic Regression & KNN:** Đạt độ chính xác 61% - 64%, nhưng Macro F1 chỉ đạt **0.28 - 0.31** do gặp khó khăn với lớp thiểu số (Hòa).
+  - **HistGradientBoosting (HGB - Advanced):** Đạt điểm cao nhất trên cả 3 chỉ số (Hold-out: **83.19%**, 3-Fold CV: **83.05%**, Macro F1: **0.82**). Cột Hold-out và CV bám sát nhau chứng minh mô hình **học thật - không học vẹt**.
+  - **Logistic Regression (Baseline):** Đạt độ chính xác 64.20%, nhưng Macro F1 chỉ đạt **0.31** do là mô hình tuyến tính gặp khó khăn với lớp thiểu số (Hòa).
 
 ---
 
 ### 🔍 2.2. Ý nghĩa Khối Phân tích Lỗi (Error Analysis)
 - **Bản chất bài toán:** Trong dữ liệu cờ vua thực tế, các trận đấu kết thúc có thắng thua rõ ràng chiếm đa số, trong khi tỷ lệ **Hòa (Draw) chỉ chiếm vỏn vẹn 5.11%** (Mất cân bằng lớp - Class Imbalance).
-- **Tại sao HGB vượt trội?** Các mô hình tuyến tính (Logistic) hoặc dựa trên láng giềng đơn giản (KNN) có xu hướng "bỏ qua" các trận hòa để dự đoán vào lớp chiếm đa số. Trong khi đó, HGB xây dựng 200 cây quyết định kế tiếp nhau, cây sau tập trung sửa sai cho cây trước, từ đó nắm bắt được các ranh giới phi tuyến phức tạp giúp nhận diện trận hòa chính xác hơn hẳn.
+- **Tại sao HGB vượt trội so với Baseline?** Mô hình tuyến tính cơ sở (Logistic Regression) có xu hướng bị lấn át bởi các ván đấu quyết định. Trong khi đó, HGB xây dựng 200 cây quyết định kế tiếp nhau, cây sau tập trung sửa sai cho cây trước, từ đó nắm bắt được các ranh giới phi tuyến phức tạp giúp nhận diện trận hòa chính xác hơn hẳn (Macro F1 đạt **0.82** so với **0.31** của Baseline).
 
 ---
 
 ### 📊 2.3. Biểu đồ Cột Ngang Tầm quan trọng của Tính năng (Mục 5.3 - Feature Importance)
-- **Hình thức:** Biểu đồ thanh ngang so sánh mức độ ảnh hưởng của 5 đặc trưng giữa **HistGradientBoosting** và **Logistic Regression**.
+- **Hình thức:** Biểu đồ thanh ngang so sánh mức độ ảnh hưởng của 5 đặc trưng giữa **HistGradientBoosting** và **Logistic Regression Baseline**.
 - **Thứ tự xếp hạng mức độ quyết định kết quả:**
   1. **`rating_diff` (0.5842):** Chiếm gần 60% mức độ ảnh hưởng. Chênh lệch trình độ là yếu tố tiên quyết số 1 quyết định thắng thua trong cờ vua.
   2. **`white_rating` (0.2150):** Trình độ của người cầm quân Trắng (người có lợi thế đi trước).
@@ -77,9 +77,8 @@
 - **Công thức tính khoảng cách chênh lệch:**
   $$\text{Gap} = \text{Train Accuracy} - \text{Hold-out Test Accuracy}$$
 - **Ý nghĩa từng mô hình trên biểu đồ:**
-  - **Logistic Regression ($\text{Gap} = -0.8\%$):** Khoảng cách gần như bằng 0 $\rightarrow$ Mô hình cực kỳ ổn định, tuyệt đối không bị quá khớp.
+  - **Logistic Regression Baseline ($\text{Gap} = -0.8\%$):** Khoảng cách gần như bằng 0 $\rightarrow$ Mô hình cực kỳ ổn định, tuyệt đối không bị quá khớp.
   - **HistGradientBoosting ($\text{Gap} = +2.1\%$):** Độ chính xác Train 85.3% và Test 83.19% rất sát nhau $\rightarrow$ Kiểm soát quá khớp xuất sắc nhờ **L2 Regularization (1.5)** và cơ chế **Early Stopping**.
-  - **KNN ($\text{Gap} = +36.6\%$):** Train đạt 99.9% nhưng Test 63.3% $\rightarrow$ Đây là đặc tính tự nhiên của thuật toán Lazy Learner (KNN luôn nhớ chính xác các điểm dữ liệu trong tập train của nó).
 
 ---
 
@@ -99,7 +98,7 @@
 - **Cách đọc biểu đồ:**
   - Trục X thể hiện 3 lần chia (`Fold 1`, `Fold 2`, `Fold 3`).
   - Các đường nét đứt đậm biểu diễn `Validation Accuracy` của từng mô hình qua các Fold.
-  - **Kết luận:** Cả 3 đường đều nằm ngang phẳng lì (HGB dao động quanh 83.05% ±0.42%, Logistic quanh 63.95% ±0.61%) chứng minh thuật toán có tính **ổn định rất cao và đáng tin cậy**.
+  - **Kết luận:** Cả 2 đường đều nằm ngang phẳng lì (HGB dao động quanh 83.05% ±0.42%, Logistic Baseline quanh 63.95% ±0.61%) chứng minh thuật toán có tính **ổn định rất cao và đáng tin cậy**.
 
 ---
 

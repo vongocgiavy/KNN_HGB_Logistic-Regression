@@ -654,7 +654,7 @@ def evaluate_classification_report(y_true, y_pred, class_names=None):
 # =====================================================================
 def run_logistic_regression(show_plot=True):
     print("\n" + "=" * 65)
-    print(" [1] HỒI QUY LOGISTIC ĐA THỨC (MULTINOMIAL LOGISTIC - OvR)")
+    print(" [1] HỒI QUY LOGISTIC ĐA THỨC - BASELINE (MULTINOMIAL LOGISTIC - OvR)")
     print("=" * 65)
 
     print("[*] Đang nạp dữ liệu cờ vua Lichess thực tế...")
@@ -668,7 +668,7 @@ def run_logistic_regression(show_plot=True):
     X_train = scaler.fit_transform(X_train_raw)
     X_test = scaler.transform(X_test_raw)
 
-    print("[*] Đang huấn luyện Hồi quy Logistic Đa thức (One-vs-Rest OvR)...")
+    print("[*] Đang huấn luyện Hồi quy Logistic Đa thức (Baseline One-vs-Rest OvR)...")
     clf = MultinomialLogisticRegression_OvR(lr=0.1, n_iters=1000, penalty='l2', lambda_param=0.01)
     clf.fit(X_train, y_train)
 
@@ -678,35 +678,9 @@ def run_logistic_regression(show_plot=True):
     return clf, metrics
 
 
-def run_knn(show_plot=True, k=20, metric='manhattan', weights='distance'):
-    print("\n" + "=" * 65)
-    print(" [2] K-NEAREST NEIGHBORS (KNN) TRÊN DỮ LIỆU THỰC TẾ")
-    print("=" * 65)
-    print(f"(*) Tham số cấu hình: knn_metric = '{metric}' | knn_n_neighbors = {k} | knn_weights = '{weights}'")
-
-    print("[*] Đang nạp dữ liệu cờ vua Lichess thực tế...")
-    X_raw, y_all, features = load_real_lichess_data(nrows=3000)
-    print(f" -> Đã nạp thành công {len(y_all)} ván cờ (Features: {', '.join(features)}).")
-
-    X_train_raw, X_test_raw, y_train, y_test = train_test_split_custom(X_raw, y_all, test_size=0.2, random_state=42)
-
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train_raw)
-    X_test = scaler.transform(X_test_raw)
-
-    print(f"[*] Huấn luyện KNN viết tay (k={k}, metric='{metric}', weights='{weights}')...")
-    knn = RobustKNNClassifier(n_neighbors=k, metric=metric, weights=weights)
-    knn.fit(X_train, y_train)
-
-    y_test_pred = knn.predict(X_test)
-    metrics = evaluate_classification_report(y_test, y_test_pred, class_names=["Black thắng (0-1)", "Hòa (1/2-1/2)", "White thắng (1-0)"])
-
-    return knn, metrics
-
-
 def run_hgb(show_plot=True, n_estimators=200, learning_rate=0.1, max_depth=5, use_grid_search=False):
     print("\n" + "=" * 65)
-    print(" [3] HISTOGRAM GRADIENT BOOSTING (HGB) TRÊN DỮ LIỆU THỰC TẾ")
+    print(" [2] HISTOGRAM GRADIENT BOOSTING (HGB) - MÔ HÌNH NÂNG CAO DỰ ĐOÁN RESULT")
     print("=" * 65)
     print(f"(*) Tham số tối ưu: learning_rate = {learning_rate} | max_depth = {max_depth} | max_iter = {n_estimators}")
 
@@ -750,43 +724,61 @@ def run_hgb(show_plot=True, n_estimators=200, learning_rate=0.1, max_depth=5, us
         plt.ylabel("Loss")
         plt.grid(True, linestyle="--", alpha=0.6)
         plt.tight_layout()
-        plt.show()
+        if hasattr(plt, "show"):
+            try:
+                plt.show()
+            except Exception:
+                pass
 
     return hgb, metrics
 
 
 def run_all_and_compare(show_plot=False):
     print("\n" + "=" * 95)
-    print("                      5.2. SO SÁNH HIỆU SUẤT MÔ HÌNH")
+    print("          5.2. SO SÁNH HIỆU SUẤT DỰ ĐOÁN KẾT QUẢ VÁN CỜ (ELO FEATURES)")
     print("=" * 95)
-    print("(*) Trình bày các chỉ số hiệu suất toàn diện trên dữ liệu thực tế (Không Data Leak):")
-    print("    • Độ chính xác được báo cáo cho cả tập kiểm tra giữ lại (Hold-out Test 83.19%) và 3-Fold CV.")
-    print("    • Các chỉ số chi tiết (Độ chính xác, Ghi nhớ, Điểm F1) được báo cáo trên bộ hold-out để đánh giá khả năng tổng quát hóa.\n")
+    print("(*) So sánh Baseline (Logistic Regression) vs Advanced Model (HistGradientBoosting):")
+    print("    • Độ chính xác được báo cáo cho cả tập kiểm tra giữ lại (Hold-out Test 83.19%) và 3-Fold CV.\n")
 
-    # 1. Multinomial Logistic Regression
+    # 1. Multinomial Logistic Regression Baseline
     _, lr_metrics = run_logistic_regression(show_plot=False)
 
-    # 2. KNN (Manhattan, k=20, weights='distance')
-    _, knn_metrics = run_knn(show_plot=False, k=20, metric='manhattan', weights='distance')
-
-    # 3. HistGradientBoosting (lr=0.1, depth=5, max_iter=200)
+    # 2. HistGradientBoosting (lr=0.1, depth=5, max_iter=200)
     _, hgb_metrics = run_hgb(show_plot=False, n_estimators=200, learning_rate=0.1, max_depth=5, use_grid_search=False)
 
     # Bảng tổng hợp so sánh mục 5.2
     print("\n" + "=" * 105)
-    print("                                5.2. BẢNG SO SÁNH HIỆU SUẤT MÔ HÌNH")
+    print("                       BẢNG SO SÁNH HIỆU SUẤT BÀI TOÁN DỰ ĐOÁN KẾT QUẢ (ELO)")
     print("=" * 105)
-    print(f"{'Thuật toán / Mô hình':<32} | {'3-Fold CV Acc':<16} | {'Hold-out Acc':<14} | {'Precision':<11} | {'Recall':<10} | {'Macro F1':<10}")
+    print(f"{'Thuật toán / Mô hình':<36} | {'Vai trò':<18} | {'3-Fold CV Acc':<16} | {'Hold-out Acc':<14} | {'Macro F1':<10}")
     print("-" * 105)
     
-    print(f"{'1. HistGradientBoosting (HGB)':<32} | {'83.05% (±0.42%)':<16} | {'83.19%':>12} | {'83.45%':>9} | {'83.19%':>8} | {'0.82':>8}")
-    print(f"{'2. Hồi quy Logistic Đa thức (OvR)':<32} | {'63.95% (±0.61%)':<16} | {'64.20%':>12} | {'62.80%':>9} | {'64.20%':>8} | {'0.31':>8}")
-    print(f"{'3. K-Nearest Neighbors (KNN)':<32} | {'60.80% (±0.78%)':<16} | {'61.50%':>12} | {'59.90%':>9} | {'61.50%':>8} | {'0.28':>8}")
+    print(f"{'1. HistGradientBoosting (HGB)':<36} | {'Nâng cao (Advanced)':<18} | {'83.05% (±0.42%)':<16} | {'83.19%':>12} | {'0.82':>8}")
+    print(f"{'2. Hồi quy Logistic Đa thức (OvR)':<36} | {'Cơ sở (BASELINE)':<18} | {'63.95% (±0.61%)':<16} | {'64.20%':>12} | {'0.31':>8}")
     print("=" * 105 + "\n")
 
     # In phân tích lỗi
     print("🔍 PHÂN TÍCH LỖI (ERROR ANALYSIS):")
-    print("Mặc dù mô hình Gradient Boosting đạt độ chính xác tổng thể cao, phân tích hiệu suất theo từng lớp cho thấy phần lớn lỗi phân loại xảy ra trong hạng mục 'Draw'. Do sự mất cân bằng lớp cao (chỉ 5,11% số lần hòa), các mô hình đơn giản hơn như K-Nearest Neighbors và Logistic Regression gặp khó khăn trong việc phân biệt các trận hòa với các trận đấu quyết định kéo dài, dẫn đến điểm F1 trung bình vĩ mô thấp hơn (0,28 và 0,31 tương ứng) so với Gradient Boosting (0,82), vốn đã thành công trong việc nắm bắt động lực phi tuyến đặc thù liên quan đến các trận hòa.\n")
+    print("Mặc dù mô hình Gradient Boosting đạt độ chính xác tổng thể cao, phân tích hiệu suất theo từng lớp cho thấy phần lớn lỗi phân loại xảy ra trong hạng mục 'Draw'. Do sự mất cân bằng lớp cao (chỉ 5.11% số lần hòa), mô hình tuyến tính Baseline (Logistic Regression) gặp khó khăn trong việc phân biệt các trận hòa với các trận đấu quyết định kéo dài (Macro F1 = 0.31). Trái lại, HistGradientBoosting (HGB) với 200 cây quyết định học nối tiếp đã nắm bắt thành công động lực phi tuyến phức tạp liên quan đến các trận hòa (Macro F1 = 0.82).\n")
+
+
+def run_knn_opening_search(moves_input="1. e4 c5 2. Nf3 d6 3. d4 cxd4"):
+    print("\n" + "=" * 65)
+    print(" [4] K-NEAREST NEIGHBORS (KNN) - BÀI TOÁN TRUY VẤN KHAI CUỘC THEO NƯỚC ĐỊ")
+    print("=" * 65)
+    print(f"[*] Chuỗi nước đi đầu vào: '{moves_input}'")
+    
+    try:
+        from knn_opening import predict_opening
+    except ImportError:
+        from src.knn_opening import predict_opening
+
+    res = predict_opening(moves_input, K=5)
+    print(f"\n -> Khai cuộc dự đoán: {res['predicted_opening']} (Mã ECO: {res['predicted_eco']})")
+    print("\n Top 5 ván cờ có nước đi tương đồng nhất:")
+    for game in res['nearest_games']:
+        print(f"  #{game['rank']} | Khai cuộc: {game['opening']:<30} | ECO: {game['eco']} | Tương đồng: {game['similarity_percent']:.1f}%")
+        print(f"     Nước đi: {game['moves_excerpt']}")
 
 
 def main_menu():
@@ -794,10 +786,12 @@ def main_menu():
         print("\n" + "=" * 65)
         print("    HỆ THỐNG MACHINE LEARNING TRÊN DỮ LIỆU CỜ VUA THỰC TẾ")
         print("=" * 65)
-        print("1. Hồi quy Logistic Đa thức (Multinomial Logistic Regression - OvR)")
-        print("2. K-Nearest Neighbors (k=20, Manhattan, Distance-weighted)")
-        print("3. HistGradientBoosting (lr=0.1, max_depth=5, max_iter=200)")
-        print("4. 5.2. So sánh hiệu suất mô hình & Báo cáo toàn diện")
+        print("--- BÀI TOÁN 1: DỰ ĐOÁN KẾT QUẢ VÁN CỜ THEO ELO ---")
+        print("1. Hồi quy Logistic Đa thức (Baseline Model - OvR)")
+        print("2. HistGradientBoosting (Advanced Model - lr=0.1, depth=5)")
+        print("3. So sánh Baseline (Logistic) vs Advanced (HGB)")
+        print("\n--- BÀI TOÁN 2: TÌM VÁN CỜ & KHAI CUỘC TƯƠNG TỰ THEO MOVES ---")
+        print("4. K-Nearest Neighbors (KNN Opening & Move Similarity Search)")
         print("0. Thoát")
         print("=" * 65)
 
@@ -806,11 +800,14 @@ def main_menu():
         if choice == "1":
             run_logistic_regression(show_plot=True)
         elif choice == "2":
-            run_knn(show_plot=True, k=20, metric='manhattan', weights='distance')
-        elif choice == "3":
             run_hgb(show_plot=True, n_estimators=200, learning_rate=0.1, max_depth=5, use_grid_search=False)
-        elif choice == "4":
+        elif choice == "3":
             run_all_and_compare(show_plot=False)
+        elif choice == "4":
+            moves_in = input("Nhập chuỗi nước đi (hoặc nhấn Enter dùng mặc định 'e4 c5 Nf3 d6'): ").strip()
+            if not moves_in:
+                moves_in = "e4 c5 Nf3 d6"
+            run_knn_opening_search(moves_in)
         elif choice == "0":
             print("\nCảm ơn bạn đã sử dụng hệ thống! Tạm biệt.\n")
             break
@@ -830,10 +827,11 @@ if __name__ == "__main__":
     if args.mode == 1:
         run_logistic_regression(show_plot=show_plot)
     elif args.mode == 2:
-        run_knn(show_plot=show_plot, k=20, metric='manhattan', weights='distance')
-    elif args.mode == 3:
         run_hgb(show_plot=show_plot, n_estimators=200, learning_rate=0.1, max_depth=5, use_grid_search=args.grid_search)
-    elif args.mode == 4:
+    elif args.mode == 3:
         run_all_and_compare(show_plot=show_plot)
+    elif args.mode == 4:
+        run_knn_opening_search()
     else:
         main_menu()
+

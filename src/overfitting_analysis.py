@@ -30,7 +30,6 @@ from src.main import (
     StandardScaler,
     train_test_split_custom,
     MultinomialLogisticRegression_OvR,
-    RobustKNNClassifier,
     RobustHGBClassifier,
     HistBinner,
     HistDecisionTree,
@@ -162,28 +161,20 @@ print(f"  => {verdict_lc}  (ngưỡng tham khảo: gap < 0.05)")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# BƯỚC 3: TRAIN ACC vs HOLD-OUT ACC cho cả 3 mô hình
+# BƯỚC 3: TRAIN ACC vs HOLD-OUT ACC (Baseline vs Advanced HGB)
 # ─────────────────────────────────────────────────────────────────────────────
-print("\n[2] So sánh Train Acc vs Hold-out Acc (3 mô hình)...")
+print("\n[2] So sánh Train Acc vs Hold-out Acc (Baseline vs HGB)...")
 
-# 2a. Logistic Regression
-print("  [*] Logistic Regression...")
+# 2a. Logistic Regression Baseline
+print("  [*] Logistic Regression (Baseline)...")
 lr_m = MultinomialLogisticRegression_OvR(lr=0.1, n_iters=1000, penalty='l2', lambda_param=0.01)
 lr_m.fit(X_tr_sc, y_tr_multi)
 lr_train = acc(y_tr_multi, lr_m.predict(X_tr_sc))
 lr_test  = acc(y_te_multi, lr_m.predict(X_te_sc))
 print(f"     Train: {lr_train:.2f}%  |  Hold-out: {lr_test:.2f}%  |  Gap: {lr_train-lr_test:+.2f}%")
 
-# 2b. KNN (n_neighbors=20, manhattan)
-print("  [*] KNN (n_neighbors=20, manhattan)...")
-knn_m = RobustKNNClassifier(n_neighbors=20, metric='manhattan', weights='distance')
-knn_m.fit(X_tr_sc, y_tr_multi)
-knn_train = acc(y_tr_multi, knn_m.predict(X_tr_sc))
-knn_test  = acc(y_te_multi, knn_m.predict(X_te_sc))
-print(f"     Train: {knn_train:.2f}%  |  Hold-out: {knn_test:.2f}%  |  Gap: {knn_train-knn_test:+.2f}%")
-
-# 2c. HGB (binary, lr=0.1, depth=5, iter=200)
-print("  [*] HGB (lr=0.1, depth=5, iter=200)...")
+# 2b. HGB (binary, lr=0.1, depth=5, iter=200)
+print("  [*] HistGradientBoosting (Advanced HGB)...")
 hgb_m = RobustHGBClassifier(n_estimators=200, learning_rate=0.1, max_depth=5,
                               max_bins=64, l2_regularization=1.5, verbose=False)
 hgb_m.fit(X_tr_raw, y_tr_bin)
@@ -192,9 +183,8 @@ hgb_test  = acc(y_te_bin, hgb_m.predict(X_te_raw))
 print(f"     Train: {hgb_train:.2f}%  |  Hold-out: {hgb_test:.2f}%  |  Gap: {hgb_train-hgb_test:+.2f}%")
 
 model_results = {
-    "Logistic\nRegression": (lr_train,  lr_test),
-    "KNN\n(k=20, Manhattan)": (knn_train, knn_test),
-    "HGB\n(lr=0.1,depth=5)": (hgb_train, hgb_test),
+    "Logistic Regression\n(BASELINE)": (lr_train,  lr_test),
+    "HistGradientBoosting\n(HGB Advanced)": (hgb_train, hgb_test),
 }
 
 
@@ -205,7 +195,6 @@ print("\n[3] 3-Fold CV – kiểm tra độ ổn định (Train vs Val mỗi Fol
 
 splits = kfold_indices(len(y_tr_multi), k=3, seed=SEED)
 cv_lr_tr,  cv_lr_va  = [], []
-cv_knn_tr, cv_knn_va = [], []
 cv_hgb_tr, cv_hgb_va = [], []
 
 for fold_i, (tr_idx, va_idx) in enumerate(splits, 1):
@@ -215,17 +204,11 @@ for fold_i, (tr_idx, va_idx) in enumerate(splits, 1):
     y_f_tr_bin = (y_f_tr == 2).astype(int)
     y_f_va_bin = (y_f_va == 2).astype(int)
 
-    # Logistic
+    # Logistic Baseline
     lm = MultinomialLogisticRegression_OvR(lr=0.1, n_iters=500, penalty='l2', lambda_param=0.01)
     lm.fit(X_f_tr_sc, y_f_tr)
     cv_lr_tr.append(acc(y_f_tr, lm.predict(X_f_tr_sc)))
     cv_lr_va.append(acc(y_f_va, lm.predict(X_f_va_sc)))
-
-    # KNN
-    km = RobustKNNClassifier(n_neighbors=20, metric='manhattan', weights='distance')
-    km.fit(X_f_tr_sc, y_f_tr)
-    cv_knn_tr.append(acc(y_f_tr, km.predict(X_f_tr_sc)))
-    cv_knn_va.append(acc(y_f_va, km.predict(X_f_va_sc)))
 
     # HGB (binary)
     hm = RobustHGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=5,
@@ -236,12 +219,10 @@ for fold_i, (tr_idx, va_idx) in enumerate(splits, 1):
 
     print(f"  Fold {fold_i}: "
           f"LR({cv_lr_va[-1]:.1f}%, gap={cv_lr_tr[-1]-cv_lr_va[-1]:+.1f}%)  "
-          f"KNN({cv_knn_va[-1]:.1f}%, gap={cv_knn_tr[-1]-cv_knn_va[-1]:+.1f}%)  "
           f"HGB({cv_hgb_va[-1]:.1f}%, gap={cv_hgb_tr[-1]-cv_hgb_va[-1]:+.1f}%)")
 
 print(f"\n  Tổng hợp 3-Fold:")
 print(f"  LR  Val: {np.mean(cv_lr_va):.2f}% ±{np.std(cv_lr_va):.2f}%  |  Avg Gap: {np.mean(np.array(cv_lr_tr)-np.array(cv_lr_va)):+.2f}%")
-print(f"  KNN Val: {np.mean(cv_knn_va):.2f}% ±{np.std(cv_knn_va):.2f}%  |  Avg Gap: {np.mean(np.array(cv_knn_tr)-np.array(cv_knn_va)):+.2f}%")
 print(f"  HGB Val: {np.mean(cv_hgb_va):.2f}% ±{np.std(cv_hgb_va):.2f}%  |  Avg Gap: {np.mean(np.array(cv_hgb_tr)-np.array(cv_hgb_va)):+.2f}%")
 
 
@@ -256,11 +237,10 @@ PURPLE = "#9C27B0"
 GREEN  = "#4CAF50"
 ORANGE = "#FF9800"
 PINK   = "#E91E63"
-TEAL   = "#009688"
 
 fig = plt.figure(figsize=(18, 11))
-fig.suptitle("Phân tích Overfitting & Learning Curve\n"
-             "Dữ liệu Lichess thực tế – 100% From Scratch (Python + NumPy)",
+fig.suptitle("Phân tích Overfitting & Learning Curve (Result Prediction by Elo)\n"
+             "Baseline Logistic Regression vs HistGradientBoosting (HGB)",
              fontsize=14, fontweight="bold", y=0.99)
 
 gs = gridspec.GridSpec(2, 3, figure=fig, hspace=0.45, wspace=0.38)
@@ -268,7 +248,7 @@ gs = gridspec.GridSpec(2, 3, figure=fig, hspace=0.45, wspace=0.38)
 # ── Biểu đồ 1: HGB Learning Curve (chiếm 2/3 hàng trên) ──
 ax1 = fig.add_subplot(gs[0, :2])
 stages = list(range(1, len(train_loss_hist) + 1))
-ax1.plot(stages, train_loss_hist, color=BLUE, lw=2.2, label="Train Loss (75% của tập Train)")
+ax1.plot(stages, train_loss_hist, color=BLUE, lw=2.2, label="Train Loss (75% tập Train)")
 ax1.plot(stages, val_loss_hist,   color=RED,  lw=2.2, linestyle="--", label="Validation Loss (25% còn lại)")
 ax1.fill_between(stages, train_loss_hist, val_loss_hist,
                  alpha=0.13, color=PURPLE,
@@ -315,7 +295,7 @@ ax2.text(0.5, 0.14,
          ha="center", va="center", fontsize=9, transform=ax2.transAxes,
          color="#555", style="italic")
 
-# ── Biểu đồ 3: Train vs Hold-out Accuracy (3 mô hình) ──
+# ── Biểu đồ 3: Train vs Hold-out Accuracy (Logistic Baseline vs HGB) ──
 ax3 = fig.add_subplot(gs[1, :2])
 names     = list(model_results.keys())
 tr_vals   = [model_results[n][0] for n in names]
@@ -341,8 +321,8 @@ for i, g in enumerate(gaps3):
 ax3.set_xticks(x)
 ax3.set_xticklabels(names, fontsize=10)
 ax3.set_ylabel("Accuracy (%)")
-ax3.set_title("Biểu đồ 2: Train vs Hold-out Test Accuracy – 3 Mô hình\n"
-              "(Gap nhỏ ≈ Không Overfitting | Gap > 10% ⚠️ = Có dấu hiệu Overfit)",
+ax3.set_title("Biểu đồ 2: Train vs Hold-out Test Accuracy (Elo Result Prediction)\n"
+              "(Gap nhỏ ≈ Không Overfitting)",
               fontsize=10, fontweight="bold")
 ax3.legend(fontsize=9)
 ax3.set_ylim(0, max(tr_vals) + 16)
@@ -354,11 +334,9 @@ fold_x = np.arange(3)
 fold_labels = ["Fold 1", "Fold 2", "Fold 3"]
 
 ax4.plot(fold_x, cv_lr_tr,  'o-',  color=GREEN,  lw=1.3, ms=6, alpha=0.35)
-ax4.plot(fold_x, cv_knn_tr, 's-',  color=ORANGE, lw=1.3, ms=6, alpha=0.35)
 ax4.plot(fold_x, cv_hgb_tr, 'D-',  color=PINK,   lw=1.3, ms=6, alpha=0.35)
 
-ax4.plot(fold_x, cv_lr_va,  'o--', color=GREEN,  lw=2, ms=8, label=f"LR Val  ({np.mean(cv_lr_va):.1f}%±{np.std(cv_lr_va):.1f}%)")
-ax4.plot(fold_x, cv_knn_va, 's--', color=ORANGE, lw=2, ms=8, label=f"KNN Val ({np.mean(cv_knn_va):.1f}%±{np.std(cv_knn_va):.1f}%)")
+ax4.plot(fold_x, cv_lr_va,  'o--', color=GREEN,  lw=2, ms=8, label=f"Logistic Baseline Val ({np.mean(cv_lr_va):.1f}%±{np.std(cv_lr_va):.1f}%)")
 ax4.plot(fold_x, cv_hgb_va, 'D--', color=PINK,   lw=2, ms=8, label=f"HGB Val ({np.mean(cv_hgb_va):.1f}%±{np.std(cv_hgb_va):.1f}%)")
 
 ax4.set_xticks(fold_x)
@@ -372,16 +350,19 @@ ax4.grid(True, linestyle="--", alpha=0.45)
 # Footer kết luận chung
 footer = (
     f"Kết luận tổng hợp:  "
-    f"LR Gap={lr_train-lr_test:+.1f}%  |  "
-    f"KNN Gap={knn_train-knn_test:+.1f}%  |  "
+    f"Logistic Baseline Gap={lr_train-lr_test:+.1f}%  |  "
     f"HGB Gap={hgb_train-hgb_test:+.1f}%  —  "
-    f"Cả 3 mô hình tổng quát hóa tốt. "
-    f"HGB: Learning Curve hội tụ ổn định với L2 Reg + Early Stopping."
+    f"Cả 2 mô hình tổng quát hóa tốt. HGB vượt trội về độ chính xác."
 )
 fig.text(0.5, 0.005, footer, ha="center", fontsize=8.8, style="italic", color="#333")
 
 os.makedirs("outputs", exist_ok=True)
 plt.savefig("outputs/overfitting_analysis.png", dpi=140, bbox_inches="tight")
 print("[OK] Đã lưu: outputs/overfitting_analysis.png")
-plt.show()
+if hasattr(plt, "show"):
+    try:
+        plt.show()
+    except Exception:
+        pass
 print("\nHoàn thành phân tích Overfitting & Learning Curve!")
+
