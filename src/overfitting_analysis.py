@@ -38,9 +38,9 @@ from src.main import (
 SEED = 42
 np.random.seed(SEED)
 
-# ─────────────────────────────────────────────────────────────────────────────
-# TIỆN ÍCH
-# ─────────────────────────────────────────────────────────────────────────────
+#─────────────────────────────────────────────────────────────────────────────
+#TIỆN ÍCH
+#─────────────────────────────────────────────────────────────────────────────
 def acc(y_true, y_pred):
     return float(np.mean(np.array(y_true) == np.array(y_pred))) * 100.0
 
@@ -58,9 +58,9 @@ def kfold_indices(n, k=3, seed=SEED):
     return [(np.concatenate([folds[j] for j in range(k) if j != i]), folds[i]) for i in range(k)]
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# BƯỚC 1: NẠP & PHÂN CHIA DỮ LIỆU (KHÔNG DATA LEAK)
-# ─────────────────────────────────────────────────────────────────────────────
+#─────────────────────────────────────────────────────────────────────────────
+#BƯỚC 1: NẠP & PHÂN CHIA DỮ LIỆU (KHÔNG DATA LEAK)
+#─────────────────────────────────────────────────────────────────────────────
 print("\n" + "=" * 72)
 print("  PHÂN TÍCH OVERFITTING & LEARNING CURVE – DỮ LIỆU LICHESS THỰC TẾ")
 print("=" * 72)
@@ -68,7 +68,7 @@ print("[*] Nạp dữ liệu cờ vua Lichess thực tế...")
 
 X_raw, y_multi, features = load_real_lichess_data(nrows=5000)
 
-# SPLIT TRƯỚC => scaler FIT trên train => KHÔNG DATA LEAK
+#SPLIT TRƯỚC => scaler FIT trên train => KHÔNG DATA LEAK
 X_tr_raw, X_te_raw, y_tr_multi, y_te_multi = train_test_split_custom(
     X_raw, y_multi, test_size=0.2, random_state=SEED
 )
@@ -77,7 +77,7 @@ scaler = StandardScaler()
 X_tr_sc = scaler.fit(X_tr_raw).transform(X_tr_raw)
 X_te_sc = scaler.transform(X_te_raw)
 
-# Nhãn nhị phân cho HGB (White thắng vs không)
+#Nhãn nhị phân cho HGB (White thắng vs không)
 y_tr_bin = (y_tr_multi == 2).astype(int)
 y_te_bin = (y_te_multi == 2).astype(int)
 
@@ -86,11 +86,11 @@ print(f"  Phân phối nhãn Train => 0(Đen):{np.sum(y_tr_multi==0):,} | "
       f"1(Hòa):{np.sum(y_tr_multi==1):,} | 2(Trắng):{np.sum(y_tr_multi==2):,}")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# BƯỚC 2: HGB LEARNING CURVE (Train Loss vs Val Loss theo stage)
-# Phân chia INTERNAL: 75% train / 25% val – CẢ HAI dùng chung binner
-# Binner FIT CHỈ trên phần train_lc => không leak
-# ─────────────────────────────────────────────────────────────────────────────
+#─────────────────────────────────────────────────────────────────────────────
+#BƯỚC 2: HGB LEARNING CURVE (Train Loss vs Val Loss theo stage)
+#Phân chia INTERNAL: 75% train / 25% val – CẢ HAI dùng chung binner
+#Binner FIT CHỈ trên phần train_lc => không leak
+#─────────────────────────────────────────────────────────────────────────────
 print("\n[1] HGB Learning Curve (Train Loss vs Validation Loss)...")
 
 n_lc = int(0.75 * len(y_tr_bin))
@@ -99,7 +99,7 @@ y_lc_tr  = y_tr_bin[:n_lc].astype(np.float64)
 X_lc_val = X_tr_raw[n_lc:]
 y_lc_val = y_tr_bin[n_lc:].astype(np.float64)
 
-# Binner fit CHỈ trên lc_train
+#Binner fit CHỈ trên lc_train
 lc_binner = HistBinner(max_bins=64)
 X_lc_tr_b  = lc_binner.fit_transform(np.array(X_lc_tr,  dtype=np.float64))
 X_lc_val_b = lc_binner.transform(np.array(X_lc_val, dtype=np.float64))
@@ -156,16 +156,16 @@ val_acc_lc   = acc((raw_val > 0).astype(int), y_lc_val.astype(int))
 print(f"  Train Loss: {final_train_loss:.5f} | Train Acc: {train_acc_lc:.2f}%")
 print(f"  Val   Loss: {final_val_loss:.5f} | Val   Acc: {val_acc_lc:.2f}%")
 print(f"  Gap Loss (Val - Train): {gap_loss:+.5f}")
-verdict_lc = "KHÔNG BỊ OVERFITTING ✅" if gap_loss < 0.05 else "CÓ DẤU HIỆU OVERFITTING ⚠️"
+verdict_lc = "KHÔNG BỊ OVERFITTING " if gap_loss < 0.05 else "CÓ DẤU HIỆU OVERFITTING "
 print(f"  => {verdict_lc}  (ngưỡng tham khảo: gap < 0.05)")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# BƯỚC 3: TRAIN ACC vs HOLD-OUT ACC (Baseline vs Advanced HGB)
-# ─────────────────────────────────────────────────────────────────────────────
+#─────────────────────────────────────────────────────────────────────────────
+#BƯỚC 3: TRAIN ACC vs HOLD-OUT ACC (Baseline vs Advanced HGB)
+#─────────────────────────────────────────────────────────────────────────────
 print("\n[2] So sánh Train Acc vs Hold-out Acc (Baseline vs HGB)...")
 
-# 2a. Logistic Regression Baseline
+#2a. Logistic Regression Baseline
 print("  [*] Logistic Regression (Baseline)...")
 lr_m = MultinomialLogisticRegression_OvR(lr=0.1, n_iters=1000, penalty='l2', lambda_param=0.01)
 lr_m.fit(X_tr_sc, y_tr_multi)
@@ -173,7 +173,7 @@ lr_train = acc(y_tr_multi, lr_m.predict(X_tr_sc))
 lr_test  = acc(y_te_multi, lr_m.predict(X_te_sc))
 print(f"     Train: {lr_train:.2f}%  |  Hold-out: {lr_test:.2f}%  |  Gap: {lr_train-lr_test:+.2f}%")
 
-# 2b. HGB (binary, lr=0.1, depth=5, iter=200)
+#2b. HGB (binary, lr=0.1, depth=5, iter=200)
 print("  [*] HistGradientBoosting (Advanced HGB)...")
 hgb_m = RobustHGBClassifier(n_estimators=200, learning_rate=0.1, max_depth=5,
                               max_bins=64, l2_regularization=1.5, verbose=False)
@@ -188,9 +188,9 @@ model_results = {
 }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# BƯỚC 4: 3-FOLD CV VARIANCE (Train vs Val mỗi fold)
-# ─────────────────────────────────────────────────────────────────────────────
+#─────────────────────────────────────────────────────────────────────────────
+#BƯỚC 4: 3-FOLD CV VARIANCE (Train vs Val mỗi fold)
+#─────────────────────────────────────────────────────────────────────────────
 print("\n[3] 3-Fold CV – kiểm tra độ ổn định (Train vs Val mỗi Fold)...")
 
 splits = kfold_indices(len(y_tr_multi), k=3, seed=SEED)
@@ -226,9 +226,9 @@ print(f"  LR  Val: {np.mean(cv_lr_va):.2f}% ±{np.std(cv_lr_va):.2f}%  |  Avg Ga
 print(f"  HGB Val: {np.mean(cv_hgb_va):.2f}% ±{np.std(cv_hgb_va):.2f}%  |  Avg Gap: {np.mean(np.array(cv_hgb_tr)-np.array(cv_hgb_va)):+.2f}%")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# BƯỚC 5: VẼ BIỂU ĐỒ
-# ─────────────────────────────────────────────────────────────────────────────
+#─────────────────────────────────────────────────────────────────────────────
+#BƯỚC 5: VẼ BIỂU ĐỒ
+#─────────────────────────────────────────────────────────────────────────────
 print("\n[4] Vẽ toàn bộ biểu đồ phân tích Overfitting...")
 
 BLUE   = "#2196F3"
@@ -245,7 +245,7 @@ fig.suptitle("Phân tích Overfitting & Learning Curve (Result Prediction by Elo
 
 gs = gridspec.GridSpec(2, 3, figure=fig, hspace=0.45, wspace=0.38)
 
-# ── Biểu đồ 1: HGB Learning Curve (chiếm 2/3 hàng trên) ──
+#── Biểu đồ 1: HGB Learning Curve (chiếm 2/3 hàng trên) ──
 ax1 = fig.add_subplot(gs[0, :2])
 stages = list(range(1, len(train_loss_hist) + 1))
 ax1.plot(stages, train_loss_hist, color=BLUE, lw=2.2, label="Train Loss (75% tập Train)")
@@ -264,7 +264,7 @@ ax1.set_title(f"Biểu đồ 1: HGB Learning Curve – Train vs Validation Loss\
 ax1.legend(fontsize=9, loc="upper right")
 ax1.grid(True, linestyle="--", alpha=0.45)
 
-# Annotation điểm cuối
+#Annotation điểm cuối
 ax1.annotate(f"Train={final_train_loss:.4f}\nAcc={train_acc_lc:.1f}%",
              xy=(stages[-1], final_train_loss), xytext=(-70, 10),
              textcoords="offset points", fontsize=8, color=BLUE,
@@ -274,7 +274,7 @@ ax1.annotate(f"Val={final_val_loss:.4f}\nAcc={val_acc_lc:.1f}%",
              textcoords="offset points", fontsize=8, color=RED,
              arrowprops=dict(arrowstyle="->", color=RED, lw=1))
 
-# ── Biểu đồ 2: Panel Kết luận Overfitting ──
+#── Biểu đồ 2: Panel Kết luận Overfitting ──
 ax2 = fig.add_subplot(gs[0, 2])
 ax2.axis("off")
 vc = GREEN if gap_loss < 0.05 else RED
@@ -295,7 +295,7 @@ ax2.text(0.5, 0.14,
          ha="center", va="center", fontsize=9, transform=ax2.transAxes,
          color="#555", style="italic")
 
-# ── Biểu đồ 3: Train vs Hold-out Accuracy (Logistic Baseline vs HGB) ──
+#── Biểu đồ 3: Train vs Hold-out Accuracy (Logistic Baseline vs HGB) ──
 ax3 = fig.add_subplot(gs[1, :2])
 names     = list(model_results.keys())
 tr_vals   = [model_results[n][0] for n in names]
@@ -328,7 +328,7 @@ ax3.legend(fontsize=9)
 ax3.set_ylim(0, max(tr_vals) + 16)
 ax3.grid(True, axis="y", linestyle="--", alpha=0.45)
 
-# ── Biểu đồ 4: 3-Fold CV – Val Acc mỗi fold ──
+#── Biểu đồ 4: 3-Fold CV – Val Acc mỗi fold ──
 ax4 = fig.add_subplot(gs[1, 2])
 fold_x = np.arange(3)
 fold_labels = ["Fold 1", "Fold 2", "Fold 3"]
@@ -347,7 +347,7 @@ ax4.set_title("Biểu đồ 3: 3-Fold CV\nTrain (mờ) vs Val (đậm) theo từ
 ax4.legend(fontsize=8, loc="lower right")
 ax4.grid(True, linestyle="--", alpha=0.45)
 
-# Footer kết luận chung
+#Footer kết luận chung
 footer = (
     f"Kết luận tổng hợp:  "
     f"Logistic Baseline Gap={lr_train-lr_test:+.1f}%  |  "

@@ -1,5 +1,5 @@
 ===============================================================================================
-          5.2. SO SÁNH HIỆU SUẤT MÔ HÌNH DỰ ĐOÁN KẾT QUẢ VÁN CỜ (ELO FEATURES)
+ 5.2. SO SÁNH HIỆU SUẤT MÔ HÌNH DỰ ĐOÁN KẾT QUẢ VÁN CỜ (ELO FEATURES)
 ===============================================================================================
 
 Bộ phân loại Tăng cường Gradient Biểu đồ Histogram (HGB) đạt hiệu suất vượt trội so với
@@ -7,12 +7,12 @@ mô hình cơ sở Hồi quy Logistic (Baseline), với độ chính xác giữ 
 Sự đồng bộ chặt chẽ giữa điểm số Hold-out Test và điểm 3-Fold Cross-Validation chứng minh
 khả năng tổng quát hóa vững chắc của HGB mà không bị quá khớp.
 
-                                 Thuật toán / Mô hình                     Vai trò 3-Fold CV Accuracy Hold-out Test Accuracy Precision Recall Macro F1
-HistGradientBoosting (HGB, lr=0.1, depth=5, iter=200) Mô hình Nâng cao (Advanced)    83.05% (±0.42%)                 83.19%    83.45% 83.19%     0.82
-Hồi quy Logistic Đa thức (Multinomial Logistic - OvR)    Mô hình Cơ sở (BASELINE)    63.95% (±0.61%)                 64.20%    62.80% 64.20%     0.31
+ Thuật toán / Mô hình Vai trò 3-Fold CV Accuracy Hold-out Test Accuracy Precision Recall Macro F1
+HistGradientBoosting (HGB, lr=0.1, depth=5, iter=200) Mô hình Nâng cao (Advanced) 83.05% (±0.42%) 83.19% 83.45% 83.19% 0.82
+Hồi quy Logistic Đa thức (Multinomial Logistic - OvR) Mô hình Cơ sở (BASELINE) 63.95% (±0.61%) 64.20% 62.80% 64.20% 0.31
 
 -----------------------------------------------------------------------------------------------
-🔍 PHÂN TÍCH LỖI (ERROR ANALYSIS):
+ PHÂN TÍCH LỖI (ERROR ANALYSIS):
 Mặc dù mô hình Gradient Boosting đạt độ chính xác tổng thể cao, phân tích hiệu suất theo từng lớp
 cho thấy phần lớn lỗi phân loại xảy ra trong hạng mục 'Draw'. Do sự mất cân bằng lớp cao (chỉ 5.11% số lần hòa),
 mô hình tuyến tính Baseline (Logistic Regression) gặp khó khăn trong việc phân biệt các trận hòa với các
@@ -20,15 +20,15 @@ trận đấu quyết định kéo dài (Macro F1 = 0.31). Trái lại, HistGrad
 học nối tiếp đã nắm bắt thành công động lực phi tuyến phức tạp liên quan đến các trận hòa (Macro F1 = 0.82).
 
 ===============================================================================================
-            5.3. PHÂN TÍCH TẦM QUAN TRỌNG CỦA TÍNH NĂNG (FEATURE IMPORTANCE)
+ 5.3. PHÂN TÍCH TẦM QUAN TRỌNG CỦA TÍNH NĂNG (FEATURE IMPORTANCE)
 ===============================================================================================
 Các giá trị phân tích tầm quan trọng của tính năng cho thấy các mẫu nhất quán giữa các thuật toán:
 
-Tính năng (Feature)  HGB Importance  Logistic Baseline |Coef|
-        rating_diff          0.5842                    0.4912
-       white_rating          0.2150                    0.2310
-       black_rating          0.1420                    0.1850
-        opening_ply          0.0385                    0.0520
-              rated          0.0203                    0.0408
+Tính năng (Feature) HGB Importance Logistic Baseline |Coef|
+ rating_diff 0.5842 0.4912
+ white_rating 0.2150 0.2310
+ black_rating 0.1420 0.1850
+ opening_ply 0.0385 0.0520
+ rated 0.0203 0.0408
 
 ===============================================================================================

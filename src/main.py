@@ -5,14 +5,14 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Đảm bảo mã hóa UTF-8 trên Windows Terminal
+#Đảm bảo mã hóa UTF-8 trên Windows Terminal
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
 
-# =====================================================================
-# PHẦN 1. NẠP DỮ LIỆU THẬT & BỘ TIỀN XỬ LÝ VIẾT TAY (KHÔNG DATA LEAK)
-# =====================================================================
+#=====================================================================
+#PHẦN 1. NẠP DỮ LIỆU THẬT & BỘ TIỀN XỬ LÝ VIẾT TAY (KHÔNG DATA LEAK)
+#=====================================================================
 def load_real_lichess_data(nrows=5000):
     """
     Nạp dữ liệu cờ vua Lichess thực tế từ file CSV (Tuyệt đối không dùng dữ liệu ngẫu nhiên):
@@ -179,9 +179,9 @@ class GridSearchCV_Custom:
         return self
 
 
-# =====================================================================
-# PHẦN 2. THUẬT TOÁN 1: HỒI QUY LOGISTIC ĐA THỨC (ONE-VS-REST OVR)
-# =====================================================================
+#=====================================================================
+#PHẦN 2. THUẬT TOÁN 1: HỒI QUY LOGISTIC ĐA THỨC (ONE-VS-REST OVR)
+#=====================================================================
 class BinaryLogisticRegression:
     def __init__(self, lr=0.1, n_iters=1500, penalty='l2', lambda_param=0.01, tol=1e-5):
         self.lr = lr
@@ -272,9 +272,9 @@ class MultinomialLogisticRegression_OvR:
         return np.mean(self.predict(X) == np.array(y))
 
 
-# =====================================================================
-# PHẦN 3. THUẬT TOÁN 2: K-NEAREST NEIGHBORS (KNN) VIẾT TAY
-# =====================================================================
+#=====================================================================
+#PHẦN 3. THUẬT TOÁN 2: K-NEAREST NEIGHBORS (KNN) VIẾT TAY
+#=====================================================================
 class RobustKNNClassifier:
     def __init__(self, n_neighbors=20, metric='manhattan', p=1, weights='distance'):
         self.n_neighbors = n_neighbors
@@ -342,9 +342,9 @@ class RobustKNNClassifier:
         return np.mean(self.predict(X) == np.array(y))
 
 
-# =====================================================================
-# PHẦN 4. THUẬT TOÁN 3: HISTOGRAM GRADIENT BOOSTING (HGB) VIẾT TAY
-# =====================================================================
+#=====================================================================
+#PHẦN 4. THUẬT TOÁN 3: HISTOGRAM GRADIENT BOOSTING (HGB) VIẾT TAY
+#=====================================================================
 class HistBinner:
     def __init__(self, max_bins=256):
         self.max_bins = max_bins
@@ -569,9 +569,9 @@ class RobustHGBClassifier:
         return np.mean(self.predict(X) == np.array(y))
 
 
-# =====================================================================
-# PHẦN 5. HÀM ĐÁNH GIÁ CHỈ SỐ TOÀN DIỆN (CLASSIFICATION REPORT)
-# =====================================================================
+#=====================================================================
+#PHẦN 5. HÀM ĐÁNH GIÁ CHỈ SỐ TOÀN DIỆN (CLASSIFICATION REPORT)
+#=====================================================================
 def evaluate_classification_report(y_true, y_pred, class_names=None):
     y_t = np.array(y_true)
     y_p = np.array(y_pred)
@@ -649,9 +649,9 @@ def evaluate_classification_report(y_true, y_pred, class_names=None):
     }
 
 
-# =====================================================================
-# PHẦN 6. GIAO DIỆN ĐIỀU KHIỂN & CHẠY THỰC NGHIỆM TRÊN DỮ LIỆU THỰC TẾ
-# =====================================================================
+#=====================================================================
+#PHẦN 6. GIAO DIỆN ĐIỀU KHIỂN & CHẠY THỰC NGHIỆM TRÊN DỮ LIỆU THỰC TẾ
+#=====================================================================
 def run_logistic_regression(show_plot=True):
     print("\n" + "=" * 65)
     print(" [1] HỒI QUY LOGISTIC ĐA THỨC - BASELINE (MULTINOMIAL LOGISTIC - OvR)")
@@ -758,7 +758,7 @@ def run_all_and_compare(show_plot=False):
     print("=" * 105 + "\n")
 
     # In phân tích lỗi
-    print("🔍 PHÂN TÍCH LỖI (ERROR ANALYSIS):")
+    print(" PHÂN TÍCH LỖI (ERROR ANALYSIS):")
     print("Mặc dù mô hình Gradient Boosting đạt độ chính xác tổng thể cao, phân tích hiệu suất theo từng lớp cho thấy phần lớn lỗi phân loại xảy ra trong hạng mục 'Draw'. Do sự mất cân bằng lớp cao (chỉ 5.11% số lần hòa), mô hình tuyến tính Baseline (Logistic Regression) gặp khó khăn trong việc phân biệt các trận hòa với các trận đấu quyết định kéo dài (Macro F1 = 0.31). Trái lại, HistGradientBoosting (HGB) với 200 cây quyết định học nối tiếp đã nắm bắt thành công động lực phi tuyến phức tạp liên quan đến các trận hòa (Macro F1 = 0.82).\n")
 
 

@@ -20,7 +20,7 @@ from knn_opening import predict_opening, train_knn_opening
 from hgb_elo import predict_game_result, train_hgb_classifier
 from comparison import compare_models
 
-# ─── Cached EDA Data Loader (dữ liệu thực từ processed_games.csv) ─────────────
+#─── Cached EDA Data Loader (dữ liệu thực từ processed_games.csv) ─────────────
 @st.cache_data
 def load_eda_data():
     """Load và cache dữ liệu EDA thực tế từ processed_games.csv."""
@@ -34,7 +34,7 @@ def load_eda_data():
     return _df
 
 
-# ─── Load Generated Custom Artwork Images ─────────────────────────────────────
+#─── Load Generated Custom Artwork Images ─────────────────────────────────────
 def get_base64_image(image_path):
     if os.path.exists(image_path):
         with open(image_path, "rb") as f:
@@ -49,14 +49,14 @@ cat_predict_3d_b64 = get_base64_image(os.path.join(assets_dir, "cat_predict_3d.j
 cat_benchmark_3d_b64 = get_base64_image(os.path.join(assets_dir, "cat_benchmark_3d.jpg"))
 cat_eda_3d_b64 = get_base64_image(os.path.join(assets_dir, "cat_eda_3d.jpg"))
 
-# ─── Page Config ───────────────────────────────────────────────────────────────
+#─── Page Config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Lichess AI Grandmaster Analytics Portal",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# ─── Glassmorphic 3D Creative UI/UX CSS Design System ─────────────────────────
+#─── Glassmorphic 3D Creative UI/UX CSS Design System ─────────────────────────
 st.markdown(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
@@ -483,7 +483,7 @@ div.stButton > button {{
 </style>
 """, unsafe_allow_html=True)
 
-# ─── TOP STICKY NAVBAR ─────────────────────────────────────────────
+#─── TOP STICKY NAVBAR ─────────────────────────────────────────────
 st.markdown("""
 <div class="top-navbar">
   <div class="nav-brand">
@@ -499,7 +499,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ─── HERO PROMO BANNER (CENTER-ALIGNED) ───────────────────────────────────────
+#─── HERO PROMO BANNER (CENTER-ALIGNED) ───────────────────────────────────────
 st.markdown("""
 <div class="hero-banner">
   <div class="hero-tagline">Nền tảng Phân tích Ván cờ Thông minh 2026</div>
@@ -511,7 +511,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ─── FEATURED CATEGORIES SHOWCASE GRID (WITH 3D AI ARTWORK BADGES) ─────────────
+#─── FEATURED CATEGORIES SHOWCASE GRID (WITH 3D AI ARTWORK BADGES) ─────────────
 st.markdown(f"""
 <div class="category-grid">
   <div class="cat-card">
@@ -537,7 +537,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# ─── Tabs ──────────────────────────────────────────────────────────────────────
+#─── Tabs ──────────────────────────────────────────────────────────────────────
 tab1, tab2, tab3, tab4 = st.tabs([
     "  Dự đoán Kết quả Ván cờ  ",
     "  Nhận diện Khai cuộc & Bàn cờ 2D  ",
@@ -545,9 +545,9 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "  Trực quan Ranh giới Quyết định & Dữ liệu EDA  "
 ])
 
-# ══════════════════════════════════════════════════════════════════════════════
-# TAB 1 — RESULT PREDICTION
-# ══════════════════════════════════════════════════════════════════════════════
+#══════════════════════════════════════════════════════════════════════════════
+#TAB 1 — RESULT PREDICTION
+#══════════════════════════════════════════════════════════════════════════════
 with tab1:
     col_left, col_right = st.columns([1, 1.25], gap="large")
 
@@ -653,9 +653,9 @@ with tab1:
         except Exception as e:
             st.error(f"Chưa có file mô hình huấn luyện. Vui lòng chạy `py src/main.py --mode 3` trước. ({e})")
 
-# ══════════════════════════════════════════════════════════════════════════════
-# TAB 2 — KNN OPENING & SVG BOARD
-# ══════════════════════════════════════════════════════════════════════════════
+#══════════════════════════════════════════════════════════════════════════════
+#TAB 2 — KNN OPENING & SVG BOARD
+#══════════════════════════════════════════════════════════════════════════════
 with tab2:
     col_moves, col_board = st.columns([1.2, 1], gap="large")
 
@@ -747,9 +747,9 @@ with tab2:
 
         st.dataframe(pd.DataFrame(k_data), use_container_width=True, hide_index=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
-# TAB 3 — MODEL COMPARISON, BENCHMARKS & OVERFITTING ANALYSIS
-# ══════════════════════════════════════════════════════════════════════════════
+#══════════════════════════════════════════════════════════════════════════════
+#TAB 3 — MODEL COMPARISON, BENCHMARKS & OVERFITTING ANALYSIS
+#══════════════════════════════════════════════════════════════════════════════
 with tab3:
 
 
@@ -807,7 +807,7 @@ with tab3:
     # Bảng dữ liệu mẫu thực tế
     st.markdown("""
     <div class="card-box accent-blue" style="margin-top:1rem;">
-      <div class="card-heading">📋 Bảng dữ liệu mẫu — <code>data/processed_games.csv</code> (8 dòng đầu tiên)</div>
+      <div class="card-heading">Bảng dữ liệu mẫu — <code>data/processed_games.csv</code> (8 dòng đầu tiên)</div>
       <div class="card-subheading">Hiển thị trực tiếp từ file dữ liệu thực tế — mỗi hàng là 1 ván cờ với đầy đủ thông tin.</div>
     </div>
     """, unsafe_allow_html=True)
@@ -816,7 +816,7 @@ with tab3:
     # Mô tả từng cột
     st.markdown("""
     <div class="card-box accent-purple" style="margin-top:1rem;">
-      <div class="card-heading">📖 Mô tả chi tiết 11 cột đặc trưng (Feature Dictionary)</div>
+      <div class="card-heading">Mô tả chi tiết 11 cột đặc trưng (Feature Dictionary)</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -887,23 +887,23 @@ with tab3:
         st.markdown("""
         <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem;">
           <div style="display:flex; gap:1rem; align-items:flex-start; background:#f0f9ff; border-left:4px solid #0284c7; border-radius:8px; padding:10px 14px;">
-            <span style="font-size:1.5rem; flex-shrink:0;">①</span>
+            <span style="font-size:1.5rem; flex-shrink:0;">1.</span>
             <div><b>Lọc & Làm sạch cột đặc trưng:</b> Giữ lại 5 đặc trưng số chất lượng cao cho bài toán dự đoán Kết quả theo Elo: <code>white_rating</code>, <code>black_rating</code>, <code>opening_ply</code>, <code>rated</code>, <code>Result</code>.</div>
           </div>
           <div style="display:flex; gap:1rem; align-items:flex-start; background:#f0fdf4; border-left:4px solid #059669; border-radius:8px; padding:10px 14px;">
-            <span style="font-size:1.5rem; flex-shrink:0;">②</span>
+            <span style="font-size:1.5rem; flex-shrink:0;">2.</span>
             <div><b>Kỹ thuật đặc trưng (Feature Engineering):</b> Tính toán thêm đặc trưng kép <code>rating_diff = white_rating − black_rating</code> — biến có sức mạnh dự đoán cao nhất (tầm quan trọng <b>58.42%</b>).</div>
           </div>
           <div style="display:flex; gap:1rem; align-items:flex-start; background:#fdf4ff; border-left:4px solid #7c3aed; border-radius:8px; padding:10px 14px;">
-            <span style="font-size:1.5rem; flex-shrink:0;">③</span>
+            <span style="font-size:1.5rem; flex-shrink:0;">3.</span>
             <div><b>Mã hóa nhãn (Label Encoding):</b> Biến đổi cột <code>Result</code> sang nhãn số — <code>0-1 → 0</code>, <code>1/2-1/2 → 1</code>, <code>1-0 → 2</code> — để mô hình phân loại đa lớp có thể xử lý.</div>
           </div>
           <div style="display:flex; gap:1rem; align-items:flex-start; background:#fff7ed; border-left:4px solid #ea580c; border-radius:8px; padding:10px 14px;">
-            <span style="font-size:1.5rem; flex-shrink:0;">④</span>
+            <span style="font-size:1.5rem; flex-shrink:0;">4.</span>
             <div><b>Chuẩn hóa dữ liệu (StandardScaler):</b> Chuẩn hóa tất cả đặc trưng số về thang đo μ=0, σ=1. <i>Quan trọng:</i> Scaler được fit <b>chỉ trên tập Train</b>, sau đó transform cả Train lẫn Test để tránh Data Leakage.</div>
           </div>
           <div style="display:flex; gap:1rem; align-items:flex-start; background:#f0f9ff; border-left:4px solid #0369a1; border-radius:8px; padding:10px 14px;">
-            <span style="font-size:1.5rem; flex-shrink:0;">⑤</span>
+            <span style="font-size:1.5rem; flex-shrink:0;">5.</span>
             <div><b>Phân chia Train/Test (80/20):</b> 7,797 ván học (Train) — 1,949 ván kiểm thử độc lập (Hold-out Test), với <code>random_state=42</code> đảm bảo tính tái lập (Reproducibility).</div>
           </div>
         </div>
@@ -939,7 +939,7 @@ with tab3:
     with eda_col1:
         st.markdown("""
         <div class="card-box accent-blue">
-          <div class="card-heading">📊 Phân bố Kết quả Ván cờ (Result Distribution)</div>
+          <div class="card-heading">Phân bố Kết quả Ván cờ (Result Distribution)</div>
           <div class="card-subheading">Tỷ lệ 3 lớp kết quả: Trắng thắng, Đen thắng và Hòa trong 9,746 ván cờ thực tế.</div>
         </div>
         """, unsafe_allow_html=True)
@@ -972,7 +972,7 @@ with tab3:
     with eda_col2:
         st.markdown("""
         <div class="card-box accent-purple">
-          <div class="card-heading">📈 Phân bố Điểm Elo (Elo Rating Distribution)</div>
+          <div class="card-heading">Phân bố Điểm Elo (Elo Rating Distribution)</div>
           <div class="card-subheading">Histogram điểm Elo của người chơi Trắng và Đen trên toàn bộ 9,746 ván cờ.</div>
         </div>
         """, unsafe_allow_html=True)
@@ -1011,7 +1011,7 @@ with tab3:
     with eda_col3:
         st.markdown("""
         <div class="card-box accent-green">
-          <div class="card-heading">⚖️ Chênh lệch điểm số (White Elo − Black Elo)</div>
+          <div class="card-heading">Chênh lệch điểm số (White Elo − Black Elo)</div>
           <div class="card-subheading">Phân phối <code>rating_diff</code> — đặc trưng quan trọng nhất trong mô hình dự đoán kết quả.</div>
         </div>
         """, unsafe_allow_html=True)
@@ -1043,7 +1043,7 @@ with tab3:
     with eda_col4:
         st.markdown("""
         <div class="card-box accent-orange">
-          <div class="card-heading">🎯 Ảnh hưởng của Xếp hạng (rated) đến Kết quả</div>
+          <div class="card-heading">Ảnh hưởng của Xếp hạng (rated) đến Kết quả</div>
           <div class="card-subheading">Tỷ lệ thắng-thua-hòa trong ván đấu xếp hạng (Rated=1) so với ván giao hữu (Rated=0).</div>
         </div>
         """, unsafe_allow_html=True)
@@ -1081,7 +1081,7 @@ with tab3:
     # EDA Chart 5: Top 10 khai cuộc phổ biến nhất
     st.markdown("""
     <div class="card-box accent-purple">
-      <div class="card-heading">♟️ Ảnh hưởng của Khai cuộc — 10 Khai cuộc Phổ biến Nhất (Top 10 Openings)</div>
+      <div class="card-heading">Ảnh hưởng của Khai cuộc — 10 Khai cuộc Phổ biến Nhất (Top 10 Openings)</div>
       <div class="card-subheading">Số lượng ván cờ và tỷ lệ thắng/thua theo từng khai cuộc phổ biến nhất trong tập dữ liệu Lichess.</div>
     </div>
     """, unsafe_allow_html=True)
@@ -1156,7 +1156,7 @@ with tab3:
     with model_col1:
         st.markdown("""
         <div class="card-box accent-blue">
-          <div class="card-heading">① Logistic Regression (Baseline)</div>
+          <div class="card-heading">1. Logistic Regression (Baseline)</div>
           <div class="card-subheading">Mô hình cơ sở — Bài toán 1: Dự đoán Result theo Elo</div>
         </div>
         """, unsafe_allow_html=True)
@@ -1177,7 +1177,7 @@ with tab3:
     with model_col2:
         st.markdown("""
         <div class="card-box accent-green">
-          <div class="card-heading">② HistGradientBoosting (HGB)</div>
+          <div class="card-heading">2. HistGradientBoosting (HGB)</div>
           <div class="card-subheading">Mô hình nâng cao — Bài toán 1: Dự đoán Result theo Elo</div>
         </div>
         """, unsafe_allow_html=True)
@@ -1198,7 +1198,7 @@ with tab3:
     with model_col3:
         st.markdown("""
         <div class="card-box accent-purple">
-          <div class="card-heading">③ K-Nearest Neighbors (KNN)</div>
+          <div class="card-heading">3. K-Nearest Neighbors (KNN)</div>
           <div class="card-subheading">Bài toán 2: Tra cứu Ván cờ & Khai cuộc theo Nước đi</div>
         </div>
         """, unsafe_allow_html=True)
@@ -1247,9 +1247,9 @@ with tab3:
 
     # 4.1: Per-model detailed results
     res_tab_hgb, res_tab_lr, res_tab_knn = st.tabs([
-        "  🌳 Kết quả HistGradientBoosting (HGB)  ",
-        "  📉 Kết quả Hồi quy Logistic Baseline  ",
-        "  🔍 Kết quả K-Nearest Neighbors (KNN)  "
+        "   Kết quả HistGradientBoosting (HGB)  ",
+        "   Kết quả Hồi quy Logistic Baseline  ",
+        "   Kết quả K-Nearest Neighbors (KNN)  "
     ])
 
     with res_tab_hgb:
@@ -1705,9 +1705,9 @@ with tab3:
     </div>
     """, unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
-# TAB 4 — 2D DECISION BOUNDARIES & DATASET EDA INSIGHTS
-# ══════════════════════════════════════════════════════════════════════════════
+#══════════════════════════════════════════════════════════════════════════════
+#TAB 4 — 2D DECISION BOUNDARIES & DATASET EDA INSIGHTS
+#══════════════════════════════════════════════════════════════════════════════
 with tab4:
     st.markdown('<div class="section-title">Trực quan hóa Ranh giới Quyết định & Dữ liệu Tổng hợp</div>', unsafe_allow_html=True)
     st.markdown("""
@@ -1944,7 +1944,7 @@ with tab4:
         fig_cm.update_traces(textfont=dict(size=16, color="#0f172a", family="Plus Jakarta Sans, Be Vietnam Pro"))
         st.plotly_chart(fig_cm, use_container_width=True, config={"displayModeBar": False})
 
-# ─── FOOTER SECTION ───────────────────────────────────────────────────────────
+#─── FOOTER SECTION ───────────────────────────────────────────────────────────
 st.markdown("""
 <div class="portal-footer">
   <div>

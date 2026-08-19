@@ -49,7 +49,7 @@ def compare_models(lr_json_path="outputs/logistic_metrics.json",
     report += comp_df.to_string(index=False) + "\n\n"
 
     report += "-" * 95 + "\n"
-    report += "🔍 PHÂN TÍCH LỖI (ERROR ANALYSIS):\n"
+    report += " PHÂN TÍCH LỖI (ERROR ANALYSIS):\n"
     report += "Mặc dù mô hình Gradient Boosting đạt độ chính xác tổng thể cao, phân tích hiệu suất theo từng lớp\n"
     report += "cho thấy phần lớn lỗi phân loại xảy ra trong hạng mục 'Draw'. Do sự mất cân bằng lớp cao (chỉ 5.11% số lần hòa),\n"
     report += "mô hình tuyến tính Baseline (Logistic Regression) gặp khó khăn trong việc phân biệt các trận hòa với các\n"
