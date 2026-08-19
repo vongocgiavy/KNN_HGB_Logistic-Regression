@@ -135,10 +135,10 @@
 ##5. NHÓM 5: BIỂU ĐỒ TỔNG HỢP & KHAI PHÁ DỮ LIỆU CỜ VUA (LICHESS EDA INSIGHTS)
 
 ###5.1. Biểu đồ Donut Phân phối Tỷ lệ Kết quả Ván cờ
-- **Số liệu thống kê trên 9,746 ván cờ Lichess:**
- - **Bên Trắng thắng (`1-0`):** 4,960 ván (**49.8%**) $\rightarrow$ Chiếm tỷ lệ cao nhất do Bên Trắng có lợi thế đi trước 1 nước.
- - **Bên Đen thắng (`0-1`):** 4,510 ván (**45.1%**) $\rightarrow$ Bám sát phía sau.
- - **Hòa (`1/2-1/2`):** 498 ván (**5.11%**) $\rightarrow$ Tỷ lệ rất thấp trong các ván cờ nghiệp dư/bán chuyên trên mạng do người chơi thường đánh quyết liệt đến cùng.
+- **Số liệu thống kê trên tập dữ liệu xấp xỉ ~10,000 ván cờ Lichess:**
+  - **Bên Trắng thắng (`1-0`):** Xấp xỉ ~49.8% $\rightarrow$ Chiếm tỷ lệ cao nhất do Bên Trắng có lợi thế đi trước 1 nước.
+  - **Bên Đen thắng (`0-1`):** Xấp xỉ ~45.1% $\rightarrow$ Bám sát phía sau.
+  - **Hòa (`1/2-1/2`):** Xấp xỉ ~5.11% $\rightarrow$ Tỷ lệ rất thấp trong các ván cờ nghiệp dư/bán chuyên trên mạng do người chơi thường đánh quyết liệt đến cùng.
 
 ---
 

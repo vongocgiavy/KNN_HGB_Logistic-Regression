@@ -494,7 +494,7 @@ st.markdown("""
   </div>
   <div class="nav-status">
     <div class="status-dot"></div>
-    <span>System Online: <b>9,746 Lichess Matches</b></span>
+    <span>Trạng thái hệ thống: <b>Xấp xỉ ~10,000 ván cờ Lichess</b></span>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -779,7 +779,7 @@ with tab3:
         st.markdown(f"""
         <div class="metric-chip chip-blue" style="flex-direction:column; padding:1rem 1.2rem; border-radius:14px; min-width:0;">
           <div class="metric-chip-label">Tổng số ván cờ</div>
-          <div class="metric-chip-value">{_n_raw:,}</div>
+          <div class="metric-chip-value">~10,000 ván</div>
         </div>
         """, unsafe_allow_html=True)
     with _stat_col2:
@@ -805,10 +805,10 @@ with tab3:
         """, unsafe_allow_html=True)
 
     # Bảng dữ liệu mẫu thực tế
-    st.markdown("""
+    st.markdown(f"""
     <div class="card-box accent-blue" style="margin-top:1rem;">
-      <div class="card-heading">Bảng dữ liệu mẫu — <code>data/processed_games.csv</code> (8 dòng đầu tiên)</div>
-      <div class="card-subheading">Hiển thị trực tiếp từ file dữ liệu thực tế — mỗi hàng là 1 ván cờ với đầy đủ thông tin.</div>
+      <div class="card-heading">Bảng dữ liệu mẫu — <code>data/processed_games.csv</code> (Xấp xỉ ~10,000 ván cờ thực tế)</div>
+      <div class="card-subheading">Hiển thị trực tiếp từ file dữ liệu thực tế (tổng cộng {_n_raw:,} dòng) — mỗi hàng là 1 ván cờ với đầy đủ thông tin.</div>
     </div>
     """, unsafe_allow_html=True)
     st.dataframe(_sample_df, use_container_width=True, hide_index=True, height=480)
@@ -850,7 +850,7 @@ with tab3:
 
     st.markdown("""
     <div class="section-desc">
-    Tập dữ liệu gốc là các ván cờ thực tế từ nền tảng <b>Lichess Open Database</b> được thu thập ở định dạng PGN (Portable Game Notation).
+    Tập dữ liệu gốc gồm xấp xỉ ~10,000 ván cờ thực tế từ nền tảng <b>Lichess Open Database</b> được thu thập ở định dạng PGN (Portable Game Notation).
     Trước khi đưa vào mô hình học máy, dữ liệu trải qua quy trình tiền xử lý nghiêm ngặt để đảm bảo chất lượng và tránh rò rỉ dữ liệu (Data Leakage).
     </div>
     """, unsafe_allow_html=True)
@@ -866,11 +866,11 @@ with tab3:
         """, unsafe_allow_html=True)
 
         quality_df = pd.DataFrame([
-            {"Chỉ số kiểm tra": "Tổng số ván cờ ban đầu", "Giá trị": "9,746 ván"},
-            {"Chỉ số kiểm tra": "Số đặc trưng gốc", "Giá trị": "13 cột (PGN fields)"},
+            {"Chỉ số kiểm tra": "Tổng số ván cờ ban đầu", "Giá trị": "Xấp xỉ ~10,000 ván (10,001 ván)"},
+            {"Chỉ số kiểm tra": "Số đặc trưng gốc", "Giá trị": "11 cột (PGN fields)"},
             {"Chỉ số kiểm tra": "Giá trị thiếu (Missing Values)", "Giá trị": "Không có (0%)"},
-            {"Chỉ số kiểm tra": "Ván cờ có nhãn hợp lệ (Result)", "Giá trị": "9,746 / 9,746 (100%)"},
-            {"Chỉ số kiểm tra": "Phân phối lớp (Class Imbalance)", "Giá trị": "White 49.8% | Black 45.1% | Draw 5.1%"},
+            {"Chỉ số kiểm tra": "Ván cờ sạch hợp lệ sau lọc", "Giá trị": "Xấp xỉ ~10,000 ván (9,746 ván đầy đủ)"},
+            {"Chỉ số kiểm tra": "Phân phối lớp (Class Imbalance)", "Giá trị": "White ~49.8% | Black ~45.1% | Draw ~5.1%"},
             {"Chỉ số kiểm tra": "Khoảng Elo hợp lệ", "Giá trị": "800 – 2,700 (lọc outlier ±3σ)"},
             {"Chỉ số kiểm tra": "Số loại khai cuộc (Opening) duy nhất", "Giá trị": "294 loại (ECO A00–E99)"},
         ])
@@ -904,7 +904,7 @@ with tab3:
           </div>
           <div style="display:flex; gap:1rem; align-items:flex-start; background:#f0f9ff; border-left:4px solid #0369a1; border-radius:8px; padding:10px 14px;">
             <span style="font-size:1.5rem; flex-shrink:0;">5.</span>
-            <div><b>Phân chia Train/Test (80/20):</b> 7,797 ván học (Train) — 1,949 ván kiểm thử độc lập (Hold-out Test), với <code>random_state=42</code> đảm bảo tính tái lập (Reproducibility).</div>
+            <div><b>Phân chia Train/Test (80/20):</b> Xấp xỉ ~8,000 ván học (7,797 ván Train) — ~2,000 ván kiểm thử độc lập (1,949 ván Hold-out Test), với <code>random_state=42</code> đảm bảo tính tái lập (Reproducibility).</div>
           </div>
         </div>
         """, unsafe_allow_html=True)
