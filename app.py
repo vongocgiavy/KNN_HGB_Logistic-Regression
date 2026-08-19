@@ -1260,7 +1260,7 @@ with tab3:
         </div>
         """, unsafe_allow_html=True)
 
-        hgb_res_col1, hgb_res_col2 = st.columns([1, 1.2], gap="large")
+        hgb_res_col1, hgb_res_col2 = st.columns([1, 1.15], gap="large")
         with hgb_res_col1:
             hgb_class_df = pd.DataFrame([
                 {"Lớp kết quả": "Black thắng (0-1)", "Precision": "83.1%", "Recall": "82.7%", "F1-Score": "82.9%", "Support": "259"},
@@ -1270,10 +1270,15 @@ with tab3:
             ])
             st.dataframe(hgb_class_df, use_container_width=True, hide_index=True)
             st.markdown("""
-            <div class="metric-row" style="margin-top:0.6rem;">
+            <div class="metric-row" style="margin-top:0.8rem;">
               <div class="metric-chip chip-blue"><div class="metric-chip-label">Hold-out Accuracy</div><div class="metric-chip-value">83.19%</div></div>
               <div class="metric-chip chip-green"><div class="metric-chip-label">3-Fold CV</div><div class="metric-chip-value">83.05%</div></div>
               <div class="metric-chip chip-purple"><div class="metric-chip-label">Macro F1</div><div class="metric-chip-value">0.82</div></div>
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown("""
+            <div class="alert-box alert-green" style="font-size:0.9rem; margin-top:0.8rem;">
+            <b>Nhận xét HGB:</b> Nhờ 200 cây quyết định nối tiếp, mô hình đạt độ chính xác cân bằng trên cả 3 lớp kết quả, bao gồm cả lớp thiểu số Hòa (F1 đạt 82.7%).
             </div>
             """, unsafe_allow_html=True)
         with hgb_res_col2:
@@ -1281,18 +1286,24 @@ with tab3:
             cm_hgb = np.array([[214, 2, 43], [3, 19, 1], [40, 2, 276]])
             fig_cm_hgb = px.imshow(
                 cm_hgb,
-                labels=dict(x="Dự đoán", y="Thực tế", color="Số ván"),
-                x=["Black(0-1)", "Hòa(1/2)", "White(1-0)"],
-                y=["Black(0-1)", "Hòa(1/2)", "White(1-0)"],
+                labels=dict(x="Nhãn Dự đoán", y="Nhãn Thực tế", color="Số ván"),
+                x=["Black (0-1)", "Hòa (1/2)", "White (1-0)"],
+                y=["Black (0-1)", "Hòa (1/2)", "White (1-0)"],
                 color_continuous_scale="Blues",
-                text_auto=True, height=270
+                text_auto=True, height=390
+            )
+            fig_cm_hgb.update_traces(
+                textfont=dict(size=18, family="Plus Jakarta Sans, Be Vietnam Pro", color="#0f172a")
             )
             fig_cm_hgb.update_layout(
-                margin=dict(l=10, r=10, t=30, b=10),
+                margin=dict(l=20, r=20, t=40, b=20),
                 paper_bgcolor="rgba(0,0,0,0)",
-                font=dict(family="Plus Jakarta Sans", color="#0f172a", size=13),
+                plot_bgcolor="rgba(0,0,0,0)",
+                font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
+                xaxis=dict(title="Nhãn Dự đoán (Predicted)", title_font=dict(size=14, color="#0f172a"), tickfont=dict(size=12)),
+                yaxis=dict(title="Nhãn Thực tế (Actual)", title_font=dict(size=14, color="#0f172a"), tickfont=dict(size=12)),
                 coloraxis_showscale=False,
-                title=dict(text="Ma trận nhầm lẫn HGB", font=dict(size=14, color="#0f172a"), x=0.5)
+                title=dict(text="Ma trận nhầm lẫn HGB (3x3 Confusion Matrix)", font=dict(size=15, color="#0f172a"), x=0.5)
             )
             st.plotly_chart(fig_cm_hgb, use_container_width=True, config={"displayModeBar": False})
 
@@ -1304,7 +1315,7 @@ with tab3:
         </div>
         """, unsafe_allow_html=True)
 
-        lr_res_col1, lr_res_col2 = st.columns([1, 1.2], gap="large")
+        lr_res_col1, lr_res_col2 = st.columns([1, 1.15], gap="large")
         with lr_res_col1:
             lr_class_df = pd.DataFrame([
                 {"Lớp kết quả": "Black thắng (0-1)", "Precision": "56.43%", "Recall": "61.00%", "F1-Score": "58.63%", "Support": "259"},
@@ -1314,7 +1325,7 @@ with tab3:
             ])
             st.dataframe(lr_class_df, use_container_width=True, hide_index=True)
             st.markdown("""
-            <div class="metric-row" style="margin-top:0.6rem;">
+            <div class="metric-row" style="margin-top:0.8rem;">
               <div class="metric-chip chip-blue"><div class="metric-chip-label">Hold-out Accuracy</div><div class="metric-chip-value">64.20%</div></div>
               <div class="metric-chip chip-purple"><div class="metric-chip-label">3-Fold CV</div><div class="metric-chip-value">63.95%</div></div>
               <div class="metric-chip chip-orange"><div class="metric-chip-label">Macro F1</div><div class="metric-chip-value">0.31</div></div>
@@ -1322,7 +1333,7 @@ with tab3:
             """, unsafe_allow_html=True)
             st.markdown("""
             <div class="alert-box alert-orange" style="font-size:0.88rem; margin-top:0.8rem;">
-            Hệ số hồi quy Logistic — Trọng số các đặc trưng (trung bình |coef| giữa 3 classifier OvR):<br>
+            <b>Hệ số hồi quy Logistic:</b> Trọng số các đặc trưng (trung bình |coef| giữa 3 classifier OvR):<br>
             <code>rating_diff</code>: <b>0.4912</b> &nbsp;|&nbsp; <code>white_rating</code>: <b>0.2310</b> &nbsp;|&nbsp;
             <code>black_rating</code>: <b>0.1850</b> &nbsp;|&nbsp; <code>opening_ply</code>: <b>0.0520</b> &nbsp;|&nbsp; <code>rated</code>: <b>0.0408</b>
             </div>
@@ -1331,18 +1342,24 @@ with tab3:
             cm_lr = np.array([[158, 0, 101], [15, 0, 8], [107, 0, 211]])
             fig_cm_lr = px.imshow(
                 cm_lr,
-                labels=dict(x="Dự đoán", y="Thực tế", color="Số ván"),
-                x=["Black(0-1)", "Hòa(1/2)", "White(1-0)"],
-                y=["Black(0-1)", "Hòa(1/2)", "White(1-0)"],
+                labels=dict(x="Nhãn Dự đoán", y="Nhãn Thực tế", color="Số ván"),
+                x=["Black (0-1)", "Hòa (1/2)", "White (1-0)"],
+                y=["Black (0-1)", "Hòa (1/2)", "White (1-0)"],
                 color_continuous_scale="Purples",
-                text_auto=True, height=270
+                text_auto=True, height=420
+            )
+            fig_cm_lr.update_traces(
+                textfont=dict(size=18, family="Plus Jakarta Sans, Be Vietnam Pro", color="#0f172a")
             )
             fig_cm_lr.update_layout(
-                margin=dict(l=10, r=10, t=30, b=10),
+                margin=dict(l=20, r=20, t=40, b=20),
                 paper_bgcolor="rgba(0,0,0,0)",
-                font=dict(family="Plus Jakarta Sans", color="#0f172a", size=13),
+                plot_bgcolor="rgba(0,0,0,0)",
+                font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
+                xaxis=dict(title="Nhãn Dự đoán (Predicted)", title_font=dict(size=14, color="#0f172a"), tickfont=dict(size=12)),
+                yaxis=dict(title="Nhãn Thực tế (Actual)", title_font=dict(size=14, color="#0f172a"), tickfont=dict(size=12)),
                 coloraxis_showscale=False,
-                title=dict(text="Ma trận nhầm lẫn Logistic Baseline", font=dict(size=14, color="#0f172a"), x=0.5)
+                title=dict(text="Ma trận nhầm lẫn Logistic Baseline (3x3 Confusion Matrix)", font=dict(size=15, color="#0f172a"), x=0.5)
             )
             st.plotly_chart(fig_cm_lr, use_container_width=True, config={"displayModeBar": False})
 
@@ -1353,7 +1370,7 @@ with tab3:
           <div class="card-subheading">KNN tìm kiếm các ván cờ có chuỗi nước đi tương đồng nhất và nhận diện tên Khai cuộc (Opening) + mã ECO — <b>không dùng Elo</b>.</div>
         </div>
         """, unsafe_allow_html=True)
-        knn_col1, knn_col2 = st.columns([1, 1], gap="large")
+        knn_col1, knn_col2 = st.columns([1, 1.15], gap="large")
         with knn_col1:
             st.markdown("""
             <b>Ví dụ truy vấn thực tế:</b>
@@ -1382,11 +1399,12 @@ with tab3:
                 textfont=dict(size=13, color="#0f172a")
             ))
             fig_sim.update_layout(
-                height=260, margin=dict(l=10, r=50, t=10, b=10),
+                height=320, margin=dict(l=10, r=50, t=35, b=10),
                 paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                xaxis=dict(range=[55, 68], gridcolor="#e2e8f0", title="Độ tương đồng (%)"),
-                yaxis=dict(gridcolor="rgba(0,0,0,0)"),
-                font=dict(family="Plus Jakarta Sans", color="#0f172a", size=12),
+                xaxis=dict(range=[55, 68], gridcolor="#e2e8f0", title="Độ tương đồng (%)", title_font=dict(size=14, color="#0f172a")),
+                yaxis=dict(gridcolor="rgba(0,0,0,0)", tickfont=dict(size=12)),
+                font=dict(family="Plus Jakarta Sans", color="#0f172a", size=13),
+                title=dict(text="Biểu đồ Độ tương đồng Khai cuộc Top 5", font=dict(size=15, color="#0f172a"), x=0.5),
                 showlegend=False
             )
             st.plotly_chart(fig_sim, use_container_width=True, config={"displayModeBar": False})
