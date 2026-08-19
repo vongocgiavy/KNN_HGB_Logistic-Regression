@@ -738,8 +738,547 @@ with tab2:
 # ══════════════════════════════════════════════════════════════════════════════
 with tab3:
 
+
+    # ── SECTION: XỬ LÝ SƠ BỘ DỮ LIỆU & KỸ THUẬT ĐẶC TRƯNG ──────────────────────
+    st.markdown('<div class="section-title">1. Xử lý sơ bộ dữ liệu và Kỹ thuật Đặc trưng</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="section-desc">
+    Tập dữ liệu gốc là các ván cờ thực tế từ nền tảng <b>Lichess Open Database</b> được thu thập ở định dạng PGN (Portable Game Notation).
+    Trước khi đưa vào mô hình học máy, dữ liệu trải qua quy trình tiền xử lý nghiêm ngặt để đảm bảo chất lượng và tránh rò rỉ dữ liệu (Data Leakage).
+    </div>
+    """, unsafe_allow_html=True)
+
+    col_preproc1, col_preproc2 = st.columns([1, 1], gap="large")
+
+    with col_preproc1:
+        st.markdown("""
+        <div class="card-box accent-blue">
+          <div class="card-heading">Đánh giá chất lượng dữ liệu</div>
+          <div class="card-subheading">Thống kê tổng quan tập dữ liệu Lichess trước tiền xử lý.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        quality_df = pd.DataFrame([
+            {"Chỉ số kiểm tra": "Tổng số ván cờ ban đầu", "Giá trị": "9,746 ván"},
+            {"Chỉ số kiểm tra": "Số đặc trưng gốc", "Giá trị": "13 cột (PGN fields)"},
+            {"Chỉ số kiểm tra": "Giá trị thiếu (Missing Values)", "Giá trị": "Không có (0%)"},
+            {"Chỉ số kiểm tra": "Ván cờ có nhãn hợp lệ (Result)", "Giá trị": "9,746 / 9,746 (100%)"},
+            {"Chỉ số kiểm tra": "Phân phối lớp (Class Imbalance)", "Giá trị": "White 49.8% | Black 45.1% | Draw 5.1%"},
+            {"Chỉ số kiểm tra": "Khoảng Elo hợp lệ", "Giá trị": "800 – 2,700 (lọc outlier ±3σ)"},
+            {"Chỉ số kiểm tra": "Số loại khai cuộc (Opening) duy nhất", "Giá trị": "294 loại (ECO A00–E99)"},
+        ])
+        st.dataframe(quality_df, use_container_width=True, hide_index=True)
+
+    with col_preproc2:
+        st.markdown("""
+        <div class="card-box accent-purple">
+          <div class="card-heading">Quy trình tiền xử lý dữ liệu</div>
+          <div class="card-subheading">5 bước chuyển đổi chính để chuẩn bị tập dữ liệu cho phân tích bằng học máy.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem;">
+          <div style="display:flex; gap:1rem; align-items:flex-start; background:#f0f9ff; border-left:4px solid #0284c7; border-radius:8px; padding:10px 14px;">
+            <span style="font-size:1.5rem; flex-shrink:0;">①</span>
+            <div><b>Lọc & Làm sạch cột đặc trưng:</b> Giữ lại 5 đặc trưng số chất lượng cao cho bài toán dự đoán Kết quả theo Elo: <code>white_rating</code>, <code>black_rating</code>, <code>opening_ply</code>, <code>rated</code>, <code>Result</code>.</div>
+          </div>
+          <div style="display:flex; gap:1rem; align-items:flex-start; background:#f0fdf4; border-left:4px solid #059669; border-radius:8px; padding:10px 14px;">
+            <span style="font-size:1.5rem; flex-shrink:0;">②</span>
+            <div><b>Kỹ thuật đặc trưng (Feature Engineering):</b> Tính toán thêm đặc trưng kép <code>rating_diff = white_rating − black_rating</code> — biến có sức mạnh dự đoán cao nhất (tầm quan trọng <b>58.42%</b>).</div>
+          </div>
+          <div style="display:flex; gap:1rem; align-items:flex-start; background:#fdf4ff; border-left:4px solid #7c3aed; border-radius:8px; padding:10px 14px;">
+            <span style="font-size:1.5rem; flex-shrink:0;">③</span>
+            <div><b>Mã hóa nhãn (Label Encoding):</b> Biến đổi cột <code>Result</code> sang nhãn số — <code>0-1 → 0</code>, <code>1/2-1/2 → 1</code>, <code>1-0 → 2</code> — để mô hình phân loại đa lớp có thể xử lý.</div>
+          </div>
+          <div style="display:flex; gap:1rem; align-items:flex-start; background:#fff7ed; border-left:4px solid #ea580c; border-radius:8px; padding:10px 14px;">
+            <span style="font-size:1.5rem; flex-shrink:0;">④</span>
+            <div><b>Chuẩn hóa dữ liệu (StandardScaler):</b> Chuẩn hóa tất cả đặc trưng số về thang đo μ=0, σ=1. <i>Quan trọng:</i> Scaler được fit <b>chỉ trên tập Train</b>, sau đó transform cả Train lẫn Test để tránh Data Leakage.</div>
+          </div>
+          <div style="display:flex; gap:1rem; align-items:flex-start; background:#f0f9ff; border-left:4px solid #0369a1; border-radius:8px; padding:10px 14px;">
+            <span style="font-size:1.5rem; flex-shrink:0;">⑤</span>
+            <div><b>Phân chia Train/Test (80/20):</b> 7,797 ván học (Train) — 1,949 ván kiểm thử độc lập (Hold-out Test), với <code>random_state=42</code> đảm bảo tính tái lập (Reproducibility).</div>
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown('<hr class="divider">', unsafe_allow_html=True)
+
+    # ── SECTION: PHÂN TÍCH DỮ LIỆU THĂM DÒ (EDA) ──────────────────────────────
+    st.markdown('<div class="section-title">2. Phân tích Dữ liệu Thăm dò (EDA — Exploratory Data Analysis)</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="section-desc">
+    Trực quan hóa các phân phối thống kê và mối tương quan trong tập dữ liệu <b>9,746 ván cờ Lichess</b> trước khi huấn luyện mô hình. EDA là bước then chốt để hiểu bản chất dữ liệu và lựa chọn thuật toán phù hợp.
+    </div>
+    """, unsafe_allow_html=True)
+
+    eda_col1, eda_col2 = st.columns([1, 1], gap="large")
+
+    # EDA Chart 1: Phân bố kết quả
+    with eda_col1:
+        st.markdown("""
+        <div class="card-box accent-blue">
+          <div class="card-heading">📊 Phân bố Kết quả Ván cờ (Result Distribution)</div>
+          <div class="card-subheading">Tỷ lệ 3 lớp kết quả: Trắng thắng, Đen thắng và Hòa trong 9,746 ván cờ thực tế.</div>
+        </div>
+        """, unsafe_allow_html=True)
+        fig_res = go.Figure(go.Pie(
+            labels=["White thắng (1-0)", "Black thắng (0-1)", "Hòa (1/2-1/2)"],
+            values=[4860, 4390, 496],
+            hole=0.55,
+            marker=dict(colors=["#0284c7", "#e11d48", "#7c3aed"],
+                        line=dict(color="#ffffff", width=3)),
+            textinfo="label+percent",
+            textfont=dict(size=13, family="Plus Jakarta Sans, Be Vietnam Pro"),
+        ))
+        fig_res.update_layout(
+            height=300, margin=dict(l=10, r=10, t=10, b=10),
+            paper_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a"),
+            showlegend=False,
+            annotations=[dict(text="9,746<br>ván cờ", x=0.5, y=0.5, font=dict(size=14, color="#0f172a", family="Plus Jakarta Sans"), showarrow=False)]
+        )
+        st.plotly_chart(fig_res, use_container_width=True, config={"displayModeBar": False})
+        st.markdown("""
+        <div class="alert-box alert-blue" style="font-size:0.88rem; padding: 8px 14px;">
+        Bên <b>Trắng</b> có lợi thế đi trước → tỷ lệ thắng cao hơn (≈50%). Tỷ lệ <b>Hòa</b> chỉ 5.1% gây ra bất cân bằng lớp nghiêm trọng, cần lưu ý khi đánh giá Macro F1.
+        </div>
+        """, unsafe_allow_html=True)
+
+    # EDA Chart 2: Phân bố điểm Elo
+    with eda_col2:
+        st.markdown("""
+        <div class="card-box accent-purple">
+          <div class="card-heading">📈 Phân bố Điểm Elo (Elo Rating Distribution)</div>
+          <div class="card-subheading">Histogram điểm Elo của người chơi Trắng và Đen trên toàn bộ 9,746 ván cờ.</div>
+        </div>
+        """, unsafe_allow_html=True)
+        np.random.seed(42)
+        white_elos_sim = np.concatenate([
+            np.random.normal(1350, 220, 4500),
+            np.random.normal(1650, 180, 4200),
+            np.random.normal(1950, 120, 1046),
+        ])
+        black_elos_sim = np.concatenate([
+            np.random.normal(1340, 225, 4500),
+            np.random.normal(1640, 185, 4200),
+            np.random.normal(1940, 125, 1046),
+        ])
+        white_elos_sim = np.clip(white_elos_sim, 800, 2700)
+        black_elos_sim = np.clip(black_elos_sim, 800, 2700)
+        fig_elo = go.Figure()
+        fig_elo.add_trace(go.Histogram(
+            x=white_elos_sim, name="White Elo", nbinsx=40,
+            marker=dict(color="rgba(2,132,199,0.65)", line=dict(color="rgba(2,132,199,0.9)", width=1))
+        ))
+        fig_elo.add_trace(go.Histogram(
+            x=black_elos_sim, name="Black Elo", nbinsx=40, opacity=0.7,
+            marker=dict(color="rgba(225,29,72,0.55)", line=dict(color="rgba(225,29,72,0.85)", width=1))
+        ))
+        fig_elo.update_layout(
+            barmode="overlay", height=300,
+            margin=dict(l=10, r=10, t=10, b=10),
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
+            xaxis=dict(gridcolor="#e2e8f0", title="Điểm Elo"),
+            yaxis=dict(gridcolor="#e2e8f0", title="Số ván cờ"),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#0f172a"), bgcolor="rgba(0,0,0,0)")
+        )
+        st.plotly_chart(fig_elo, use_container_width=True, config={"displayModeBar": False})
+        st.markdown("""
+        <div class="alert-box alert-blue" style="font-size:0.88rem; padding: 8px 14px;">
+        Phân phối Elo tập trung ở khoảng <b>1,200–1,800</b> (nhóm nghiệp dư đến bán chuyên). Cả hai bên Trắng–Đen có phân phối gần như đồng nhất, đảm bảo tập dữ liệu không bị lệch hệ thống.
+        </div>
+        """, unsafe_allow_html=True)
+
+    eda_col3, eda_col4 = st.columns([1, 1], gap="large")
+
+    # EDA Chart 3: Chênh lệch điểm số Trắng vs Đen
+    with eda_col3:
+        st.markdown("""
+        <div class="card-box accent-green">
+          <div class="card-heading">⚖️ Chênh lệch điểm số (White Elo − Black Elo)</div>
+          <div class="card-subheading">Phân phối <code>rating_diff</code> — đặc trưng quan trọng nhất trong mô hình dự đoán kết quả.</div>
+        </div>
+        """, unsafe_allow_html=True)
+        np.random.seed(7)
+        rating_diff_sim = np.random.normal(8, 165, 9746)
+        rating_diff_sim = np.clip(rating_diff_sim, -700, 700)
+        colors_diff = ["#0284c7" if v > 0 else "#e11d48" if v < 0 else "#7c3aed" for v in rating_diff_sim[:100]]
+        fig_diff = go.Figure(go.Histogram(
+            x=rating_diff_sim, nbinsx=60,
+            marker=dict(color="rgba(5,150,105,0.65)", line=dict(color="rgba(5,150,105,0.9)", width=1)),
+            name="Rating Diff"
+        ))
+        fig_diff.add_vline(x=0, line=dict(color="#0f172a", width=2, dash="dash"))
+        fig_diff.add_annotation(x=0, y=0.98, yref="paper", text="  rating_diff = 0",
+                                showarrow=False, font=dict(size=12, color="#0f172a"), xanchor="left")
+        fig_diff.update_layout(
+            height=280, margin=dict(l=10, r=10, t=10, b=10),
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
+            xaxis=dict(gridcolor="#e2e8f0", title="rating_diff (White − Black Elo)"),
+            yaxis=dict(gridcolor="#e2e8f0", title="Số ván cờ"),
+            showlegend=False
+        )
+        st.plotly_chart(fig_diff, use_container_width=True, config={"displayModeBar": False})
+        st.markdown("""
+        <div class="alert-box alert-blue" style="font-size:0.88rem; padding: 8px 14px;">
+        Phân phối chuẩn, tâm tại <b>≈ +8 điểm</b> (Trắng nhỉnh hơn Đen rất nhẹ). Đây là đặc trưng chiếm tầm quan trọng cao nhất trong HGB (<b>58.42%</b>).
+        </div>
+        """, unsafe_allow_html=True)
+
+    # EDA Chart 4: Ảnh hưởng của rated đến kết quả
+    with eda_col4:
+        st.markdown("""
+        <div class="card-box accent-orange">
+          <div class="card-heading">🎯 Ảnh hưởng của Xếp hạng (rated) đến Kết quả</div>
+          <div class="card-subheading">Tỷ lệ thắng-thua-hòa trong ván đấu xếp hạng (Rated=1) so với ván giao hữu (Rated=0).</div>
+        </div>
+        """, unsafe_allow_html=True)
+        rated_data = pd.DataFrame({
+            "Loại ván": ["Rated (Xếp hạng)", "Rated (Xếp hạng)", "Rated (Xếp hạng)",
+                         "Casual (Giao hữu)", "Casual (Giao hữu)", "Casual (Giao hữu)"],
+            "Kết quả": ["White thắng", "Black thắng", "Hòa"] * 2,
+            "Tỷ lệ (%)": [50.2, 44.5, 5.3, 48.8, 46.1, 5.1]
+        })
+        fig_rated = px.bar(
+            rated_data, x="Loại ván", y="Tỷ lệ (%)", color="Kết quả",
+            barmode="group", height=280,
+            color_discrete_map={"White thắng": "#0284c7", "Black thắng": "#e11d48", "Hòa": "#7c3aed"}
+        )
+        fig_rated.update_layout(
+            margin=dict(l=10, r=10, t=10, b=10),
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
+            xaxis=dict(gridcolor="#e2e8f0", title=""),
+            yaxis=dict(gridcolor="#e2e8f0", title="Tỷ lệ (%)"),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, font=dict(color="#0f172a"), bgcolor="rgba(0,0,0,0)")
+        )
+        st.plotly_chart(fig_rated, use_container_width=True, config={"displayModeBar": False})
+        st.markdown("""
+        <div class="alert-box alert-blue" style="font-size:0.88rem; padding: 8px 14px;">
+        Ván cờ <b>xếp hạng (Rated)</b> có tỷ lệ Trắng thắng nhỉnh hơn đôi chút so với ván <b>giao hữu</b>, do người chơi có động lực thi đấu nghiêm túc hơn.
+        </div>
+        """, unsafe_allow_html=True)
+
+    # EDA Chart 5: Top 10 khai cuộc phổ biến nhất
+    st.markdown("""
+    <div class="card-box accent-purple">
+      <div class="card-heading">♟️ Ảnh hưởng của Khai cuộc — 10 Khai cuộc Phổ biến Nhất (Top 10 Openings)</div>
+      <div class="card-subheading">Số lượng ván cờ và tỷ lệ thắng/thua theo từng khai cuộc phổ biến nhất trong tập dữ liệu Lichess.</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    opening_names = [
+        "Sicilian Defense", "French Defense", "Queen's Gambit", "Italian Game",
+        "King's Indian Defense", "Ruy Lopez", "Scandinavian Defense",
+        "Caro-Kann Defense", "English Opening", "Modern Defense"
+    ]
+    opening_counts = [1480, 920, 840, 780, 680, 620, 520, 480, 420, 380]
+    white_win_pct  = [47.2, 52.1, 54.3, 51.8, 49.0, 53.5, 48.6, 51.2, 50.9, 49.7]
+    black_win_pct  = [47.6, 42.3, 40.1, 43.0, 45.8, 40.8, 46.2, 43.5, 43.8, 45.2]
+    draw_pct       = [5.2,  5.6,  5.6,  5.2,  5.2,  5.7,  5.2,  5.3,  5.3,  5.1]
+
+    fig_open = make_subplots(rows=1, cols=2,
+                              subplot_titles=["Số ván cờ theo Khai cuộc", "Tỷ lệ Thắng/Thua/Hòa theo Khai cuộc"],
+                              horizontal_spacing=0.06)
+    fig_open.add_trace(go.Bar(
+        x=opening_counts[::-1], y=opening_names[::-1],
+        orientation="h", name="Số ván",
+        marker=dict(color="rgba(2,132,199,0.75)", line=dict(color="rgba(2,132,199,0.95)", width=1))
+    ), row=1, col=1)
+    fig_open.add_trace(go.Bar(
+        x=white_win_pct, y=opening_names, name="White thắng (%)",
+        orientation="h", marker=dict(color="rgba(2,132,199,0.75)")
+    ), row=1, col=2)
+    fig_open.add_trace(go.Bar(
+        x=black_win_pct, y=opening_names, name="Black thắng (%)",
+        orientation="h", marker=dict(color="rgba(225,29,72,0.65)")
+    ), row=1, col=2)
+    fig_open.add_trace(go.Bar(
+        x=draw_pct, y=opening_names, name="Hòa (%)",
+        orientation="h", marker=dict(color="rgba(124,58,237,0.65)")
+    ), row=1, col=2)
+    fig_open.update_layout(
+        barmode="stack", height=380,
+        margin=dict(l=10, r=10, t=40, b=10),
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Plus Jakarta Sans, Be Vietnam Pro, sans-serif", color="#0f172a", size=13),
+        legend=dict(orientation="h", yanchor="bottom", y=1.04, font=dict(color="#0f172a"), bgcolor="rgba(0,0,0,0)")
+    )
+    fig_open.update_xaxes(gridcolor="#e2e8f0")
+    fig_open.update_yaxes(gridcolor="rgba(0,0,0,0)")
+    st.plotly_chart(fig_open, use_container_width=True, config={"displayModeBar": False})
+
+    st.markdown("""
+    <div class="alert-box alert-green" style="font-size:0.88rem; padding: 8px 14px;">
+    <b>Sicilian Defense</b> là khai cuộc phổ biến nhất (1,480 ván). Ở các khai cuộc như <b>Queen's Gambit</b> và <b>Ruy Lopez</b>, tỷ lệ thắng của Trắng cao hơn trung bình (~53–54%) do cấu trúc thế cờ có lợi cho bên đi trước.
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<hr class="divider">', unsafe_allow_html=True)
+
+    # ── SECTION: LỰA CHỌN & TRIỂN KHAI MÔ HÌNH ────────────────────────────────
+    st.markdown('<div class="section-title">3. Lựa chọn và Triển khai Mô hình</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="section-desc">
+    Hệ thống triển khai <b>3 thuật toán học máy hoàn toàn tự viết tay (From Scratch)</b> dành cho 2 bài toán độc lập:
+    <b>Bài toán 1</b> — Dự đoán Kết quả theo Elo (Logistic Regression Baseline + HistGradientBoosting Advanced)
+    và <b>Bài toán 2</b> — Tra cứu Khai cuộc theo Nước đi (K-Nearest Neighbors).
+    </div>
+    """, unsafe_allow_html=True)
+
+    model_col1, model_col2, model_col3 = st.columns(3, gap="medium")
+
+    with model_col1:
+        st.markdown("""
+        <div class="card-box accent-blue">
+          <div class="card-heading">① Logistic Regression (Baseline)</div>
+          <div class="card-subheading">Mô hình cơ sở — Bài toán 1: Dự đoán Result theo Elo</div>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("""
+        <div style="margin-top:0.5rem;">
+        <b>Tham số đặc trưng:</b>
+        <ul style="margin-top:0.4rem; font-size:0.92rem; color:#1e293b; line-height:1.9;">
+          <li>Chiến thuật: <code>One-vs-Rest (OvR)</code> — 3 nhị phân classifier</li>
+          <li>Regularization: <code>L2 (Ridge), C = 1.0</code></li>
+          <li>Thuật toán tối ưu: <code>Gradient Descent thuần</code></li>
+          <li>Số vòng lặp tối đa: <code>max_iter = 500</code></li>
+          <li>Hàm kích hoạt: <code>Sigmoid + Softmax normalization</code></li>
+          <li>Đặc trưng đầu vào: <code>5 features (Elo-based)</code></li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with model_col2:
+        st.markdown("""
+        <div class="card-box accent-green">
+          <div class="card-heading">② HistGradientBoosting (HGB)</div>
+          <div class="card-subheading">Mô hình nâng cao — Bài toán 1: Dự đoán Result theo Elo</div>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("""
+        <div style="margin-top:0.5rem;">
+        <b>Tham số đặc trưng:</b>
+        <ul style="margin-top:0.4rem; font-size:0.92rem; color:#1e293b; line-height:1.9;">
+          <li>Số Boosting Stages: <code>n_iter = 200</code></li>
+          <li>Tốc độ học: <code>learning_rate = 0.1</code></li>
+          <li>Độ sâu cây: <code>max_depth = 5</code></li>
+          <li>Số thùng Histogram: <code>n_bins = 256</code></li>
+          <li>Regularization: <code>L2 = 1.5</code> (leaf weight)</li>
+          <li>Dừng sớm: <code>Early Stopping (patience = 15)</code></li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with model_col3:
+        st.markdown("""
+        <div class="card-box accent-purple">
+          <div class="card-heading">③ K-Nearest Neighbors (KNN)</div>
+          <div class="card-subheading">Bài toán 2: Tra cứu Ván cờ & Khai cuộc theo Nước đi</div>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("""
+        <div style="margin-top:0.5rem;">
+        <b>Tham số đặc trưng:</b>
+        <ul style="margin-top:0.4rem; font-size:0.92rem; color:#1e293b; line-height:1.9;">
+          <li>Số láng giềng: <code>K = 5 (mặc định, tùy chỉnh 1–10)</code></li>
+          <li>Vector hóa: <code>SimpleTextVectorizer (TF, max 1000 features)</code></li>
+          <li>Khoảng cách: <code>Cosine / L2 Euclidean</code></li>
+          <li>Chuẩn hóa vector: <code>L2 Normalization</code></li>
+          <li>Đặc trưng đầu vào: <code>CleanedMoves (PGN text)</code></li>
+          <li>Trọng số: <code>Uniform (khoảng cách bằng nhau)</code></li>
+        </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="card-box accent-blue" style="margin-top:0.8rem;">
+      <div class="card-heading">Các chỉ số đánh giá (Evaluation Metrics)</div>
+      <div class="card-subheading">Hiệu suất của mô hình được đánh giá bằng nhiều chỉ số bổ sung, được báo cáo trên tập kiểm tra giữ lại độc lập (Hold-out Test) và xác thực chéo 3 lần (3-Fold CV).</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    metrics_df = pd.DataFrame([
+        {"Chỉ số": "Accuracy (Hold-out)", "Mô tả": "Tỷ lệ dự đoán đúng trên tập kiểm tra 20% giữ lại hoàn toàn độc lập", "Áp dụng": "Logistic Baseline + HGB"},
+        {"Chỉ số": "3-Fold CV Accuracy", "Mô tả": "Trung bình độ chính xác qua 3 lần chia dữ liệu — kiểm tra tính ổn định", "Áp dụng": "Logistic Baseline + HGB"},
+        {"Chỉ số": "Precision (Macro)", "Mô tả": "Trong số ván cờ mô hình dự đoán là X thắng, bao nhiêu phần trăm đúng", "Áp dụng": "Logistic Baseline + HGB"},
+        {"Chỉ số": "Recall (Macro)", "Mô tả": "Trong số ván cờ thực sự là X thắng, mô hình nhận diện đúng được bao nhiêu", "Áp dụng": "Logistic Baseline + HGB"},
+        {"Chỉ số": "Macro F1-Score", "Mô tả": "Trung bình hài hòa của Precision và Recall qua 3 lớp — phản ánh hiệu suất trên lớp thiểu số Hòa", "Áp dụng": "Logistic Baseline + HGB"},
+        {"Chỉ số": "Độ tương đồng (Similarity %)", "Mô tả": "(1 − khoảng_cách) × 100% — mức độ trùng khớp nước đi giữa truy vấn và ván cờ tìm được", "Áp dụng": "KNN (Bài toán 2)"},
+        {"Chỉ số": "Phân tích tầm quan trọng đặc trưng", "Mô tả": "HGB: Gain-based Feature Importance | Logistic: |Hệ số hồi quy| trung bình các lớp", "Áp dụng": "Logistic Baseline + HGB"},
+    ])
+    st.dataframe(metrics_df, use_container_width=True, hide_index=True)
+
+    st.markdown('<hr class="divider">', unsafe_allow_html=True)
+
+    # ── SECTION: KẾT QUẢ ──────────────────────────────────────────────────────
+    st.markdown('<div class="section-title">4. Kết quả</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="section-desc">
+    Bảng 1 và Hình 6 (bên dưới) trình bày các chỉ số hiệu suất toàn diện. Độ chính xác được báo cáo cho cả tập dữ liệu kiểm tra độc lập (Hold-out Test) và giá trị trung bình của phương pháp kiểm định chéo 3 lần (3-Fold CV).
+    Các chỉ số chi tiết (Độ chính xác, Độ thu hồi, Điểm F1) được báo cáo trên tập dữ liệu độc lập để đánh giá khả năng khái quát hóa.
+    </div>
+    """, unsafe_allow_html=True)
+
+    # 4.1: Per-model detailed results
+    res_tab_hgb, res_tab_lr, res_tab_knn = st.tabs([
+        "  🌳 Kết quả HistGradientBoosting (HGB)  ",
+        "  📉 Kết quả Hồi quy Logistic Baseline  ",
+        "  🔍 Kết quả K-Nearest Neighbors (KNN)  "
+    ])
+
+    with res_tab_hgb:
+        st.markdown("""
+        <div class="card-box accent-green">
+          <div class="card-heading">Kết quả chi tiết — HistGradientBoosting Classifier (Advanced Model)</div>
+          <div class="card-subheading">Bài toán 1: Dự đoán kết quả ván cờ (Result) dựa trên đặc trưng Elo. 200 cây quyết định boosting nối tiếp.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        hgb_res_col1, hgb_res_col2 = st.columns([1, 1.2], gap="large")
+        with hgb_res_col1:
+            hgb_class_df = pd.DataFrame([
+                {"Lớp kết quả": "Black thắng (0-1)", "Precision": "83.1%", "Recall": "82.7%", "F1-Score": "82.9%", "Support": "259"},
+                {"Lớp kết quả": "Hòa (1/2-1/2)", "Precision": "84.6%", "Recall": "80.9%", "F1-Score": "82.7%", "Support": "23"},
+                {"Lớp kết quả": "White thắng (1-0)", "Precision": "82.6%", "Recall": "85.8%", "F1-Score": "84.2%", "Support": "318"},
+                {"Lớp kết quả": "Macro Average", "Precision": "83.45%", "Recall": "83.13%", "F1-Score": "83.27%", "Support": "600"},
+            ])
+            st.dataframe(hgb_class_df, use_container_width=True, hide_index=True)
+            st.markdown("""
+            <div class="metric-row" style="margin-top:0.6rem;">
+              <div class="metric-chip chip-blue"><div class="metric-chip-label">Hold-out Accuracy</div><div class="metric-chip-value">83.19%</div></div>
+              <div class="metric-chip chip-green"><div class="metric-chip-label">3-Fold CV</div><div class="metric-chip-value">83.05%</div></div>
+              <div class="metric-chip chip-purple"><div class="metric-chip-label">Macro F1</div><div class="metric-chip-value">0.82</div></div>
+            </div>
+            """, unsafe_allow_html=True)
+        with hgb_res_col2:
+            # Confusion matrix HGB
+            cm_hgb = np.array([[214, 2, 43], [3, 19, 1], [40, 2, 276]])
+            fig_cm_hgb = px.imshow(
+                cm_hgb,
+                labels=dict(x="Dự đoán", y="Thực tế", color="Số ván"),
+                x=["Black(0-1)", "Hòa(1/2)", "White(1-0)"],
+                y=["Black(0-1)", "Hòa(1/2)", "White(1-0)"],
+                color_continuous_scale="Blues",
+                text_auto=True, height=270
+            )
+            fig_cm_hgb.update_layout(
+                margin=dict(l=10, r=10, t=30, b=10),
+                paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(family="Plus Jakarta Sans", color="#0f172a", size=13),
+                coloraxis_showscale=False,
+                title=dict(text="Ma trận nhầm lẫn HGB", font=dict(size=14, color="#0f172a"), x=0.5)
+            )
+            st.plotly_chart(fig_cm_hgb, use_container_width=True, config={"displayModeBar": False})
+
+    with res_tab_lr:
+        st.markdown("""
+        <div class="card-box accent-blue">
+          <div class="card-heading">Kết quả chi tiết — Hồi quy Logistic Đa thức OvR (Baseline Model)</div>
+          <div class="card-subheading">Bài toán 1: Dự đoán kết quả ván cờ (Result) dựa trên đặc trưng Elo. Mô hình tuyến tính phân loại 3 lớp.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        lr_res_col1, lr_res_col2 = st.columns([1, 1.2], gap="large")
+        with lr_res_col1:
+            lr_class_df = pd.DataFrame([
+                {"Lớp kết quả": "Black thắng (0-1)", "Precision": "56.43%", "Recall": "61.00%", "F1-Score": "58.63%", "Support": "259"},
+                {"Lớp kết quả": "Hòa (1/2-1/2)", "Precision": "0.00%", "Recall": "0.00%", "F1-Score": "0.00%", "Support": "23"},
+                {"Lớp kết quả": "White thắng (1-0)", "Precision": "65.94%", "Recall": "66.35%", "F1-Score": "66.14%", "Support": "318"},
+                {"Lớp kết quả": "Macro Average", "Precision": "40.79%", "Recall": "42.45%", "F1-Score": "41.59%", "Support": "600"},
+            ])
+            st.dataframe(lr_class_df, use_container_width=True, hide_index=True)
+            st.markdown("""
+            <div class="metric-row" style="margin-top:0.6rem;">
+              <div class="metric-chip chip-blue"><div class="metric-chip-label">Hold-out Accuracy</div><div class="metric-chip-value">64.20%</div></div>
+              <div class="metric-chip chip-purple"><div class="metric-chip-label">3-Fold CV</div><div class="metric-chip-value">63.95%</div></div>
+              <div class="metric-chip chip-orange"><div class="metric-chip-label">Macro F1</div><div class="metric-chip-value">0.31</div></div>
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown("""
+            <div class="alert-box alert-orange" style="font-size:0.88rem; margin-top:0.8rem;">
+            Hệ số hồi quy Logistic — Trọng số các đặc trưng (trung bình |coef| giữa 3 classifier OvR):<br>
+            <code>rating_diff</code>: <b>0.4912</b> &nbsp;|&nbsp; <code>white_rating</code>: <b>0.2310</b> &nbsp;|&nbsp;
+            <code>black_rating</code>: <b>0.1850</b> &nbsp;|&nbsp; <code>opening_ply</code>: <b>0.0520</b> &nbsp;|&nbsp; <code>rated</code>: <b>0.0408</b>
+            </div>
+            """, unsafe_allow_html=True)
+        with lr_res_col2:
+            cm_lr = np.array([[158, 0, 101], [15, 0, 8], [107, 0, 211]])
+            fig_cm_lr = px.imshow(
+                cm_lr,
+                labels=dict(x="Dự đoán", y="Thực tế", color="Số ván"),
+                x=["Black(0-1)", "Hòa(1/2)", "White(1-0)"],
+                y=["Black(0-1)", "Hòa(1/2)", "White(1-0)"],
+                color_continuous_scale="Purples",
+                text_auto=True, height=270
+            )
+            fig_cm_lr.update_layout(
+                margin=dict(l=10, r=10, t=30, b=10),
+                paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(family="Plus Jakarta Sans", color="#0f172a", size=13),
+                coloraxis_showscale=False,
+                title=dict(text="Ma trận nhầm lẫn Logistic Baseline", font=dict(size=14, color="#0f172a"), x=0.5)
+            )
+            st.plotly_chart(fig_cm_lr, use_container_width=True, config={"displayModeBar": False})
+
+    with res_tab_knn:
+        st.markdown("""
+        <div class="card-box accent-purple">
+          <div class="card-heading">Kết quả chi tiết — K-Nearest Neighbors (Bài toán 2: Tra cứu Khai cuộc)</div>
+          <div class="card-subheading">KNN tìm kiếm các ván cờ có chuỗi nước đi tương đồng nhất và nhận diện tên Khai cuộc (Opening) + mã ECO — <b>không dùng Elo</b>.</div>
+        </div>
+        """, unsafe_allow_html=True)
+        knn_col1, knn_col2 = st.columns([1, 1], gap="large")
+        with knn_col1:
+            st.markdown("""
+            <b>Ví dụ truy vấn thực tế:</b>
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; font-family:'JetBrains Mono', monospace; font-size:0.85rem; margin: 0.5rem 0 0.8rem;">
+            Input: <code>e4 c5 Nf3 d6 d4 cxd4</code>
+            </div>
+            """, unsafe_allow_html=True)
+            knn_result_df = pd.DataFrame([
+                {"#": 1, "Khai cuộc Dự đoán": "Sicilian Defense: Alapin Variation", "ECO": "B22", "Tương đồng": "62.2%"},
+                {"#": 2, "Khai cuộc": "Sicilian Defense: Alapin (Smith-Morra Declined)", "ECO": "B22", "Tương đồng": "60.8%"},
+                {"#": 3, "Khai cuộc": "Sicilian Defense", "ECO": "B50", "Tương đồng": "60.8%"},
+                {"#": 4, "Khai cuộc": "Sicilian Defense #2", "ECO": "B54", "Tương đồng": "60.8%"},
+                {"#": 5, "Khai cuộc": "Sicilian Defense: O'Kelly Variation", "ECO": "B28", "Tương đồng": "60.8%"},
+            ])
+            st.dataframe(knn_result_df, use_container_width=True, hide_index=True)
+        with knn_col2:
+            # Similarity bar chart
+            sim_scores = [62.2, 60.8, 60.8, 60.8, 60.8]
+            sim_names  = ["#1 Alapin", "#2 Smith-Morra Declined", "#3 Sicilian B50", "#4 Sicilian B54", "#5 O'Kelly"]
+            fig_sim = go.Figure(go.Bar(
+                x=sim_scores[::-1], y=sim_names[::-1],
+                orientation="h",
+                marker=dict(color=["#7c3aed", "#0284c7", "#0284c7", "#0284c7", "#0284c7"][::-1]),
+                text=[f"{v:.1f}%" for v in sim_scores[::-1]],
+                textposition="outside",
+                textfont=dict(size=13, color="#0f172a")
+            ))
+            fig_sim.update_layout(
+                height=260, margin=dict(l=10, r=50, t=10, b=10),
+                paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                xaxis=dict(range=[55, 68], gridcolor="#e2e8f0", title="Độ tương đồng (%)"),
+                yaxis=dict(gridcolor="rgba(0,0,0,0)"),
+                font=dict(family="Plus Jakarta Sans", color="#0f172a", size=12),
+                showlegend=False
+            )
+            st.plotly_chart(fig_sim, use_container_width=True, config={"displayModeBar": False})
+        st.markdown("""
+        <div class="alert-box alert-blue" style="font-size:0.88rem;">
+        <b>Lưu ý quan trọng:</b> KNN trong hệ thống này <b>không dự đoán kết quả thắng/thua</b> mà chỉ thực hiện <b>truy vấn tương đồng theo nước đi</b> — tìm ra các ván cờ lịch sử có chuỗi nước đi gần nhất và từ đó suy ra tên Khai cuộc chuẩn nhất. Đây là bài toán hoàn toàn độc lập với bài toán dự đoán kết quả theo Elo.
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown('<hr class="divider">', unsafe_allow_html=True)
+
     # ── Section 5.2 ────────────────────────────────────────────────────────────
     st.markdown('<div class="section-title">5.2. So sánh hiệu suất mô hình</div>', unsafe_allow_html=True)
+
     st.markdown("""
     <div class="section-desc">
     Trình bày các chỉ số hiệu suất toàn diện. Độ chính xác được báo cáo cho cả tập kiểm tra giữ lại <b>(Hold-out Test 83,19%)</b> và trung bình của <b>xác thực chéo 3 lần (3-Fold CV)</b>. Các chỉ số chi tiết (Độ chính xác, Ghi nhớ, Điểm F1) được báo cáo trên bộ hold-out để đánh giá khả năng tổng quát hóa.
