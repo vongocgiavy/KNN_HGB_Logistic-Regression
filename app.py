@@ -767,19 +767,19 @@ with tab3:
     @st.cache_data
     def load_sample_data():
         _p = os.path.join(os.path.dirname(__file__), "data", "processed_games.csv")
-        _df = pd.read_csv(_p, nrows=8)
+        _df = pd.read_csv(_p)
         return _df
 
     _sample_df = load_sample_data()
-    _n_raw = 10001  # tổng dòng trong file (10002 dòng - 1 header)
+    _n_raw = len(_sample_df)
 
     # Thống kê nhanh
     _stat_col1, _stat_col2, _stat_col3, _stat_col4 = st.columns(4)
     with _stat_col1:
-        st.markdown("""
+        st.markdown(f"""
         <div class="metric-chip chip-blue" style="flex-direction:column; padding:1rem 1.2rem; border-radius:14px; min-width:0;">
           <div class="metric-chip-label">Tổng số ván cờ</div>
-          <div class="metric-chip-value">10,001</div>
+          <div class="metric-chip-value">{_n_raw:,}</div>
         </div>
         """, unsafe_allow_html=True)
     with _stat_col2:
@@ -811,7 +811,7 @@ with tab3:
       <div class="card-subheading">Hiển thị trực tiếp từ file dữ liệu thực tế — mỗi hàng là 1 ván cờ với đầy đủ thông tin.</div>
     </div>
     """, unsafe_allow_html=True)
-    st.dataframe(_sample_df, use_container_width=True, hide_index=True)
+    st.dataframe(_sample_df, use_container_width=True, hide_index=True, height=480)
 
     # Mô tả từng cột
     st.markdown("""
