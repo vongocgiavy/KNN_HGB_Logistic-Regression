@@ -753,8 +753,101 @@ with tab2:
 with tab3:
 
 
+    # ── SECTION: MÔ TẢ TẬP DỮ LIỆU ───────────────────────────────────────────
+    st.markdown('<div class="section-title">0. Mô tả Tập dữ liệu (Dataset Description)</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="section-desc">
+    Tập dữ liệu được lấy từ <b>Lichess Open Database</b> — nền tảng cờ vua trực tuyến mã nguồn mở lớn nhất thế giới.
+    Dữ liệu gồm các ván cờ thực tế dạng <b>PGN (Portable Game Notation)</b>, được parse và chuyển đổi sang định dạng CSV
+    với <b>11 cột đặc trưng</b> mô tả đầy đủ thông tin mỗi ván đấu.
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Load sample data để hiển thị
+    @st.cache_data
+    def load_sample_data():
+        _p = os.path.join(os.path.dirname(__file__), "data", "processed_games.csv")
+        _df = pd.read_csv(_p, nrows=8)
+        return _df
+
+    _sample_df = load_sample_data()
+    _n_raw = 10001  # tổng dòng trong file (10002 dòng - 1 header)
+
+    # Thống kê nhanh
+    _stat_col1, _stat_col2, _stat_col3, _stat_col4 = st.columns(4)
+    with _stat_col1:
+        st.markdown("""
+        <div class="metric-chip chip-blue" style="flex-direction:column; padding:1rem 1.2rem; border-radius:14px; min-width:0;">
+          <div class="metric-chip-label">Tổng số ván cờ</div>
+          <div class="metric-chip-value">10,001</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with _stat_col2:
+        st.markdown("""
+        <div class="metric-chip chip-purple" style="flex-direction:column; padding:1rem 1.2rem; border-radius:14px; min-width:0;">
+          <div class="metric-chip-label">Số đặc trưng (Cột)</div>
+          <div class="metric-chip-value">11 cột</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with _stat_col3:
+        st.markdown("""
+        <div class="metric-chip chip-green" style="flex-direction:column; padding:1rem 1.2rem; border-radius:14px; min-width:0;">
+          <div class="metric-chip-label">Nguồn dữ liệu</div>
+          <div class="metric-chip-value">Lichess.org</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with _stat_col4:
+        st.markdown("""
+        <div class="metric-chip chip-orange" style="flex-direction:column; padding:1rem 1.2rem; border-radius:14px; min-width:0;">
+          <div class="metric-chip-label">Định dạng gốc</div>
+          <div class="metric-chip-value">PGN → CSV</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Bảng dữ liệu mẫu thực tế
+    st.markdown("""
+    <div class="card-box accent-blue" style="margin-top:1rem;">
+      <div class="card-heading">📋 Bảng dữ liệu mẫu — <code>data/processed_games.csv</code> (8 dòng đầu tiên)</div>
+      <div class="card-subheading">Hiển thị trực tiếp từ file dữ liệu thực tế — mỗi hàng là 1 ván cờ với đầy đủ thông tin.</div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.dataframe(_sample_df, use_container_width=True, hide_index=True)
+
+    # Mô tả từng cột
+    st.markdown("""
+    <div class="card-box accent-purple" style="margin-top:1rem;">
+      <div class="card-heading">📖 Mô tả chi tiết 11 cột đặc trưng (Feature Dictionary)</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    _dict_df = pd.DataFrame([
+        {"Tên cột": "White",       "Kiểu dữ liệu": "string",  "Mô tả": "Tên tài khoản người chơi cầm quân Trắng (bên đi trước)"},
+        {"Tên cột": "Black",       "Kiểu dữ liệu": "string",  "Mô tả": "Tên tài khoản người chơi cầm quân Đen (bên đi sau)"},
+        {"Tên cột": "WhiteElo",    "Kiểu dữ liệu": "int",     "Mô tả": "Điểm Elo hiện tại của người chơi Trắng tại thời điểm ván đấu (thước đo trình độ)"},
+        {"Tên cột": "BlackElo",    "Kiểu dữ liệu": "int",     "Mô tả": "Điểm Elo hiện tại của người chơi Đen tại thời điểm ván đấu"},
+        {"Tên cột": "Result",      "Kiểu dữ liệu": "string",  "Mô tả": "Kết quả ván cờ: '1-0' (Trắng thắng), '0-1' (Đen thắng), '1/2-1/2' (Hòa) — NHÃN MỤC TIÊU bài toán 1"},
+        {"Tên cột": "ECO",         "Kiểu dữ liệu": "string",  "Mô tả": "Mã phân loại khai cuộc chuẩn quốc tế (A00–E99), ví dụ: C62 = Ruy Lopez, B20 = Sicilian"},
+        {"Tên cột": "Opening",     "Kiểu dữ liệu": "string",  "Mô tả": "Tên đầy đủ khai cuộc, ví dụ: 'Ruy Lopez: Steinitz Defense' — NHÃN MỤC TIÊU bài toán 2"},
+        {"Tên cột": "TimeControl", "Kiểu dữ liệu": "string",  "Mô tả": "Quy tắc kiểm soát thời gian, ví dụ: '300+0' = 5 phút/người, '60+0' = 1 phút (Bullet)"},
+        {"Tên cột": "Termination", "Kiểu dữ liệu": "string",  "Mô tả": "Lý do kết thúc ván đấu: Normal (chiếu hết), Time forfeit (hết giờ), Abandoned (bỏ cuộc)"},
+        {"Tên cột": "Moves",       "Kiểu dữ liệu": "string",  "Mô tả": "Chuỗi nước đi đầy đủ định dạng PGN, ví dụ: '1. e4 e5 2. Nf3 Nc6 ...' — ĐẦU VÀO bài toán 2 (KNN)"},
+        {"Tên cột": "Event",       "Kiểu dữ liệu": "string",  "Mô tả": "Tên sự kiện / giải đấu, chứa thông tin 'Rated' (có xếp hạng) hoặc 'Casual' (giao hữu)"},
+    ])
+    st.dataframe(_dict_df, use_container_width=True, hide_index=True)
+
+    st.markdown("""
+    <div class="alert-box alert-blue" style="margin-top:0.5rem; font-size:0.9rem;">
+    <b>Phân công đặc trưng theo từng Bài toán:</b><br>
+    • <b>Bài toán 1 (Dự đoán Result theo Elo):</b> Sử dụng <code>WhiteElo</code>, <code>BlackElo</code>, <code>TimeControl</code>, <code>Event</code> → tạo thêm <code>rating_diff</code>, <code>rated</code>, <code>opening_ply</code>. Nhãn mục tiêu: <code>Result</code>.<br>
+    • <b>Bài toán 2 (Tìm Khai cuộc theo Nước đi — KNN):</b> Sử dụng cột <code>Moves</code> (chuỗi PGN) sau khi làm sạch thành <code>CleanedMoves</code>. Nhãn mục tiêu: <code>Opening</code> / <code>ECO</code>.
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<hr class="divider">', unsafe_allow_html=True)
+
     # ── SECTION: XỬ LÝ SƠ BỘ DỮ LIỆU & KỸ THUẬT ĐẶC TRƯNG ──────────────────────
     st.markdown('<div class="section-title">1. Xử lý sơ bộ dữ liệu và Kỹ thuật Đặc trưng</div>', unsafe_allow_html=True)
+
     st.markdown("""
     <div class="section-desc">
     Tập dữ liệu gốc là các ván cờ thực tế từ nền tảng <b>Lichess Open Database</b> được thu thập ở định dạng PGN (Portable Game Notation).
