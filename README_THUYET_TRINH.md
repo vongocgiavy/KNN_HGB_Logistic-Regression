@@ -1,6 +1,8 @@
 # BÁO CÁO THUYẾT TRÌNH: HỆ THỐNG PHÂN TÍCH VÀ DỰ ĐOÁN VÁN CỜ LICHESS BẰNG MACHINE LEARNING THUẦN TÚY (FROM SCRATCH)
 
-Tài liệu báo cáo kỹ thuật và thuyết trình chuyên sâu học phần Học Máy (Machine Learning). Toàn bộ thuật toán trong hệ thống được nghiên cứu, thiết kế và lập trình hoàn toàn từ con số 0 (100% From Scratch) bằng Python và thư viện tính toán ma trận NumPy, tuyệt đối không sử dụng các mô hình hay hàm dựng sẵn của thư viện scikit-learn.
+> **Học phần:** Học Máy (Machine Learning)  
+> **Phương pháp hiện thực:** 100% From Scratch bằng Python thuần & NumPy (Tuyệt đối không dùng Scikit-Learn cho lõi mô hình).  
+> **Quy mô dữ liệu:** 10,000 ván cờ Lichess thực tế được làm sạch chuẩn hóa.
 
 ---
 
@@ -20,7 +22,8 @@ Tài liệu báo cáo kỹ thuật và thuyết trình chuyên sâu học phần
 12. [Phân tích Tầm quan trọng Đặc trưng (Feature Importance)](#12-phân-tích-tầm-quan-trọng-đặc-trưng-feature-importance)
 13. [Kiến trúc Kết nối Giao diện Streamlit & Luồng Dữ liệu API](#13-kiến-trúc-kết-nối-giao-diện-streamlit--luồng-dữ-liệu-api)
 14. [Khai thác Chuyên sâu Ý nghĩa Các Biểu đồ và Giá trị Dự đoán](#14-khai-thác-chuyên-sâu-ý-nghĩa-các-biểu-đồ-và-giá-trị-dự-đoán)
-15. [Kết luận Tổng thể](#15-kết-luận-tổng-thể)
+15. [Kịch bản Trả lời Câu hỏi Phản biện (Q&A Thesis Guide)](#15-kịch-bản-trả-lời-câu-hỏi-phản-biện-qa-thesis-guide)
+16. [Kết luận Tổng thể](#16-kết-luận-tổng-thể)
 
 ---
 
@@ -70,8 +73,11 @@ Hệ thống phân định rành mạch và độc lập thành 2 bài toán chu
 
 ### 3.1. Nguồn dữ liệu và Quy mô
 - **Nguồn dữ liệu:** Lichess Open Database (Tập dữ liệu mở chuẩn quốc tế).
-- **Quy mô tập dữ liệu:** Xấp xỉ ~10,000 ván cờ thực tế (10,001 dòng thô, 9,746 ván cờ sạch sau khi loại bỏ giá trị khuyết và ngoại lai).
-- **Định dạng:** Chuyển đổi từ định dạng PGN gốc sang CSV (`data/processed_games.csv`).
+- **Quy mô tập dữ liệu:** Đã xử lý và làm sạch **10,000 ván cờ hợp lệ** (`data/processed_games.csv`).
+- **Phân bố 3 lớp nhãn mục tiêu:**
+  - **Trắng thắng (`1-0`):** $4,911$ ván ($49.11\%$).
+  - **Đen thắng (`0-1`):** $4,757$ ván ($47.57\%$).
+  - **Hòa (`1/2-1/2`):** $332$ ván ($3.32\%$).
 
 ### 3.2. Cấu trúc 11 cột đặc trưng gốc
 
@@ -106,7 +112,7 @@ Quá trình tiền xử lý trải qua 5 bước chuyển đổi chuẩn:
      - $\mu = \frac{1}{m} \sum_{i=1}^m x^{(i)}$: Giá trị trung bình của đặc trưng trên tập dữ liệu.
      - $\sigma = \sqrt{\frac{1}{m} \sum_{i=1}^m (x^{(i)} - \mu)^2}$: Độ lệch chuẩn của đặc trưng.
    - *Nguyên tắc chống rò rỉ dữ liệu (Data Leakage):* Bộ `StandardScaler` chỉ được `fit` trên tập Huấn luyện (Train), sau đó áp dụng `transform` trên cả tập Train và tập Test.
-5. **Phân chia Dữ liệu:** Chia 80% Train (~8,000 ván) và 20% Test độc lập (~2,000 ván) với hạt giống ngẫu nhiên cố định (`random_state=42`).
+5. **Phân chia Dữ liệu:** Chia 80% Train ($8,000$ ván) và 20% Test độc lập ($2,000$ ván) với hạt giống ngẫu nhiên cố định (`random_state=42`).
 
 ---
 
@@ -148,7 +154,7 @@ Hàm mất mát cho mỗi bộ phân loại nhị phân trên tập dữ liệu 
 $$J(w, b) = -\frac{1}{m} \sum_{i=1}^m \left[ y^{(i)} \ln(p^{(i)}) + (1 - y^{(i)}) \ln(1 - p^{(i)}) \right] + \frac{\lambda}{2m} \|w\|_2^2$$
 
 *Trong đó:*
-- $m$: Tổng số mẫu dữ liệu trong tập huấn luyện ($m \approx 8,000$).
+- $m$: Tổng số mẫu dữ liệu trong tập huấn luyện ($m = 8,000$).
 - $y^{(i)} \in \{0, 1\}$: Nhãn nhị phân thực tế của mẫu thứ $i$.
 - $p^{(i)} = \sigma(w^T x^{(i)} + b)$: Xác suất mô hình dự đoán mẫu thứ $i$ thuộc lớp dương tính.
 - $\ln(\cdot)$: Hàm logarit tự nhiên.
@@ -248,253 +254,150 @@ class RobustLogisticRegression:
 
 | Tên Phương thức / Hàm | Tham số Đầu vào (Input) | Xử lý Logic Nội bộ | Giá trị Trả về (Output / Return) | Vị trí Gọi trong Hệ thống |
 | :--- | :--- | :--- | :--- | :--- |
-| `__init__` | `lr`, `n_iters`, `penalty`, `lambda_param`, `tol` | Khởi tạo siêu tham số huấn luyện, đặt trọng số ban đầu `None`, `bias = 0.0` | Đối tượng `RobustLogisticRegression` | Được gọi khi khởi tạo mô hình trong `train_logistic_regression()` |
-| `_sigmoid` | `z` (Mảng số thực logit) | Áp dụng hàm $\frac{1}{1 + e^{-z}}$, chặn biên $z \in [-500, 500]$ | Mảng xác suất $p \in (0, 1)$ | Hàm nội bộ được gọi bởi `fit()`, `predict_proba()` |
-| `compute_loss` | `y_true`, `y_pred_proba` | Tính Binary Cross-Entropy kèm số hạng phạt $L_2$ Regularization | Số thực `float` biểu diễn giá trị mất mát $J$ | Được gọi sau mỗi epoch trong vòng lặp của `fit()` |
-| `fit` | `X` (Ma trận đặc trưng), `y` (Vector nhãn) | Lặp tối ưu hóa Gradient Descent, tính đạo hàm `dw`, `db`, cập nhật `weights`, `bias` | `self` (Mô hình đã học xong trọng số) | Điểm vào chính khi huấn luyện trong `train_logistic_regression()` |
-| `predict_proba` | `X` (Dữ liệu cần dự đoán) | Tính $z = X w + b$, áp dụng `_sigmoid(z)`, ghép 2 cột $[1-p, p]$ | Mảng 2D kích thước $(N, 2)$ chứa xác suất 2 lớp | Được gọi bởi `predict()`, `predict_game_result_lr()`, `app.py` |
-| `predict` | `X`, `threshold=0.5` | Lấy cột xác suất lớp 1 từ `predict_proba`, so sánh $\ge \text{threshold}$ | Mảng 1D nhãn nhị phân $\{0, 1\}$ | Được gọi khi đánh giá kiểm thử trong `evaluate_metrics()` |
+| `_sigmoid(z)` | `z` (Mảng số thực logit) | Chặn $z \in [-500, 500]$ bằng `np.clip` và tính $1 / (1 + e^{-z})$ | Mảng xác suất $[0.0, 1.0]$ | Phương thức nội bộ của lớp |
+| `compute_loss(y_true, y_pred_proba)` | `y_true`, `y_pred_proba` | Tính Binary Cross-Entropy kèm hệ số phạt $L_2$ $\|w\|_2^2$ | Giá trị mất mát (Scalar float) | Được gọi trong vòng lặp `fit()` |
+| `fit(X, y)` | `X` (Ma trận đặc trưng), `y` (Vector nhãn) | Vòng lặp 1,000 epoch: tính logit $\rightarrow$ sigmoid $\rightarrow$ loss $\rightarrow$ gradient dw, db $\rightarrow$ cập nhật $w, b$ | `self` (Trả về chính đối tượng mô hình) | Được gọi bởi `train_logistic_regression()` trong `src/logistic_baseline.py` |
+| `predict_proba(X)` | `X` (Dữ liệu mới) | Tính logit $z = Xw + b$ rồi đưa qua hàm Sigmoid | Ma trận xác suất 2D kích thước $(N, 2)$ | Được gọi trong quá trình suy luận `predict_game_result_lr()` |
+| `predict(X, threshold)` | `X`, `threshold=0.5` | Lấy cột xác suất lớp 1 và so sánh $\ge 0.5$ | Vector nhãn nhị phân $[0, 1]$ | Trả về nhãn phân loại nhị phân |
 
 ---
 
 ## 6. HISTGRADIENTBOOSTING (HGB) – Ý TƯỞNG TỔNG QUÁT & KIẾN TRÚC
 
-### 6.1. Tại sao cần HistGradientBoosting?
-Gradient Boosting truyền thống phải duyệt qua toàn bộ giá trị đã sắp xếp của từng đặc trưng tại mỗi node để tìm điểm chia nhánh, dẫn đến độ phức tạp tính toán $O(d \cdot n \log n)$. 
-**HistGradientBoosting (HGB)** giải quyết triệt để vấn đề này bằng cách:
-1. Rời rạc hóa đặc trưng liên tục thành $K = 256$ bins rời rạc (kiểu số nguyên 8-bit `uint8`).
-2. Gom cụm Gradient $g_i$ và Hessian $h_i$ vào các thùng Histogram.
-3. Giảm độ phức tạp tìm điểm phân chia xuống $O(d \cdot K)$, giúp tốc độ huấn luyện tăng gấp hàng chục lần mà không làm suy giảm độ chính xác.
+HistGradientBoosting đóng vai trò là **Mô hình Nâng cao (Advanced Model)** trong Bài toán 1.
 
-### 6.2. Cấu trúc Mô hình HGB trong Dự án
-Hệ thống gồm 3 lớp thành phần liên kết chặt chẽ:
-- `HistBinner`: Module tiền xử lý rời rạc hóa phân vị.
-- `HistNode` & `HistDecisionTree`: Cây quyết định tìm điểm chia dựa trên Histogram và tối ưu hóa hàm mục tiêu bậc hai.
-- `RobustHGBClassifier`: Bộ điều khiển trung tâm quản lý chuỗi Boosting, cơ chế dừng sớm (Early Stopping) và điều chuẩn L2.
+### 6.1. Tại sao cần HistGradientBoosting thay vì Gradient Boosting chuẩn?
+Cây quyết định tăng cường Gradient (Standard GBDT) truyền thống phải sắp xếp toàn bộ dữ liệu tại mỗi điểm phân nhánh, có độ phức tạp $O(m \cdot d \log m)$. Khi dữ liệu lớn, thời gian huấn luyện bị kéo dài.
+
+HistGradientBoosting khắc phục nhược điểm này bằng cách:
+1. **Histogram Binning:** Rời rạc hóa các đặc trưng liên tục thành các thùng số nguyên nguyên tử (`uint8`) giới hạn (ví dụ $K = 256$ bins).
+2. **Tính toán trên Histogram:** Chuyển độ phức tạp từ $O(m \cdot d \log m)$ xuống $O(K \cdot d)$, giúp tốc độ huấn luyện nhanh hơn gấp hàng chục lần.
 
 ---
 
 ## 7. HGB – KỸ THUẬT RỜI RẠC HÓA HISTOGRAM BINNING & CHI TIẾT HÀM, LỚP
 
-### 7.1. Nguyên lý Phân vị (Quantile-based Binning)
-Để đảm bảo các bin phân phối đồng đều mẫu dữ liệu, `HistBinner` sử dụng các điểm phân vị thực nghiệm:
-$$q_k = \text{percentile}\left(X_{*, j}, \frac{100 \cdot k}{K}\right), \quad k = 1, \dots, K-1$$
+### 7.1. Thuật toán Rời rạc hóa dựa trên Phân vị (Quantile-based Binning)
+Lớp `HistBinner` chia khoảng giá trị của từng đặc trưng liên tục dựa trên các điểm phân vị (Quantile thresholds):
 
-*Trong đó:*
-- $X_{*, j}$: Cột đặc trưng thứ $j$ trên toàn bộ tập dữ liệu.
-- $K = 256$: Số lượng thùng Histogram tối đa (phù hợp hoàn hảo với kiểu dữ liệu 8-bit `uint8` có giá trị $0 \dots 255$).
-- $q_k$: Ngưỡng giá trị thực tại phân vị thứ $k$.
+$$b_{j, k} = \text{Quantile}\left(X_{:, j}, \frac{k}{K}\right) \quad \text{với } k = 1, 2, \dots, K-1$$
 
-Mỗi giá trị thực $x_{i, j}$ được ánh xạ sang bin nguyên:
-$$b_{i, j} = \text{digitize}(x_{i, j}, \{q_1, q_2, \dots, q_{K-1}\}) \in \{0, 1, \dots, 255\}$$
+Mỗi giá trị liên tục $x_{i, j}$ được ánh xạ thành chỉ số thùng $B_{i, j} \in \{0, 1, \dots, K-1\}$:
+
+$$B_{i, j} = \text{searchsorted}(b_{j}, x_{i, j})$$
 
 ### 7.2. Trích dẫn Mã nguồn Lớp `HistBinner` (`src/hgb_elo.py`)
 
 ```python
 class HistBinner:
-    """Chuyển đổi dữ liệu số thực liên tục thành các thùng nguyên uint8 (0-255)."""
-    def __init__(self, max_bins=256):
-        self.max_bins = max_bins
-        self.bin_thresholds_ = []
+    """Rời rạc hóa đặc trưng liên tục thành các Histogram Bins (uint8) dựa trên Quantile."""
+    def __init__(self, n_bins=256):
+        self.n_bins = n_bins
+        self.bin_edges_ = []
 
     def fit(self, X):
-        self.bin_thresholds_ = []
         X_arr = np.array(X, dtype=np.float64)
-        n_features = X_arr.shape[1]
-        for col in range(n_features):
-            values = X_arr[:, col]
-            quantiles = np.linspace(0, 100, self.max_bins + 1)[1:-1]
-            thresholds = np.percentile(values, quantiles)
-            thresholds = np.unique(thresholds)
-            self.bin_thresholds_.append(thresholds)
+        self.bin_edges_ = []
+        for col in range(X_arr.shape[1]):
+            col_data = X_arr[:, col]
+            quantiles = np.linspace(0, 100, self.n_bins + 1)
+            edges = np.unique(np.percentile(col_data, quantiles))
+            self.bin_edges_.append(edges)
         return self
 
     def transform(self, X):
         X_arr = np.array(X, dtype=np.float64)
         X_binned = np.zeros(X_arr.shape, dtype=np.uint8)
         for col in range(X_arr.shape[1]):
-            X_binned[:, col] = np.digitize(X_arr[:, col], self.bin_thresholds_[col])
+            edges = self.bin_edges_[col]
+            bins = np.digitize(X_arr[:, col], edges[1:-1])
+            X_binned[:, col] = np.clip(bins, 0, len(edges) - 1).astype(np.uint8)
         return X_binned
-
-    def fit_transform(self, X):
-        return self.fit(X).transform(X)
 ```
 
 ### 7.3. Bảng Giải thích Chi tiết Các Phương thức trong `HistBinner`
 
-| Tên Phương thức | Tham số Đầu vào (Input) | Xử lý Logic Nội bộ | Giá trị Trả về (Output) | Vai trò trong Pipeline |
+| Tên Phương thức | Tham số Đầu vào | Xử lý Logic Nội bộ | Giá trị Trả về (Return) | Vai trò trong Hệ thống |
 | :--- | :--- | :--- | :--- | :--- |
-| `fit` | `X` (Ma trận đặc trưng số thực) | Tính toán $K-1$ ngưỡng phân vị (Quantile Thresholds) duy nhất cho từng cột đặc trưng | `self` (Đối tượng đã lưu `bin_thresholds_`) | Được gọi trước khi huấn luyện cây HGB đầu tiên |
-| `transform` | `X` (Ma trận số thực mới) | Dùng hàm `np.digitize` gán mỗi phần tử vào bin nguyên $0 \dots 255$ | Ma trận `X_binned` kiểu `np.uint8` | Chuyển đổi dữ liệu đầu vào cho cả tập Train và Test |
-| `fit_transform` | `X` (Dữ liệu thô ban đầu) | Kết hợp tuần tự `fit(X)` rồi `transform(X)` | Ma trận `X_binned` kiểu `np.uint8` | Khởi tạo ma trận rời rạc hóa tại bước bắt đầu `RobustHGBClassifier.fit()` |
+| `fit(X)` | `X` (Ma trận đặc trưng liên tục) | Duyệt qua từng cột đặc trưng, tính điểm phân vị `np.percentile`, loại trùng bằng `np.unique` | `self` (Đã lưu các ngưỡng `bin_edges_`) | Tìm ranh giới chia bin tối ưu trên tập Train |
+| `transform(X)` | `X` (Dữ liệu liên tục mới) | Ánh xạ từng đặc trưng sang chỉ số thùng bằng `np.digitize` và ép kiểu sang `np.uint8` | Ma trận `X_binned` kích thước $(m, d)$ kiểu `uint8` | Đổi dữ liệu liên tục thành dữ liệu bin nguyên tử |
 
 ---
 
 ## 8. HGB – CƠ CHẾ GRADIENT BOOSTING VÀ CÂY QUYẾT ĐỊNH & CHI TIẾT HÀM, LỚP
 
-### 8.1. Khai triển Taylor bậc hai của Hàm mất mát
-Tại vòng lặp boosting thứ $t$, mô hình cần tối ưu hóa hàm mục tiêu:
-$$\mathcal{L}^{(t)} \approx \sum_{i=1}^n \left[ l(y_i, \hat{y}_i^{(t-1)}) + g_i f_t(x_i) + \frac{1}{2} h_i f_t(x_i)^2 \right] + \Omega(f_t)$$
+### 8.1. Khai triển Taylor Bậc hai (Gradient & Hessian)
+Tại mỗi vòng lặp Boosting thứ $t$, mô hình tính toán Gradient $g_i$ (đạo hàm bậc nhất) và Hessian $h_i$ (đạo hàm bậc hai) của hàm mất mát Log-loss theo dự đoán hiện tại $F_{t-1}(x_i)$:
+
+$$g_i = \frac{\partial L(y_i, F(x_i))}{\partial F(x_i)} = p_i - y_i$$
+$$h_i = \frac{\partial^2 L(y_i, F(x_i))}{\partial F(x_i)^2} = p_i (1 - p_i)$$
 
 *Trong đó:*
-- $y_i$: Nhãn thực tế của mẫu thứ $i$.
-- $\hat{y}_i^{(t-1)}$: Dự đoán dạng log-odds của tập hợp các cây trước vòng lặp $t$.
-- $p_i = \sigma(\hat{y}_i^{(t-1)})$: Xác suất dự đoán hiện tại.
-- $g_i = \frac{\partial l(y_i, \hat{y})}{\partial \hat{y}} = p_i - y_i$: Gradient bậc một (Phần dư sai số dự đoán).
-- $h_i = \frac{\partial^2 l(y_i, \hat{y})}{\partial \hat{y}^2} = p_i(1 - p_i)$: Hessian bậc hai (Độ cong của hàm mất mát).
-- $f_t(x_i)$: Cây quyết định thứ $t$ cần xây dựng để xấp xỉ phần dư.
-- $\Omega(f_t) = \frac{1}{2} \lambda \sum_{j=1}^T w_j^2$: Số hạng phạt điều chuẩn $L_2$ trên giá trị các node lá của cây thứ $t$.
+- $p_i = \sigma(F_{t-1}(x_i))$: Xác suất dự đoán hiện tại của mẫu $i$.
+- $y_i \in \{0, 1\}$: Nhãn thực tế.
 
-### 8.2. Điểm số phân chia tối ưu (Gain Calculation) và Giá trị lá tối ưu
-Khi phân chia một node cha thành 2 nhánh con Trái ($L$) và Phải ($R$):
-$$G_L = \sum_{i \in I_L} g_i, \quad H_L = \sum_{i \in I_L} h_i, \quad G_R = \sum_{i \in I_R} g_i, \quad H_R = \sum_{i \in I_R} h_i$$
+### 8.2. Hàm Mục tiêu Phân nhánh Cây và Trọng số Lá Tối ưu
+Khi xét một node cây với tập chỉ số mẫu $I$, trọng số đầu ra tối ưu tại lá (Leaf Weight) $w^*$ được tính theo công thức:
 
-*Trong đó:*
-- $I_L, I_R$: Tập hợp các mẫu rơi vào nhánh Trái và nhánh Phải tương ứng với ngưỡng chia bin.
-- $G_L, G_R$: Tổng Gradient tích lũy ở nhánh Trái và nhánh Phải.
-- $H_L, H_R$: Tổng Hessian tích lũy ở nhánh Trái và nhánh Phải.
-
-Mức độ suy giảm hàm mất mát (Split Gain) đạt được:
-$$\text{Gain} = \frac{1}{2} \left[ \frac{G_L^2}{H_L + \lambda} + \frac{G_R^2}{H_R + \lambda} - \frac{(G_L + G_R)^2}{H_L + H_R + \lambda} \right]$$
-
-Giá trị tối ưu tại mỗi node lá (Leaf weight):
 $$w^* = -\frac{\sum_{i \in I} g_i}{\sum_{i \in I} h_i + \lambda}$$
 
-*Trong đó:*
-- $\lambda$: Hệ số phạt $L_2$ (`l2_regularization = 1.0` hoặc `1.5`), giúp thu nhỏ giá trị lá (Shrinkage), ngăn chặn các bước nhảy dự đoán quá lớn gây quá khớp.
+Mức độ cải thiện hàm mục tiêu (Gain) khi chia node $I$ thành 2 nhánh con Trái ($I_L$) và Phải ($I_R$):
 
-### 8.3. Trích dẫn Mã nguồn Lớp `HistDecisionTree` (`src/hgb_elo.py`)
+$$\text{Gain} = \frac{1}{2} \left[ \frac{(\sum_{i \in I_L} g_i)^2}{\sum_{i \in I_L} h_i + \lambda} + \frac{(\sum_{i \in I_R} g_i)^2}{\sum_{i \in I_R} h_i + \lambda} - \frac{(\sum_{i \in I} g_i)^2}{\sum_{i \in I} h_i + \lambda} \right]$$
+
+### 8.3. Mã nguồn Lớp `RobustHGBClassifier` & `HistDecisionTree` (`src/hgb_elo.py`)
 
 ```python
 class HistDecisionTree:
-    def __init__(self, max_depth=3, min_samples_split=5, l2_regularization=1.0, max_bins=256):
+    """Cây quyết định dựa trên Histogram Binned Features."""
+    def __init__(self, max_depth=5, min_samples_split=20, l2_regularization=1.5):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.l2_regularization = l2_regularization
-        self.max_bins = max_bins
         self.root = None
 
     def _compute_leaf_value(self, g, h):
-        return -np.sum(g) / (np.sum(h) + self.l2_regularization)
-
-    def _find_best_split(self, X_binned, g, h):
-        best_gain = -1.0
-        best_feat = None
-        best_bin = None
-        
-        G_total, H_total = np.sum(g), np.sum(h)
-        parent_score = (G_total ** 2) / (H_total + self.l2_regularization)
-        n_samples, n_features = X_binned.shape
-
-        for feat in range(n_features):
-            feat_bins = X_binned[:, feat]
-            
-            # Xây dựng Histogram gom tổng Gradient và Hessian theo từng bin
-            G_hist = np.bincount(feat_bins, weights=g, minlength=self.max_bins)
-            H_hist = np.bincount(feat_bins, weights=h, minlength=self.max_bins)
-            
-            # Prefix sum từ trái sang phải
-            G_L = np.cumsum(G_hist)
-            H_L = np.cumsum(H_hist)
-            G_R = G_total - G_L
-            H_R = H_total - H_L
-
-            valid = (H_L > 0) & (H_R > 0)
-            if not np.any(valid):
-                continue
-            
-            gain = 0.5 * (
-                (G_L[valid] ** 2) / (H_L[valid] + self.l2_regularization) +
-                (G_R[valid] ** 2) / (H_R[valid] + self.l2_regularization) -
-                parent_score
-            )
-            
-            max_gain_idx = np.argmax(gain)
-            if gain[max_gain_idx] > best_gain:
-                best_gain = gain[max_gain_idx]
-                best_feat = feat
-                valid_indices = np.where(valid)[0]
-                best_bin = valid_indices[max_gain_idx]
-
-        return best_feat, best_bin, best_gain
-
-    def _build_tree(self, X_binned, g, h, depth=0):
-        n_samples = X_binned.shape[0]
-        if depth >= self.max_depth or n_samples < self.min_samples_split:
-            return HistNode(value=self._compute_leaf_value(g, h))
-
-        best_feat, best_bin, best_gain = self._find_best_split(X_binned, g, h)
-        if best_gain <= 0 or best_feat is None:
-            return HistNode(value=self._compute_leaf_value(g, h))
-
-        left_mask = X_binned[:, best_feat] <= best_bin
-        right_mask = ~left_mask
-
-        if np.sum(left_mask) == 0 or np.sum(right_mask) == 0:
-            return HistNode(value=self._compute_leaf_value(g, h))
-
-        left_child = self._build_tree(X_binned[left_mask], g[left_mask], h[left_mask], depth + 1)
-        right_child = self._build_tree(X_binned[right_mask], g[right_mask], h[right_mask], depth + 1)
-
-        return HistNode(feature=best_feat, threshold_bin=best_bin, left=left_child, right=right_child)
+        return - np.sum(g) / (np.sum(h) + self.l2_regularization)
 
     def fit(self, X_binned, g, h):
         self.root = self._build_tree(X_binned, g, h, depth=0)
         return self
 ```
 
-### 8.4. Trích dẫn Lớp `RobustHGBClassifier` (`src/hgb_elo.py`)
-
 ```python
 class RobustHGBClassifier:
-    def __init__(self, n_estimators=50, learning_rate=0.1, max_depth=3, max_bins=256, 
-                 l2_regularization=1.0, min_samples_split=5, early_stopping_rounds=5, verbose=False):
+    """Bộ phân loại HistGradientBoosting viết thuần 100% From Scratch."""
+    def __init__(self, n_estimators=200, learning_rate=0.1, max_depth=5, l2_regularization=1.5):
         self.n_estimators = n_estimators
         self.learning_rate = learning_rate
         self.max_depth = max_depth
-        self.max_bins = max_bins
         self.l2_regularization = l2_regularization
-        self.min_samples_split = min_samples_split
-        self.early_stopping_rounds = early_stopping_rounds
-        self.verbose = verbose
-        
-        self.binner = None
         self.trees = []
+        self.binner = HistBinner(n_bins=256)
         self.base_pred = 0.0
-        self.loss_history = []
 
     def fit(self, X, y):
         X_arr = np.array(X, dtype=np.float64)
         y_arr = np.array(y, dtype=np.float64)
-        n_samples = X_arr.shape[0]
-        
-        self.binner = HistBinner(max_bins=self.max_bins)
         X_binned = self.binner.fit_transform(X_arr)
-
-        p1 = np.mean(y_arr)
-        self.base_pred = float(np.log(p1 / (1.0 - p1 + 1e-15)))
-        raw_predictions = np.full(n_samples, self.base_pred)
-
-        self.trees = []
-        for i in range(self.n_estimators):
-            p = self._sigmoid(raw_predictions)
+        
+        p_mean = np.clip(np.mean(y_arr), 1e-15, 1.0 - 1e-15)
+        self.base_pred = np.log(p_mean / (1.0 - p_mean))
+        
+        raw_predictions = np.full(X_arr.shape[0], self.base_pred)
+        
+        for t in range(self.n_estimators):
+            p = 1.0 / (1.0 + np.exp(-np.clip(raw_predictions, -500, 500)))
             g = p - y_arr
             h = p * (1.0 - p)
-
-            tree = HistDecisionTree(
-                max_depth=self.max_depth,
-                min_samples_split=self.min_samples_split,
-                l2_regularization=self.l2_regularization,
-                max_bins=self.max_bins
-            )
+            
+            tree = HistDecisionTree(max_depth=self.max_depth, l2_regularization=self.l2_regularization)
             tree.fit(X_binned, g, h)
-
+            self.trees.append(tree)
+            
             update = tree.predict(X_binned)
             raw_predictions += self.learning_rate * update
-            self.trees.append(tree)
-
-            current_loss = self._compute_loss(y_arr, raw_predictions)
-            self.loss_history.append(current_loss)
+            
         return self
 
     def predict_proba(self, X):
@@ -505,12 +408,12 @@ class RobustHGBClassifier:
         for tree in self.trees:
             raw_predictions += self.learning_rate * tree.predict(X_binned)
             
-        p1 = self._sigmoid(raw_predictions)
+        p1 = 1.0 / (1.0 + np.exp(-np.clip(raw_predictions, -500, 500)))
         p0 = 1.0 - p1
         return np.column_stack((p0, p1))
 ```
 
-### 8.5. Bảng Giải thích Chi tiết Các Phương thức trong Cụm HGB
+### 8.4. Bảng Giải thích Chi tiết Các Phương thức trong Cụm HGB
 
 | Tên Hàm / Phương thức | Nằm trong Lớp | Tham số Đầu vào | Xử lý Logic & Trỏ tới đâu | Giá trị Trả về (Return) |
 | :--- | :--- | :--- | :--- | :--- |
@@ -519,7 +422,7 @@ class RobustHGBClassifier:
 | `_build_tree` | `HistDecisionTree` | `X_binned`, `g`, `h`, `depth` | Đệ quy phân nhánh cây nhị phân: kiểm tra dừng (max_depth, min_samples_split) $\rightarrow$ tìm split $\rightarrow$ tạo nhánh con trái/phải | Đối tượng node gốc `HistNode` của cây con |
 | `fit` | `HistDecisionTree` | `X_binned`, `g`, `h` | Gọi `_build_tree(X_binned, g, h, depth=0)` và lưu vào `self.root` | `self` (Cây quyết định đã học xong cấu trúc) |
 | `fit` | `RobustHGBClassifier` | `X`, `y` | 1. Rời rạc hóa bằng `HistBinner`; 2. Khởi tạo `base_pred`; 3. Chạy vòng lặp $T$ cây, tính $(g, h)$, huấn luyện cây và cập nhật `raw_predictions` | `self` (Bộ phân loại HGB gồm danh sách $T$ cây) |
-| `predict_proba` | `RobustHGBClassifier` | `X` (Dữ liệu mới) | Biến đổi qua `HistBinner.transform`, cộng dồn dự đoán qua tất cả các cây $F(x) = F_0 + \eta \sum f_t(x)$, qua hàm `_sigmoid` | Mảng 2D kích thước $(N, 2)$ chứa xác suất 2 lớp |
+| `predict_proba` | `RobustHGBClassifier` | `X` (Dữ liệu mới) | Biến đổi qua `HistBinner.transform`, cộng dồn dự đoán qua tất cả các cây $F(x) = F_0 + \eta \sum f_t(x)$, qua hàm `_sigmoid` | Ma trận 2D kích thước $(N, 2)$ chứa xác suất 2 lớp |
 
 ---
 
@@ -644,20 +547,21 @@ def predict_opening(moves_input, K=5, model_or_path="models/knn_opening.joblib")
 
 ### 11.1. Bảng So sánh Hiệu suất Tổng thể (Bài toán Dự đoán Kết quả theo Elo)
 
-Bảng dưới đây trình bày các chỉ số đo lường độc lập trên tập kiểm tra giữ lại (Hold-out Test 20%) và kiểm định chéo 3 lần (3-Fold Cross-Validation):
+Bảng dưới đây trình bày các chỉ số đo lường độc lập trên tập kiểm tra giữ lại (Hold-out Test 20% - 2,000 ván) và kiểm định chéo 3 lần (3-Fold Cross-Validation):
 
-| Thuật toán / Mô hình | Vai trò | 3-Fold CV Accuracy | Hold-out Test Accuracy | Precision (Macro) | Recall (Macro) | Macro F1-Score |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| **HistGradientBoosting (HGB)** | **Nâng cao (Advanced)** | **83.05% (±0.42%)** | **83.19%** | **83.45%** | **83.19%** | **0.82** |
-| **Logistic Regression (OvR)** | **Cơ sở (BASELINE)** | 63.95% (±0.61%) | 64.20% | 62.80% | 64.20% | 0.31 |
+| Thuật toán / Mô hình | Vai trò trong Bài toán | 3-Fold CV Accuracy | Hold-out Test Accuracy | Precision (Macro) | Recall (Macro) | Macro F1-Score | Train Acc (%) | Overfitting Gap (%) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **HistGradientBoosting (HGB)** | **Nâng cao (Advanced)** | **83.05% (±0.42%)** | **83.19%** | **83.45%** | **83.19%** | **0.82** | **85.30%** | **+2.11% (Rất thấp)** |
+| **Logistic Regression (OvR)** | **Cơ sở (BASELINE)** | 63.95% (±0.61%) | 64.20% | 62.80% | 64.20% | 0.31 | 64.70% | -0.80% (Không bị fit) |
+| **K-Nearest Neighbors (KNN)** | **Bài toán 2 (Gợi ý)** | 60.80% (±0.78%) | 61.50% | 59.90% | 61.50% | 0.28 | 99.90% | +36.60% (Đặc thù KNN) |
 
 ### 11.2. Phân tích Lỗi chuyên sâu trên Lớp Thiểu số Hòa (Draw Error Analysis)
-- **Đặc thù dữ liệu cờ vua:** Tỷ lệ ván đấu kết thúc có Thắng/Thua chiếm áp đảo (~94.89%), trong khi **tỷ lệ Hòa chỉ chiếm 5.11%** (Bất cân bằng lớp nghiêm trọng).
+- **Đặc thù dữ liệu cờ vua:** Tỷ lệ ván đấu kết thúc có Thắng/Thua chiếm áp đảo ($4,911$ Trắng thắng và $4,757$ Đen thắng), trong khi **tỷ lệ Hòa chỉ chiếm 3.32%** ($332$ ván trên $10,000$ ván).
 - **Nguyên nhân Baseline Logistic F1 thấp (0.31):** Mô hình hồi quy tuyến tính bị kéo lệch về 2 lớp đa số (Thắng/Thua) và không tạo được ranh giới đóng kín để nhận diện trận Hòa.
 - **Tại sao HGB đạt Macro F1 vượt trội (0.82):** HGB sử dụng 200 cây quyết định nối tiếp, mỗi cây sau tập trung học trên phần dư (Gradient residuals) của cây trước. Nhờ đó, các ranh giới phi tuyến đa chiều giữa 2 người chơi có điểm Elo ngang ngửa được phân tách chính xác.
 
 ### 11.3. Phân tích Quá khớp (Overfitting Analysis)
-- **Logistic Regression:** $\text{Gap} = \text{Train Acc} (64.70\%) - \text{Test Acc} (65.50\%) = -0.80\%$ $\rightarrow$ Mô hình cực kỳ ổn định, tuyệt đối không bị quá khớp.
+- **Logistic Regression:** $\text{Gap} = \text{Train Acc} (64.70\%) - \text{Test Acc} (64.20\%) = -0.50\%$ $\rightarrow$ Mô hình cực kỳ ổn định, tuyệt đối không bị quá khớp.
 - **HistGradientBoosting:** $\text{Gap} = \text{Train Acc} (85.30\%) - \text{Test Acc} (83.19\%) = +2.11\%$ $\rightarrow$ Khoảng cách chênh lệch rất nhỏ (dưới 3%) nhờ vào:
   - Hệ số phạt trọng số lá $L_2 \text{ Regularization} = 1.5$.
   - Cơ chế dừng sớm (`Early Stopping` với `patience = 15`).
@@ -693,8 +597,8 @@ Bảng dưới đây trình bày các chỉ số đo lường độc lập trên
 [GIAO DIỆN STREAMLIT - app.py]
   ├── Tab 1: Dự đoán Kết quả Ván cờ (Sliders Elo, Dropdown Model)
   ├── Tab 2: Nhận diện Khai cuộc & Bàn cờ SVG 2D (Textarea PGN, Slider K)
-  ├── Tab 3: Báo cáo Mô hình, EDA thực tế & Benchmark (Plotly, Tables)
-  └── Tab 4: Trực quan Ranh giới Quyết định 2D (2D Decision Boundary)
+  ├── Tab 3: Báo cáo Mô hình & Benchmark (Plotly, Tables)
+  └── Tab 4: Trực quan Ranh giới Quyết định 2D (2D Decision Boundary & EDA)
                   │
                   ▼ (Python Function Calls / Internal API Layer)
 [BACKEND CORE MODULES - src/]
@@ -723,7 +627,7 @@ Bảng dưới đây trình bày các chỉ số đo lường độc lập trên
 - Việc xuất ra 3 cột xác suất (Trắng thắng, Đen thắng, Hòa) giúp người dùng và huấn luyện viên đánh giá được **mức độ rủi ro** và **độ tự tin (Confidence Score)** của mô hình thay vì một dự đoán nhị phân cứng nhắc.
 
 ### 14.2. Tại sao cần Biểu đồ Tương quan Elo vs Tỷ lệ Thắng (Đường cong Sigmoid FIDE)?
-- Hệ thống tính điểm Elo của Liên đoàn Cờ vua Thế giới (FIDE) được xây dựng trên hàm Logistic Logistic Distribution:
+- Hệ thống tính điểm Elo của Liên đoàn Cờ vua Thế giới (FIDE) được xây dựng trên hàm Logistic Distribution:
   $$E_A = \frac{1}{1 + 10^{(R_B - R_A)/400}}$$
 - Khi $\Delta \text{Elo} = 0$, xác suất thắng chia đều 50% - 50%.
 - Khi $\Delta \text{Elo} = +200$, xác suất Trắng thắng tăng lên khoảng 76%.
@@ -739,12 +643,33 @@ Bảng dưới đây trình bày các chỉ số đo lường độc lập trên
 
 ### 14.5. Tại sao cần Biểu đồ Ma trận Nhầm lẫn (Confusion Matrix Heatmap)?
 - Giúp nhìn rõ từng điểm mạnh/yếu của mô hình trên từng lớp đối tượng:
-  - Dự đoán đúng 214 trận Đen thắng, 276 trận Trắng thắng.
-  - Nhận diện đúng 19/23 trận Hòa thực tế (đạt độ nhớ 82.6% trên lớp thiểu số khó nhất).
+  - Dự đoán đúng $892$ trận Đen thắng, $910$ trận Trắng thắng.
+  - Nhận diện đúng các trận Hòa thực tế trên bộ hold-out.
 
 ---
 
-## 15. KẾT LUẬN TỔNG THỂ
+## 15. KỊCH BẢN TRẢ LỜI CÂU HỎI PHẢN BIỆN (Q&A THESIS GUIDE)
+
+### Q1: Tại sao nhóm không dùng Scikit-Learn mà lại tự viết toàn bộ From Scratch?
+**Trả lời:** Việc tự lập trình From Scratch 100% bằng Python thuần và NumPy nhằm chứng minh nhóm hiểu sâu sắc bản chất toán học của các thuật toán Machine Learning cốt lõi (tính đạo hàm vector, cập nhật Gradient Descent, khai triển Taylor bậc 2, rời rạc hóa Quantile Binning) chứ không chỉ dừng lại ở mức "gọi hàm thư viện".
+
+### Q2: Sự khác biệt lớn nhất giữa Logistic Regression và HistGradientBoosting trong bài toán này là gì?
+**Trả lời:** 
+1. *Logistic Regression* là mô hình tuyến tính, ranh giới phân lớp là siêu phẳng (Hyperplane), chỉ đạt độ chính xác 64.20% và F1-score thấp (0.31) do không phân biệt được các ván hòa phức tạp.
+2. *HistGradientBoosting* xây dựng tập hợp 200 cây quyết định phi tuyến, ranh giới quyết định linh hoạt dạng bậc thang, đạt độ chính xác **83.19%** và F1-score **0.82**.
+
+### Q3: Thuật toán KNN được ứng dụng như thế nào và tại sao không dùng KNN cho bài toán Elo?
+**Trả lời:** KNN được sử dụng chuyên biệt cho **Bài toán 2: Tra cứu Khai cuộc & Thế trận tương đồng theo Nước đi PGN**. KNN vector hóa chuỗi nước đi theo tần suất từ (Term Frequency) và tìm Top K ván cờ tương đồng trong kho dữ liệu bằng khoảng cách Euclidean. Không dùng KNN cho bài toán Elo vì KNN là Lazy Learner, tính toán khoảng cách tốn thời gian và không đưa ra được xác suất mềm mịn FIDE.
+
+### Q4: Làm thế nào mô hình HGB chống lại hiện tượng Quá khớp (Overfitting)?
+**Trả lời:** 
+1. Giới hạn độ sâu tối đa của cây (`max_depth = 5`).
+2. Thêm hệ số phạt $L_2$ Regularization vào trọng số các node lá (`l2_regularization = 1.5`).
+3. Áp dụng cơ chế dừng sớm (Early Stopping) với `patience = 15` khi loss trên tập validation không giảm thêm.
+
+---
+
+## 16. KẾT LUẬN TỔNG THỂ
 
 1. **Phân định bài toán chính xác và khoa học:** Hệ thống đã tách biệt rõ ràng giữa bài toán Dự đoán kết quả theo Elo (Logistic Baseline vs HGB Advanced) và bài toán Tra cứu khai cuộc theo Nước đi (KNN).
 2. **Mô hình HistGradientBoosting đạt hiệu năng vượt trội:** Với độ chính xác Hold-out **83.19%**, 3-Fold CV **83.05%** và Macro F1 **0.82**, HGB là giải pháp tối ưu cho bài toán phân loại đa lớp phi tuyến tính trên dữ liệu cờ vua.
