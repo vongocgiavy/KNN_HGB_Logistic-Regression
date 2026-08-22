@@ -1841,12 +1841,12 @@ with tab4:
         st.markdown("""
         <div class="card-box accent-green">
           <div class="card-heading">Phân phối Tỷ lệ Kết quả Trận đấu</div>
-          <div class="card-subheading">Tỷ lệ thắng của Bên Trắng, Bên Đen và Hòa trong 9,746 ván cờ thực tế.</div>
+          <div class="card-subheading">Tỷ lệ thắng của Bên Trắng, Bên Đen và Hòa trong 10,000 ván cờ thực tế.</div>
         </div>
         """, unsafe_allow_html=True)
 
         res_labels = ["Trắng thắng (1-0)", "Đen thắng (0-1)", "Hòa (1/2-1/2)"]
-        res_counts = [4960, 4510, 498]
+        res_counts = [4911, 4757, 332]
         res_colors = ["#0284c7", "#e11d48", "#7c3aed"]
 
         fig_donut = go.Figure(data=[go.Pie(
